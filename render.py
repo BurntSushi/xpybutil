@@ -1,10 +1,3 @@
-# This code was ported from the xcb-util package (an ancillary
-# package to the X C Binding) by Andrew Gallant. The original
-# source code can be found here:
-# http://cgit.freedesktop.org/xcb/util/tree/renderutil/util.c
-#
-# Note: This *should* be a complete port.
-
 import xcb, xcb.xproto, xcb.render
 
 ID = 1 << 0
