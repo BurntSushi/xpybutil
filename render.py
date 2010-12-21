@@ -1,23 +1,25 @@
 import xcb, xcb.xproto, xcb.render
 
-ID = 1 << 0
-TYPE = 1 << 1
-DEPTH = 1 << 2
-RED = 1 << 3
-RED_MASK = 1 << 4
-GREEN = 1 << 5
-GREEN_MASK = 1 << 6
-BLUE = 1 << 7
-BLUE_MASK = 1 << 8
-ALPHA = 1 << 9
-ALPHA_MASK = 1 << 10
-COLORMAP = 1 << 11
+class PictFormat:
+    Id = 1
+    Type = 2
+    Depth = 4
+    Red = 8
+    RedMask = 16
+    Green = 32
+    GreenMask = 64
+    Blue = 128
+    BlueMask = 256
+    Alpha = 512
+    AlphaMask = 1024
+    Colormap = 2048
 
-ARGB_32 = 0
-RGB_24 = 1
-A_8 = 2
-A_4 = 3
-A_1 = 4
+class PictStandard:
+    Argb32 = 0
+    Rgb24 = 1
+    A8 = 2
+    A4 = 3
+    A1 = 4
 
 standardFormats = [
     # ARGB_32
@@ -39,8 +41,10 @@ standardFormats = [
             'colormap': 0
         },
 
-        'mask': (TYPE | DEPTH | RED | RED_MASK | GREEN | GREEN_MASK | BLUE |
-                 BLUE_MASK | ALPHA | ALPHA_MASK)
+        'mask': (PictFormat.Type | PictFormat.Depth | PictFormat.Red |
+                 PictFormat.RedMask | PictFormat.Green | PictFormat.GreenMask |
+                 PictFormat.Blue | PictFormat.BlueMask | PictFormat.Alpha |
+                 PictFormat.AlphaMask)
     },
 
     # RGB_24
@@ -62,8 +66,9 @@ standardFormats = [
             'colormap': 0
         },
 
-        'mask': (TYPE | DEPTH | RED | RED_MASK | GREEN | GREEN_MASK | BLUE |
-                 BLUE_MASK | ALPHA_MASK)
+        'mask': (PictFormat.Type | PictFormat.Depth | PictFormat.Red |
+                 PictFormat.RedMask | PictFormat.Green | PictFormat.GreenMask |
+                 PictFormat.Blue | PictFormat.BlueMask | PictFormat.AlphaMask)
     },
 
     # A_8
@@ -85,8 +90,9 @@ standardFormats = [
             'colormap': 0
         },
 
-        'mask': (TYPE | DEPTH | RED_MASK | GREEN_MASK | BLUE_MASK | ALPHA |
-                 ALPHA_MASK)
+        'mask': (PictFormat.Type | PictFormat.Depth | PictFormat.RedMask |
+                 PictFormat.GreenMask | PictFormat.BlueMask |
+                 PictFormat.Alpha | PictFormat.AlphaMask)
     },
 
     # A_4
@@ -108,8 +114,9 @@ standardFormats = [
             'colormap': 0
         },
 
-        'mask': (TYPE | DEPTH | RED_MASK | GREEN_MASK | BLUE_MASK | ALPHA |
-                 ALPHA_MASK)
+        'mask': (PictFormat.Type | PictFormat.Depth | PictFormat.RedMask |
+                 PictFormat.GreenMask | PictFormat.BlueMask |
+                 PictFormat.Alpha | PictFormat.AlphaMask)
     },
 
     # A_1
@@ -131,8 +138,9 @@ standardFormats = [
             'colormap': 0
         },
 
-        'mask': (TYPE | DEPTH | RED_MASK | GREEN_MASK | BLUE_MASK | ALPHA |
-                 ALPHA_MASK)
+        'mask': (PictFormat.Type | PictFormat.Depth | PictFormat.RedMask |
+                 PictFormat.GreenMask | PictFormat.BlueMask |
+                 PictFormat.Alpha | PictFormat.AlphaMask)
     }
 ]
 
@@ -148,40 +156,40 @@ def find_format(formats, mask, template, count):
         return None
 
     for format in formats.formats:
-        if mask & ID:
+        if mask & PictFormat.Id:
             if template['id'] != format.id:
                 continue
-        if mask & TYPE:
+        if mask & PictFormat.Type:
             if template['type'] != format.type:
                 continue
-        if mask & DEPTH:
+        if mask & PictFormat.Depth:
             if template['depth'] != format.depth:
                 continue
-        if mask & RED:
+        if mask & PictFormat.Red:
             if template['direct']['red'] != format.direct.red_shift:
                 continue
-        if mask & RED_MASK:
+        if mask & PictFormat.RedMask:
             if template['direct']['red_mask'] != format.direct.red_mask:
                 continue
-        if mask & GREEN:
+        if mask & PictFormat.Green:
             if template['direct']['green'] != format.direct.green_shift:
                 continue
-        if mask & GREEN_MASK:
+        if mask & PictFormat.GreenMask:
             if template['direct']['green_mask'] != format.direct.green_mask:
                 continue
-        if mask & BLUE:
+        if mask & PictFormat.Blue:
             if template['direct']['blue'] != format.direct.blue_shift:
                 continue
-        if mask & BLUE_MASK:
+        if mask & PictFormat.BlueMask:
             if template['direct']['blue_mask'] != format.direct.blue_mask:
                 continue
-        if mask & ALPHA:
+        if mask & PictFormat.Alpha:
             if template['direct']['alpha'] != format.direct.alpha_shift:
                 continue
-        if mask & ALPHA_MASK:
+        if mask & PictFormat.AlphaMask:
             if template['direct']['alpha_mask'] != format.direct.alpha_mask:
                 continue
-        if mask & COLORMAP:
+        if mask & PictFormat.Colormap:
             if template['colormap'] != format.colormap:
                 continue
 
