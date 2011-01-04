@@ -246,7 +246,7 @@ def get_wm_hints(c, window):
 
 def get_wm_hints_unchecked(c, window):
     return HintsCookie(
-        util.get_property(c, window, xcb.xproto.Atom.WM_HINTS))
+        util.get_property_unchecked(c, window, xcb.xproto.Atom.WM_HINTS))
 
 def _pack_hints(flags, input, initial_state, icon_pixmap, icon_window,
                 icon_x, icon_y, icon_mask, window_group):
@@ -449,7 +449,7 @@ def set_wm_state(c, window, state, icon):
                                     util.get_atom(c, 'WM_STATE'), 32,
                                     2, packed)
 
-def set_wm_state_checked(c, window, state=State.Withdrawn, icon=0):
+def set_wm_state_checked(c, window, state, icon):
     packed = struct.pack('II', state, icon)
     return c.core.ChangePropertyChecked(xcb.xproto.PropMode.Replace, window,
                                     util.get_atom(c, 'WM_STATE'),

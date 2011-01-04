@@ -33,6 +33,16 @@ class AtomNameCookie(Cookie):
     def reply(self):
         return str(self.cookie.reply().name.buf())
 
+def atom(atom_name):
+    global __atom_cache
+
+    if atom_name in __atom_cache:
+        if isinstance(__atom_cache[atom_name], AtomCookie):
+            __atom_cache[atom_name] = __atom_cache[atom_name].reply()
+        return __atom_cache[atom_name]
+
+    return None
+
 def get_atom(c, atom_name, only_if_exists=False):
     global __atom_cache
 
