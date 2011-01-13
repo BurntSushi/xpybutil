@@ -5,6 +5,7 @@ import xcb.xproto
 import event
 
 __atom_cache = {}
+__atom_nm_cache = {}
 
 class Cookie(object):
     def __init__(self, cookie):
@@ -33,6 +34,18 @@ class AtomNameCookie(Cookie):
     def reply(self):
         return str(self.cookie.reply().name.buf())
 
+# Handle atom caching
+def build_atom_cache(c, module):
+    global __atom_cache, __atom_nm_cache
+
+    for atom in module.__atoms:
+        __atom_cache[atom] = get_atom_cookie(c, atom, only_if_exists=False)
+    for atom in __atom_cache:
+        if isinstance(__atom_cache[atom], AtomCookie):
+            __atom_cache[atom] = __atom_cache[atom].reply()
+
+    __atom_nm_cache = dict((v, k) for k, v in __atom_cache.iteritems())
+
 def atom(atom_name):
     global __atom_cache
 
@@ -56,12 +69,20 @@ def get_atom(c, atom_name, only_if_exists=False):
 
     return __atom_cache[atom_name]
 
+def get_atom_name(c, atom):
+    global __atom_nm_cache
+
+    if atom not in __atom_nm_cache:
+        __atom_nm_cache[atom] = get_atom_name_cookie(c, atom).reply()
+
+    return __atom_nm_cache[atom]
+
 def get_atom_cookie(c, atom_name, only_if_exists=False):
     return AtomCookie(
                 c.core.InternAtomUnchecked(only_if_exists, len(atom_name),
                                            atom_name))
 
-def get_atom_name(c, atom):
+def get_atom_name_cookie(c, atom):
     return AtomNameCookie(c.core.GetAtomNameUnchecked(atom))
 
 def get_property(conn, window, atom):
@@ -102,6 +123,9 @@ def get_property_value(property_reply):
 def get_root(c):
     return c.get_setup().roots[0].root
 
+def send_event(c, destination, event_mask, event, propagate=False):
+    return c.core.SendEvent(propagate, destination, event_mask, event)
+
 # Sends a client event to the root window
 def _root_send_client_event_pack(window, message_type, data):
     # Pad the data
@@ -111,7 +135,7 @@ def _root_send_client_event_pack(window, message_type, data):
     # http://xcb.freedesktop.org/manual/structxcb__client__message__event__t.html
     return struct.pack(
         'BBH7I',
-        event.Event.ClientMessageEvent, # Event mask
+        event.Event.ClientMessageEvent, # Event type
         32, # Format
         0, # Sequence
         window, # Window

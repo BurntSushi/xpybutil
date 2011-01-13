@@ -92,12 +92,6 @@ class State:
     Add = 1
     Toggle = 2
 
-# Handle atom caching
-def build_atom_cache(c):
-    for atom in __atoms:
-        util.__atom_cache[atom] = util.get_atom_cookie(c, atom,
-                                                       only_if_exists=False)
-
 # Some aliases
 atom = util.get_atom
 root = util.get_root

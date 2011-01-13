@@ -1,3 +1,4 @@
+from collections import defaultdict
 import struct
 
 import xcb.xproto
@@ -36,12 +37,6 @@ class State:
     Zoomed = 2
     Iconic = 3
     Inactive = 4
-
-# Handle atom caching
-def build_atom_cache(c):
-    for atom in __atoms:
-        util.__atom_cache[atom] = util.get_atom_cookie(c, atom,
-                                                       only_if_exists=False)
 
 # WM_NAME
 
@@ -96,37 +91,37 @@ class NormalHintsCookie(util.PropertyCookie):
         if not v:
             return None
 
-        return {
-            'flags': {
-                'USPosition': v[0] & SizeHint.USPosition > 0,
-                'USSize': v[0] & SizeHint.USSize > 0,
-                'PPosition': v[0] & SizeHint.PPosition > 0,
-                'PSize': v[0] & SizeHint.PSize > 0,
-                'PMinSize': v[0] & SizeHint.PMinSize > 0,
-                'PMaxSize': v[0] & SizeHint.PMaxSize > 0,
-                'PResizeInc': v[0] & SizeHint.PResizeInc > 0,
-                'PAspect': v[0] & SizeHint.PAspect > 0,
-                'PBaseSize': v[0] & SizeHint.PBaseSize > 0,
-                'PWinGravity': v[0] & SizeHint.PWinGravity > 0
-            },
-            'x': v[1],
-            'y': v[2],
-            'width': v[3],
-            'height': v[4],
-            'min_width': v[5],
-            'min_height': v[6],
-            'max_width': v[7],
-            'max_height': v[8],
-            'width_inc': v[9],
-            'height_inc': v[10],
-            'min_aspect_num': v[11],
-            'min_aspect_den': v[12],
-            'max_aspect_num': v[13],
-            'max_aspect_den': v[14],
-            'base_width': v[15],
-            'base_height': v[16],
-            'win_gravity': v[17] if v[17] > 0 else xcb.xproto.Gravity.NorthWest
+        fields = ['x', 'y', 'width', 'height', 'min_width', 'min_height',
+                  'max_width', 'max_height', 'width_inc', 'height_inc',
+                  'min_aspect_num', 'min_aspect_den', 'max_aspect_num',
+                  'max_aspect_den', 'base_width', 'base_height', 'win_gravity']
+        retval = defaultdict(int)
+
+        retval['flags'] = {
+            'USPosition': v[0] & SizeHint.USPosition > 0,
+            'USSize': v[0] & SizeHint.USSize > 0,
+            'PPosition': v[0] & SizeHint.PPosition > 0,
+            'PSize': v[0] & SizeHint.PSize > 0,
+            'PMinSize': v[0] & SizeHint.PMinSize > 0,
+            'PMaxSize': v[0] & SizeHint.PMaxSize > 0,
+            'PResizeInc': v[0] & SizeHint.PResizeInc > 0,
+            'PAspect': v[0] & SizeHint.PAspect > 0,
+            'PBaseSize': v[0] & SizeHint.PBaseSize > 0,
+            'PWinGravity': v[0] & SizeHint.PWinGravity > 0
         }
+
+        for j, f in enumerate(fields):
+            i = j + 1 # flags offset
+
+            if i >= len(v):
+                return
+
+            if f == 'win_gravity' and v[i] <= 0:
+                v[i] = xcb.xproto.Gravity.NorthWest
+
+            retval[f] = v[i]
+
+        return retval
 
 def get_wm_normal_hints(c, window):
     return NormalHintsCookie(

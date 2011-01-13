@@ -3,26 +3,6 @@ from PIL import Image
 from PIL import ImageDraw
 from PIL import ImageFont
 
-def get_image(width, height, data):
-    im = Image.fromstring('RGBA', (width, height),
-                          ''.join([chr(i) for i in data]), 'raw', 'BGRA')
-
-    return im
-
-def get_data(image):
-    return [ord(s) for s in image.tostring('raw', 'BGRA')]
-
-def get_image_from_pixmap(c, pid):
-    try:
-        geom = c.core.GetGeometry(pid).reply()
-        pimg = c.core.GetImage(xcb.xproto.ImageFormat.ZPixmap, pid,
-                               0, 0, geom.width, geom.height,
-                               2**32 - 1).reply().data
-
-        return geom.width, geom.height, pimg
-    except xcb.xproto.BadDrawable:
-        return 0, 0, []
-
 def parse_net_wm_icon(data):
     ret = []
     for i, d in enumerate(data):
@@ -45,8 +25,9 @@ def parse_color(clr):
     return '#%s' % ('0' * (6 - len(t)) + t)
 
 def hex_to_rgb(h):
-    s = '%s%s' % (hex(h), '0' * (8 - len(hex(h))))
-    return (int(s[2:4], 16), int(s[4:6], 16), int(s[6:8], 16))
+    #s = '0x%s%s' % ('0' * (8 - len(hex(h))), hex(h))
+    s = parse_color(h)
+    return (int(s[1:3], 16), int(s[3:5], 16), int(s[5:7], 16))
 
 def border(border_color, bg_color, width, height, orient):
     assert ((width == 1 and orient in ('top', 'bottom')) or
@@ -62,6 +43,29 @@ def border(border_color, bg_color, width, height, orient):
         data = border + bg
 
     im.putdata(data)
+
+    return get_data(im)
+
+def corner(border_color, bg_color, width, height, orient):
+    im = Image.new('RGBA', (width, height))
+    d = ImageDraw.Draw(im)
+
+    d.rectangle([0, 0, width, height], fill=hex_to_rgb(bg_color))
+    coords = None
+
+    w, h = width, height
+    if orient in ('top_left', 'left_top'):
+        coords = [(0, h), (0, 0), (w, 0)]
+    elif orient in ('top_right', 'right_top'):
+        coords = [(0, 0), (w - 1, 0), (w - 1, h)]
+    elif orient in ('right_bottom', 'bottom_right'):
+        coords = [(w - 1, 0), (w - 1, h - 1), (0, h - 1)]
+    elif orient in ('bottom_left', 'left_bottom'):
+        coords = [(0, 0), (0, h - 1), (w - 1, h - 1)]
+
+    assert coords is not None
+
+    d.line(coords, fill=hex_to_rgb(border_color))
 
     return get_data(im)
 
@@ -88,67 +92,41 @@ def draw_text_bgcolor(text, font, size, color_bg, color_text, max_width,
 
     return get_data(im), w, h
 
-def blend_bgcolor(data, color, width, height, has_alpha=False):
+def get_image_from_pixmap(c, pid):
+    try:
+        geom = c.core.GetGeometry(pid).reply()
+        pimg = c.core.GetImage(xcb.xproto.ImageFormat.ZPixmap, pid,
+                               0, 0, geom.width, geom.height,
+                               2**32 - 1).reply().data
+
+        return geom.width, geom.height, pimg
+    except xcb.xproto.BadDrawable:
+        return 0, 0, []
+
+def get_image(width, height, data):
+    im = Image.fromstring('RGBA', (width, height),
+                          ''.join([chr(i) for i in data]), 'raw', 'BGRA')
+
+    return im
+
+def get_bitmap(width, height, data):
+    im = Image.fromstring('1', (width, height),
+                          ''.join([chr(i) for i in data]), 'raw', '1;R')
+
+    return im
+
+def get_data(image):
+    return [ord(s) for s in image.tostring('raw', 'BGRA')]
+
+def blend(img, mask, color, width, height, alpha=1):
     assert width > 0 and height > 0
-    assert data
 
-    im = Image.new('RGBA', (width, height))
-    d = ImageDraw.Draw(im)
-    d.rectangle([0, 0, width, height], fill=parse_color(color))
-    bg = get_data(im)
+    bg = Image.new('RGBA', (width, height))
+    bgd = ImageDraw.Draw(bg)
+    bgd.rectangle([0, 0, width, height], fill=parse_color(color))
+    bg2 = bg.copy()
 
-    ret = []
-    for pixel in xrange(0, len(data), 4):
-        blue = data[pixel]
-        green = data[pixel + 1]
-        red = data[pixel + 2]
-        alpha = data[pixel + 3]
+    blended = Image.composite(img, bg, mask)
+    blended = Image.blend(bg2, blended, alpha)
 
-        if not has_alpha and not blue and not green and not red:
-            blue = bg[pixel]
-            green = bg[pixel + 1]
-            red = bg[pixel + 2]
-
-        if has_alpha:
-            blue = bg[pixel] + (((blue - bg[pixel]) * alpha) >> 8)
-            green = bg[pixel + 1] + (((green - bg[pixel + 1]) * alpha) >> 8)
-            red = bg[pixel + 2] + (((red - bg[pixel + 2]) * alpha) >> 8)
-
-        ret.append(blue)
-        ret.append(green)
-        ret.append(red)
-        ret.append(alpha)
-
-    return ret
-
-def blend(c, data, bg_drawable, width, height, x, y, has_alpha=False):
-    assert width > 0 and height > 0
-    assert data
-
-    ret = []
-    bg = c.core.GetImage(xcb.xproto.ImageFormat.ZPixmap, bg_drawable,
-                         x, y, width, height,
-                         2**32 - 1).reply().data
-
-    for pixel in xrange(0, len(data), 4):
-        blue = data[pixel]
-        green = data[pixel + 1]
-        red = data[pixel + 2]
-        alpha = data[pixel + 3]
-
-        if not has_alpha and not blue and not green and not red:
-            blue = bg[pixel]
-            green = bg[pixel + 1]
-            red = bg[pixel + 2]
-
-        if has_alpha:
-            blue = bg[pixel] + (((blue - bg[pixel]) * alpha) >> 8)
-            green = bg[pixel + 1] + (((green - bg[pixel + 1]) * alpha) >> 8)
-            red = bg[pixel + 2] + (((red - bg[pixel + 2]) * alpha) >> 8)
-
-        ret.append(blue)
-        ret.append(green)
-        ret.append(red)
-        ret.append(alpha)
-
-    return ret
+    return get_data(blended)
