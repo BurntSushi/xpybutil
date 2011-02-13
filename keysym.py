@@ -9,23 +9,23 @@ TRIVIAL_MODS = [
     xcb.xproto.ModMask.Lock | xcb.xproto.ModMask._2
 ]
 
-def _get_min_max_keycode(c):
+def get_min_max_keycode(c):
     return c.get_setup().min_keycode, c.get_setup().max_keycode
 
 def get_keyboard_mapping(c):
-    mn, mx = _get_min_max_keycode(c)
+    mn, mx = get_min_max_keycode(c)
 
     return c.core.GetKeyboardMapping(mn, mx - mn + 1)
 
 def get_keyboard_mapping_unchecked(c):
-    mn, mx = _get_min_max_keycode(c)
+    mn, mx = get_min_max_keycode(c)
 
     return c.core.GetKeyboardMappingUnchecked(mn, mx - mn + 1)
 
 def get_keysym(c, syms, keycode, col=0):
     assert isinstance(syms, xcb.xproto.GetKeyboardMappingReply)
 
-    mn, mx = _get_min_max_keycode(c)
+    mn, mx = get_min_max_keycode(c)
     per = syms.keysyms_per_keycode
 
     return syms.keysyms[(keycode - mn) * per]
@@ -34,7 +34,7 @@ def get_keycode(c, syms, keysym):
     assert isinstance(syms, xcb.xproto.GetKeyboardMappingReply)
 
     res = []
-    mn, mx = _get_min_max_keycode(c)
+    mn, mx = get_min_max_keycode(c)
     for j in xrange(mn, mx + 1):
         ks = get_keysym(c, syms, j)
         if ks == keysym:
