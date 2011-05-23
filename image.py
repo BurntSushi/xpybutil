@@ -1,7 +1,7 @@
 import xcb.xproto
 from PIL import Image
 
-def parse_net_wm_icon(data):
+def net_wm_icon_to_bgra(data):
     ret = []
     for i, d in enumerate(data):
         pixel = i * 4
@@ -18,13 +18,12 @@ def parse_net_wm_icon(data):
 
     return ret
 
-def parse_color(clr):
+def color_humanize(clr):
     t = hex(clr).replace('0x', '')
     return '#%s' % ('0' * (6 - len(t)) + t)
 
 def hex_to_rgb(h):
-    #s = '0x%s%s' % ('0' * (8 - len(hex(h))), hex(h))
-    s = parse_color(h)
+    s = color_humanize(h)
     return (int(s[1:3], 16), int(s[3:5], 16), int(s[5:7], 16))
 
 def get_image_from_pixmap(c, pid):

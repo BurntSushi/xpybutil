@@ -30,6 +30,11 @@ def get_keysym(c, syms, keycode, col=0):
 
     return syms.keysyms[(keycode - mn) * per]
 
+def get_keysym_string(c, syms, keysym):
+    assert isinstance(syms, xcb.xproto.GetKeyboardMappingReply)
+
+    return keycodes[keysym][0]
+
 def get_keycode(c, syms, keysym):
     assert isinstance(syms, xcb.xproto.GetKeyboardMappingReply)
 
@@ -41,6 +46,22 @@ def get_keycode(c, syms, keysym):
             return j
 
     return None
+
+def get_keys_to_mods(c):
+    mm = xcb.xproto.ModMask
+    modmasks = [mm.Shift, mm.Lock, mm.Control,
+                mm._1, mm._2, mm._3, mm._4, mm._5] # order matters
+
+    mods = c.core.GetModifierMapping().reply()
+
+    res = {}
+    keyspermod = mods.keycodes_per_modifier
+    for mmi in xrange(0, len(modmasks)):
+        row = mmi * keyspermod
+        for kc in mods.keycodes[row:row + 4]:
+            res[kc] = modmasks[mmi]
+
+    return res
 
 def get_modifiers(state):
     ret = []
