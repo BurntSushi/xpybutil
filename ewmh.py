@@ -960,6 +960,71 @@ def request_current_desktop_checked(c, desktop_number,
     return revent_checked(c, root(c), atom(c, '_NET_CURRENT_DESKTOP'),
                   [desktop_number, timestamp])
 
+# _NET_VISIBLE_DESKTOPS
+
+def get_visible_desktops(c, window):
+    """
+    Returns a list of visible desktops.
+
+    The first desktop is on Xinerama screen 0, the second is on Xinerama
+    screen 1, etc.
+
+    @param c:       An xpyb connection object.
+    @param window:  A window identifier.
+    @return:        A list of visible desktops.
+    @rtype:         util.PropertyCookie (ATOM[]/32)
+    """
+    return util.PropertyCookie(
+        util.get_property(c, window, atom(c, '_NET_VISIBLE_DESKTOPS')))
+
+def get_visible_desktops_unchecked(c, window):
+    """
+    Returns a list of visible desktops.
+
+    The first desktop is on Xinerama screen 0, the second is on Xinerama
+    screen 1, etc.
+
+    @param c:       An xpyb connection object.
+    @param window:  A window identifier.
+    @return:        A list of visible desktops.
+    @rtype:         util.PropertyCookie (ATOM[]/32)
+    """
+    return util.PropertyCookie(
+        util.get_property_unchecked(c, window, 
+                                    atom(c, '_NET_VISIBLE_DESKTOPS')))
+
+def set_visible_desktops(c, window, desktops):
+    """
+    Sets the list of visible desktops.
+
+    @param c:       An xpyb connection object.
+    @param window:  A window identifier.
+    @param windows: A list of desktops.
+    @type windows:  ATOM[]/32
+    @rtype:         xcb.VoidCookie
+    """
+    packed = struct.pack('I' * len(desktops), *desktops)
+    return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, window,
+                                 atom(c, '_NET_VISIBLE_DESKTOPS'),
+                                 xcb.xproto.Atom.WINDOW, 32, len(desktops),
+                                 packed)
+
+def set_visible_desktops_checked(c, window, desktops):
+    """
+    Sets the list of visible desktops.
+
+    @param c:       An xpyb connection object.
+    @param window:  A window identifier.
+    @param windows: A list of desktops.
+    @type windows:  ATOM[]/32
+    @rtype:         xcb.VoidCookie
+    """
+    packed = struct.pack('I' * len(desktops), *desktops)
+    return c.core.ChangePropertyChecked(xcb.xproto.PropMode.Replace, window,
+                                 atom(c, '_NET_VISIBLE_DESKTOPS'),
+                                 xcb.xproto.Atom.WINDOW, 32, len(desktops),
+                                 packed)
+
 # _NET_DESKTOP_NAMES
 
 def get_desktop_names(c, window):
