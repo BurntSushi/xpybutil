@@ -25,12 +25,9 @@ def update_window_opacity():
     if not activewin:
         return
 
-    set_opacity(conn, get_parent(conn, activewin), 1)
     for client in clients:
-        if client == activewin:
-            continue
-        p = get_parent(conn, client)
-        set_opacity(conn, p, opacity)
+        set_opacity(conn, get_parent(conn, client), 
+                    1 if client == activewin else opacity)
 
     conn.flush()
 
