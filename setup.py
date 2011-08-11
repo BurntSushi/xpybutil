@@ -41,6 +41,6 @@ setup(
     long_description = "See README",
     url = "http://pytyle.com",
     platforms = 'POSIX',
-    packages = ['xpybutil', 'xpybutil/keysymdef'],
+    packages = ['share/doc/xpybutil', 'xpybutil/keysymdef'],
     data_files = [('xpybutil', ['README'])]
 )
