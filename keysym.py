@@ -9,6 +9,24 @@ TRIVIAL_MODS = [
     xcb.xproto.ModMask.Lock | xcb.xproto.ModMask._2
 ]
 
+def parse_keystring(c, key_string, kbmap):
+    """
+    A utility function to turn strings like 'Mod1-Mod4-a' into a pair
+    corresponding to its modifiers and keycode.
+    """
+    modifiers = 0
+    keycode = None
+
+    for part in key_string.split('-'):
+        if hasattr(xcb.xproto.KeyButMask, part):
+            modifiers |= getattr(xcb.xproto.KeyButMask, part)
+        else:
+            if len(part) == 1:
+                part = part.lower()
+            keycode = lookup_string(c, kbmap, part)
+
+    return modifiers, keycode
+
 def get_min_max_keycode(c):
     return c.get_setup().min_keycode, c.get_setup().max_keycode
 

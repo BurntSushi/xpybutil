@@ -175,7 +175,6 @@ def set_client_list(c, window, windows):
                                  packed)
 
 def set_client_list_checked(c, window, windows):
-    Sets the list of windows managed by the window manager.
     packed = struct.pack('I' * len(windows), *windows)
     return c.core.ChangePropertyChecked(xcb.xproto.PropMode.Replace, window,
                                  atom(c, '_NET_CLIENT_LIST'),
