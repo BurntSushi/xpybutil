@@ -546,11 +546,11 @@ def set_visible_desktops(c, window, desktops):
     """
     Sets the list of visible desktops.
 
-    @param c:       An xpyb connection object.
-    @param window:  A window identifier.
-    @param windows: A list of desktops.
-    @type windows:  ATOM[]/32
-    @rtype:         xcb.VoidCookie
+    @param c:        An xpyb connection object.
+    @param window:   A window identifier.
+    @param desktops: A list of desktops.
+    @type desktops:  ATOM[]/32
+    @rtype:          xcb.VoidCookie
     """
     packed = struct.pack('I' * len(desktops), *desktops)
     return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, window,
