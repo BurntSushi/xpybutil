@@ -1335,7 +1335,7 @@ def get_wm_window_opacity(c, window):
     Get the opacity of the current window.
 
     N.B. If your window manager uses decorations, you'll typically want to pass
-         your client's *parent* window to this function.
+    your client's *parent* window to this function.
 
     @param c:       An xpyb connection object.
     @param window:  A window identifier.
@@ -1355,7 +1355,7 @@ def set_wm_window_opacity(c, window, opacity):
     Sets the opacity of the current window.
 
     N.B. If your window manager uses decorations, you'll typically want to pass
-         your client's *parent* window to this function.
+    your client's *parent* window to this function.
 
     @param c:       An xpyb connection object.
     @param window:  A window identifier.
