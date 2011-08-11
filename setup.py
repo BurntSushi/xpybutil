@@ -1,5 +1,5 @@
 #==============================================================================
-# PyTyle - An on-demand tiling manager
+# xpybutil - An incomplete xcb-util port plus some extras
 # Copyright (C) 2009-2010  Andrew Gallant <andrew@pytyle.com>
 #
 # This program is free software; you can redistribute it and/or modify
