@@ -1,5 +1,3 @@
-#!/usr/bin/env python2
-
 # Makes all inactive windows transparent and keeps the active window opaque.
 
 # Range of values: 0 <= opacity <= 1
