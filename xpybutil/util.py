@@ -69,6 +69,9 @@ def get_atom(c, atom_name, only_if_exists=False):
 
     return __atom_cache[atom_name]
 
+def get_parent_window(c, window):
+    return c.core.QueryTree(window).reply().parent
+
 def get_atom_name(c, atom):
     global __atom_nm_cache
 

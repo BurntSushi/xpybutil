@@ -6,6 +6,9 @@ import xcb.xproto
 import util
 
 __atoms = [
+           # Non-standard
+           '_NET_VISIBLE_DESKTOPS', '_NET_WM_WINDOW_OPACITY',
+
            # Root Window Properties (and Related Messages)
            '_NET_SUPPORTED', '_NET_CLIENT_LIST', '_NET_CLIENT_LIST_STACKING',
            '_NET_NUMBER_OF_DESKTOPS', '_NET_DESKTOP_GEOMETRY',
@@ -1315,6 +1318,66 @@ def set_wm_visible_icon_name_checked(c, window, icon_name):
                                     atom(c, '_NET_WM_VISIBLE_ICON_NAME'),
                                     atom(c, 'UTF8_STRING'), 8, len(icon_name),
                                     icon_name)
+
+# _NET_WM_WINDOW_OPACITY
+
+class OpacityCookieSingle(util.PropertyCookieSingle):
+    def reply(self):
+        v = util.PropertyCookieSingle.reply(self)
+
+        if not v:
+            return None
+
+        return float(v) / float(0xffffffff)
+
+def get_wm_window_opacity(c, window):
+    """
+    Get the opacity of the current window.
+
+    N.B. If your window manager uses decorations, you'll typically want to pass
+         your client's *parent* window to this function.
+
+    @param c:       An xpyb connection object.
+    @param window:  A window identifier.
+    @return:        An opacity percentage between 0 and 1 (inclusive)
+    @rtype:         util.PropertyCookieSingle (CARDINAL/32)
+    """
+    return OpacityCookieSingle(
+        util.get_property(c, window, atom(c, '_NET_WM_WINDOW_OPACITY')))
+
+def get_wm_window_opacity_unchecked(c, window):
+    return OpacityCookieSingle(
+        util.get_property_unchecked(c, window, 
+                                    atom(c, '_NET_WM_WINDOW_OPACITY')))
+
+def set_wm_window_opacity(c, window, opacity):
+    """
+    Sets the opacity of the current window.
+
+    N.B. If your window manager uses decorations, you'll typically want to pass
+         your client's *parent* window to this function.
+
+    @param c:       An xpyb connection object.
+    @param window:  A window identifier.
+    @param opacity: A float between 0 and 1 inclusive.
+
+                    0 is completely transparent and 1 is completely opaque.
+    @type opacity:  CARDINAL/32
+    @rtype:         xcb.VoidCookie
+    """
+    assert 0 <= opacity <= 1
+    packed = struct.pack('I', int(opacity * 0xffffffff))
+    return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, window,
+                                    atom(c, '_NET_WM_WINDOW_OPACITY'),
+                                    CARDINAL, 32, 1, packed)
+
+def set_wm_window_opacity_checked(c, window, opacity):
+    assert 0 <= opacity <= 1
+    packed = struct.pack('I', int(opacity * 0xffffffff))
+    return c.core.ChangePropertyChecked(xcb.xproto.PropMode.Replace, window,
+                                    atom(c, '_NET_WM_WINDOW_OPACITY'),
+                                    CARDINAL, 32, 1,
+                                    packed)
 
 # _NET_WM_DESKTOP
 
