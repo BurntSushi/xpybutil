@@ -1,11 +1,14 @@
 from collections import deque
 import struct
+import sys
+import traceback
 
 import xcb.xproto
 
 import util
 
 __queue = deque()
+__callbacks = []
 
 class Event:
     KeyPressEvent = 2
@@ -42,6 +45,22 @@ class Event:
     ClientMessageEvent = 33
     MappingNotifyEvent = 34
 
+def connect(event_name, window, callback):
+    member = '%sEvent' % event_name
+    assert hasattr(xcb.xproto, member)
+
+    __callbacks.append((getattr(xcb.xproto, member), window, callback))
+
+def disconnect(event_name, window):
+    member = '%sEvent' % event_name
+    assert hasattr(xcb.xproto, member)
+
+    member = getattr(xcb.xproto, member)
+    cbs = filter(lambda (et, win, cb): et == member and win == window,
+                 __callbacks)
+    for item in cbs:
+        __callbacks.remove(item)
+
 def send_event(c, destination, event_mask, event, propagate=False):
     return c.core.SendEvent(propagate, destination, event_mask, event)
 
@@ -67,9 +86,30 @@ def read(c, block=False):
 
         __queue.appendleft(e)
 
+def event_loop(conn):
+    try:
+        while True:
+            read(conn, block=True)
+            for e in queue():
+                w = None
+                if hasattr(e, 'window'):
+                    w = e.window
+                elif hasattr(e, 'event'):
+                    w = e.event
+                elif hasattr(e, 'requestor'):
+                    w = e.requestor
+
+                for event_type, win, cb in __callbacks:
+                    if win == w and isinstance(e, event_type):
+                        cb(e)
+    except xcb.Exception:
+        traceback.print_exc()
+        sys.exit(1)
+
 def queue():
     while len(__queue):
         yield __queue.pop()
 
 def peek():
     return list(__queue)
+
