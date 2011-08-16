@@ -1054,7 +1054,7 @@ def request_moveresize_window(c, window, x=None, y=None, width=None,
         flags |= 1 << 11
 
     return revent(c, window, atom(c, '_NET_MOVERESIZE_WINDOW'),
-                  [flags, x, y, width, height])
+                  [flags, x or 0, y or 0, width or 0, height or 0])
 
 def request_moveresize_window_checked(c, window, x=None, y=None, width=None,
                                       height=None,
