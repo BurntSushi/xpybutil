@@ -27,6 +27,16 @@ def parse_keystring(c, key_string, kbmap):
 
     return modifiers, keycode
 
+def parse_buttonstring(button_string):
+    mods, button = 0, None
+    for part in button_string.split('-'):
+        if hasattr(xcb.xproto.KeyButMask, part):
+            mods |= getattr(xcb.xproto.KeyButMask, part)
+        else:
+            button = int(part)
+
+    return mods, button
+
 def get_min_max_keycode(c):
     return c.get_setup().min_keycode, c.get_setup().max_keycode
 
