@@ -129,9 +129,9 @@ def get_root(c):
 def send_event(c, destination, event_mask, event, propagate=False):
     return c.core.SendEvent(propagate, destination, event_mask, event)
 
-def replay_pointer():
-    core.AllowEventsChecked(xcb.xproto.Allow.ReplayPointer,
-                            xcb.xproto.Time.CurrentTime).check()
+def replay_pointer(c):
+    c.core.AllowEventsChecked(xcb.xproto.Allow.ReplayPointer,
+                              xcb.xproto.Time.CurrentTime).check()
 
 # Sends a client event to the root window
 def _root_send_client_event_pack(window, message_type, data):
