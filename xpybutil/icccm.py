@@ -1,6 +1,8 @@
 from collections import defaultdict
 import struct
 
+from xpybutil import conn, root
+
 import xcb.xproto
 
 import util
