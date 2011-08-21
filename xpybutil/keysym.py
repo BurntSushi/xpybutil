@@ -1,7 +1,10 @@
 import xcb.xproto
 
+from xpybutil import conn
 from keysymdef import keysyms, keycodes
 
+EM = xcb.xproto.EventMask
+GM = GM
 TRIVIAL_MODS = [
     0,
     xcb.xproto.ModMask.Lock,
@@ -9,7 +12,7 @@ TRIVIAL_MODS = [
     xcb.xproto.ModMask.Lock | xcb.xproto.ModMask._2
 ]
 
-def parse_keystring(c, key_string, kbmap):
+def parse_keystring(key_string, kbmap):
     """
     A utility function to turn strings like 'Mod1-Mod4-a' into a pair
     corresponding to its modifiers and keycode.
@@ -23,7 +26,7 @@ def parse_keystring(c, key_string, kbmap):
         else:
             if len(part) == 1:
                 part = part.lower()
-            keycode = lookup_string(c, kbmap, part)
+            keycode = lookup_string(kbmap, part)
 
     return modifiers, keycode
 
@@ -37,13 +40,13 @@ def parse_buttonstring(button_string):
 
     return mods, button
 
-def lookup_string(c, syms, kstr):
+def lookup_string(syms, kstr):
     assert isinstance(syms, xcb.xproto.GetKeyboardMappingReply)
 
     if kstr in keysyms:
-        return get_keycode(c, syms, keysyms[kstr])
+        return get_keycode(syms, keysyms[kstr])
     elif len(kstr) > 1 and kstr.capitalize() in keysyms:
-        return get_keycode(c, syms, keysyms[kstr.capitalize()])
+        return get_keycode(syms, keysyms[kstr.capitalize()])
 
     return None
 
@@ -52,55 +55,53 @@ def lookup_keysym(keysym):
         return keycodes[keysym][0]
     return None
 
-def get_min_max_keycode(c):
-    return c.get_setup().min_keycode, c.get_setup().max_keycode
+def get_min_max_keycode():
+    return conn.get_setup().min_keycode, conn.get_setup().max_keycode
 
-def get_keyboard_mapping(c):
-    mn, mx = get_min_max_keycode(c)
+def get_keyboard_mapping():
+    mn, mx = get_min_max_keycode()
 
-    return c.core.GetKeyboardMapping(mn, mx - mn + 1)
+    return conn.core.GetKeyboardMapping(mn, mx - mn + 1)
 
 def get_keyboard_mapping_unchecked(c):
-    mn, mx = get_min_max_keycode(c)
+    mn, mx = get_min_max_keycode()
 
-    return c.core.GetKeyboardMappingUnchecked(mn, mx - mn + 1)
+    return conn.core.GetKeyboardMappingUnchecked(mn, mx - mn + 1)
 
-def get_keysym(c, syms, keycode, col=0):
+def get_keysym(syms, keycode, col=0):
     assert isinstance(syms, xcb.xproto.GetKeyboardMappingReply)
 
-    mn, mx = get_min_max_keycode(c)
+    mn, mx = get_min_max_keycode()
     per = syms.keysyms_per_keycode
     ind = (keycode - mn) * per + col
 
     return syms.keysyms[ind]
-    # if ind in syms.keysyms: 
-    # return None 
 
-def get_keysym_string(c, syms, keysym, col=0):
+def get_keysym_string(syms, keysym, col=0):
     assert isinstance(syms, xcb.xproto.GetKeyboardMappingReply)
 
     return keycodes[keysym][col]
 
-def get_keycode(c, syms, keysym):
+def get_keycode(syms, keysym):
     assert isinstance(syms, xcb.xproto.GetKeyboardMappingReply)
 
     res = []
-    mn, mx = get_min_max_keycode(c)
+    mn, mx = get_min_max_keycode()
     cols = syms.keysyms_per_keycode
     for i in xrange(mn, mx + 1):
         for j in xrange(0, cols):
-            ks = get_keysym(c, syms, i, col=j)
+            ks = get_keysym(syms, i, col=j)
             if ks == keysym:
                 return i
 
     return None
 
-def get_keys_to_mods(c):
+def get_keys_to_mods():
     mm = xcb.xproto.ModMask
     modmasks = [mm.Shift, mm.Lock, mm.Control,
                 mm._1, mm._2, mm._3, mm._4, mm._5] # order matters
 
-    mods = c.core.GetModifierMapping().reply()
+    mods = conn.core.GetModifierMapping().reply()
 
     res = {}
     keyspermod = mods.keycodes_per_modifier
@@ -143,68 +144,58 @@ def get_modifiers(state):
 
     return ret
 
-def grab_pointer(c, grab_win, confine, cursor):
-    c.core.GrabPointer(
-            False, grab_win,
-            xcb.xproto.EventMask.PointerMotion |
-            xcb.xproto.EventMask.ButtonRelease |
-            xcb.xproto.EventMask.ButtonPress,
-            xcb.xproto.GrabMode.Async, xcb.xproto.GrabMode.Async,
-            confine, cursor, xcb.xproto.Time.CurrentTime
-        )
+def grab_pointer(grab_win, confine, cursor):
+    mask = EM.PointerMotion | EM.ButtonRelease | EM.ButtonPress
+    conn.core.GrabPointer(False, grab_win, mask, GM.Async, GM.Async,
+                          confine, cursor, xcb.xproto.Time.CurrentTime)
 
-def ungrab_pointer(c):
-    c.core.UngrabPointer(xcb.xproto.Time.CurrentTime)
+def ungrab_pointer():
+    conn.core.UngrabPointer(xcb.xproto.Time.CurrentTime)
 
-def grab_keyboard(c, grab_win):
-    return c.core.GrabKeyboard(False, grab_win, xcb.xproto.Time.CurrentTime,
-                               xcb.xproto.GrabMode.Async, 
-                               xcb.xproto.GrabMode.Async).reply()
+def grab_keyboard(grab_win):
+    return conn.core.GrabKeyboard(False, grab_win, xcb.xproto.Time.CurrentTime,
+                                  GM.Async, GM.Async).reply()
 
-def ungrab_keyboard(c):
-    c.core.UngrabKeyboardChecked(xcb.xproto.Time.CurrentTime).check()
+def ungrab_keyboard():
+    conn.core.UngrabKeyboardChecked(xcb.xproto.Time.CurrentTime).check()
 
-def grab_key(c, wid, modifiers, key):
+def grab_key(wid, modifiers, key):
     try:
         for mod in TRIVIAL_MODS:
-            c.core.GrabKeyChecked(True, wid, modifiers | mod, key,
-                                  xcb.xproto.GrabMode.Async,
-                                  xcb.xproto.GrabMode.Async).check()
+            conn.core.GrabKeyChecked(True, wid, modifiers | mod, key, GM.Async,
+                                     GM.Async).check()
 
         return True
     except xcb.xproto.BadAccess:
         return False
 
-def ungrab_key(c, wid, modifiers, key):
+def ungrab_key(wid, modifiers, key):
     try:
         for mod in TRIVIAL_MODS:
-            c.core.UngrabKeyChecked(key, wid, modifiers | mod).check()
+            conn.core.UngrabKeyChecked(key, wid, modifiers | mod).check()
 
         return True
     except xcb.xproto.BadAccess:
         return False
 
-def grab_button(c, wid, modifiers, button, propagate=False):
-    emask = (xcb.xproto.EventMask.ButtonPress |
-             xcb.xproto.EventMask.ButtonRelease |
-             xcb.xproto.EventMask.ButtonMotion)
-    mode = xcb.xproto.GrabMode.Sync if propagate else xcb.xproto.GrabMode.Async
+def grab_button(wid, modifiers, button, propagate=False):
+    mask = EM.ButtonPress | EM.ButtonRelease | EM.ButtonMotion
 
     try:
         for mod in TRIVIAL_MODS:
-            c.core.GrabButtonChecked(True, wid, emask,
-                                     mode,
-                                     xcb.xproto.GrabMode.Async, 0, 0,
+            c.core.GrabButtonChecked(True, wid, mask,
+                                     GM.Sync if propagate else GM.Async,
+                                     GM.Async, 0, 0,
                                      button, modifiers | mod).check()
 
         return True
     except xcb.xproto.BadAccess:
         return False
 
-def ungrab_button(c, wid, modifiers, button):
+def ungrab_button(wid, modifiers, button):
     try:
         for mod in TRIVIAL_MODS:
-            c.core.UngrabButtonChecked(button, wid, modifiers | mod).check()
+            conn.core.UngrabButtonChecked(button, wid, modifiers | mod).check()
 
         return True
     except xcb.xproto.BadAccess:

@@ -2,7 +2,7 @@ import struct
 
 import xcb.xproto
 
-import event
+from xpybutil import conn, root
 
 __atom_cache = {}
 __atom_nm_cache = {}
@@ -35,68 +35,58 @@ class AtomNameCookie(Cookie):
         return str(self.cookie.reply().name.buf())
 
 # Handle atom caching
-def build_atom_cache(c, module):
+def build_atom_cache(atoms):
     global __atom_cache, __atom_nm_cache
 
-    for atom in module.__atoms:
-        __atom_cache[atom] = get_atom_cookie(c, atom, only_if_exists=False)
+    for atom in atoms:
+        __atom_cache[atom] = get_atom_cookie(atom, only_if_exists=False)
     for atom in __atom_cache:
         if isinstance(__atom_cache[atom], AtomCookie):
             __atom_cache[atom] = __atom_cache[atom].reply()
 
     __atom_nm_cache = dict((v, k) for k, v in __atom_cache.iteritems())
 
-def atom(atom_name):
+def get_atom(atom_name, only_if_exists=False):
     global __atom_cache
 
-    if atom_name in __atom_cache:
-        if isinstance(__atom_cache[atom_name], AtomCookie):
-            __atom_cache[atom_name] = __atom_cache[atom_name].reply()
-        return __atom_cache[atom_name]
+    a = __atom_cache.setdefault(atom_name,
+                                get_atom_cookie(atom_name, only_if_exists))
+    if isinstance(a, AtomCookie):
+        a = a.reply()
 
-    return None
+    return a
 
-def get_atom(c, atom_name, only_if_exists=False):
-    global __atom_cache
-
-    if atom_name in __atom_cache:
-        if isinstance(__atom_cache[atom_name], AtomCookie):
-            __atom_cache[atom_name] = __atom_cache[atom_name].reply()
-    else:
-        __atom_cache[atom_name] = get_atom_cookie(c, atom_name,
-                                                  only_if_exists).reply()
-
-
-    return __atom_cache[atom_name]
-
-def get_parent_window(c, window):
-    return c.core.QueryTree(window).reply().parent
-
-def get_atom_name(c, atom):
+def get_atom_name(atom):
     global __atom_nm_cache
 
-    if atom not in __atom_nm_cache:
-        __atom_nm_cache[atom] = get_atom_name_cookie(c, atom).reply()
+    a = __atom_nm_cache.setdefault(atom, get_atom_name_cookie(atom))
 
-    return __atom_nm_cache[atom]
+    if isinstance(a, AtomNameCookie):
+        a = a.reply()
+    
+    return a
 
-def get_atom_cookie(c, atom_name, only_if_exists=False):
-    return AtomCookie(
-                c.core.InternAtomUnchecked(only_if_exists, len(atom_name),
-                                           atom_name))
+def get_atom_cookie(atom_name, only_if_exists=False):
+    atom = conn.core.InternAtomUnchecked(only_if_exists, len(atom_name),
+                                         atom_name)
+    return AtomCookie(atom)
 
-def get_atom_name_cookie(c, atom):
-    return AtomNameCookie(c.core.GetAtomNameUnchecked(atom))
+def get_atom_name_cookie(atom):
+    return AtomNameCookie(conn.core.GetAtomNameUnchecked(atom))
 
-def get_property(conn, window, atom):
+def get_property(window, atom):
+    if isinstance(atom, basestring):
+        atom = get_atom(atom)
     return conn.core.GetProperty(False, window, atom,
                                  xcb.xproto.GetPropertyType.Any, 0,
                                  2 ** 32 - 1)
 
-def get_property_unchecked(conn, window, atom):
+def get_property_unchecked(window, atom):
+    if isinstance(atom, basestring):
+        atom = get_atom(atom)
     return conn.core.GetPropertyUnchecked(False, window, atom,
-                                 xcb.xproto.GetPropertyType.Any, 0,
-                                 2 ** 32 - 1)
+                                          xcb.xproto.GetPropertyType.Any, 0,
+                                          2 ** 32 - 1)
 
 def get_property_value(property_reply):
     assert isinstance(property_reply, xcb.xproto.GetPropertyReply)
@@ -121,49 +111,6 @@ def get_property_value(property_reply):
 
     return None
 
-# I know this is bad... But i'm really not interested in
-# developing for multiple screens...
-def get_root(c):
-    return c.get_setup().roots[0].root
+def get_parent_window(window):
+    return conn.core.QueryTree(window).reply().parent
 
-def send_event(c, destination, event_mask, event, propagate=False):
-    return c.core.SendEvent(propagate, destination, event_mask, event)
-
-def replay_pointer(c):
-    c.core.AllowEventsChecked(xcb.xproto.Allow.ReplayPointer,
-                              xcb.xproto.Time.CurrentTime).check()
-
-# Sends a client event to the root window
-def _root_send_client_event_pack(window, message_type, data):
-    # Pad the data
-    data = data + ([0] * (5 - len(data)))
-
-    # Taken from
-    # http://xcb.freedesktop.org/manual/structxcb__client__message__event__t.html
-    return struct.pack(
-        'BBH7I',
-        event.Event.ClientMessageEvent, # Event type
-        32, # Format
-        0, # Sequence
-        window, # Window
-        message_type, # Message type
-        *data # Data
-    )
-
-def root_send_client_event(c, window, message_type, data):
-    return c.core.SendEvent(False, get_root(c),
-                                (xcb.xproto.EventMask.SubstructureNotify |
-                                xcb.xproto.EventMask.SubstructureRedirect),
-                            _root_send_client_event_pack(window, message_type,
-                                                         data))
-
-def root_send_client_event_checked(c, window, message_type, data):
-    # I know this is bad... But i'm really not interested in
-    # developing for multiple screens...
-    root = c.get_setup().roots[0].root
-    return c.core.SendEventChecked(
-        False, root,
-            (xcb.xproto.EventMask.SubstructureNotify |
-            xcb.xproto.EventMask.SubstructureRedirect),
-        _root_send_client_event_pack(window, message_type,
-                                     data))
