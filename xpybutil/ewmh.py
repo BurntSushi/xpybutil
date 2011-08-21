@@ -4,6 +4,7 @@ import time
 import xcb.xproto
 
 from xpybutil import conn, root
+
 import util
 
 __atoms = [
