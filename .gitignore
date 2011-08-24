@@ -2,3 +2,4 @@ tests
 *.pyc
 .*swp
 testing.py
+tags

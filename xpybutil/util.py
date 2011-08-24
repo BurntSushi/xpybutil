@@ -50,7 +50,8 @@ def get_atom(atom_name, only_if_exists=False):
     global __atom_cache
 
     a = __atom_cache.setdefault(atom_name,
-                                get_atom_cookie(atom_name, only_if_exists))
+                                get_atom_cookie(atom_name, 
+                                                only_if_exists).reply())
     if isinstance(a, AtomCookie):
         a = a.reply()
 
@@ -59,7 +60,7 @@ def get_atom(atom_name, only_if_exists=False):
 def get_atom_name(atom):
     global __atom_nm_cache
 
-    a = __atom_nm_cache.setdefault(atom, get_atom_name_cookie(atom))
+    a = __atom_nm_cache.setdefault(atom, get_atom_name_cookie(atom).reply())
 
     if isinstance(a, AtomNameCookie):
         a = a.reply()

@@ -1,16 +1,17 @@
-from collections import deque
+from collections import defaultdict, deque
 import struct
 import sys
 import traceback
 
-import xcb.xproto
+import xcb
+import xcb.xproto as xproto
 
 from xpybutil import conn, root
 import util
 
 __queue = deque()
-__callbacks = []
-EM = xcb.xproto.EventMask
+__callbacks = defaultdict(list)
+EM = xproto.EventMask
 
 class Event(object):
     KeyPressEvent = 2
@@ -48,8 +49,8 @@ class Event(object):
     MappingNotifyEvent = 34
 
 def replay_pointer():
-    conn.core.AllowEventsChecked(xcb.xproto.Allow.ReplayPointer,
-                                 xcb.xproto.Time.CurrentTime).check()
+    conn.core.AllowEventsChecked(xproto.Allow.ReplayPointer,
+                                 xproto.Time.CurrentTime).check()
 
 def send_event(destination, event_mask, event, propagate=False):
     return conn.core.SendEvent(propagate, destination, event_mask, event)
@@ -81,21 +82,27 @@ def root_send_client_event_checked(window, message_type, *data):
     packed = pack_client_message(window, message_type, *data)
     return send_event_checked(root, mask, packed)
 
+def is_connected(event_name, window, callback):
+    member = '%sEvent' % event_name
+    assert hasattr(xproto, member)
+
+    key = (getattr(xproto, member), window)
+    return key in __callbacks and callback in __callbacks[key]
+
 def connect(event_name, window, callback):
     member = '%sEvent' % event_name
-    assert hasattr(xcb.xproto, member)
+    assert hasattr(xproto, member)
 
-    __callbacks.append((getattr(xcb.xproto, member), window, callback))
+    key = (getattr(xproto, member), window)
+    __callbacks[key].append(callback)
 
 def disconnect(event_name, window):
     member = '%sEvent' % event_name
-    assert hasattr(xcb.xproto, member)
+    assert hasattr(xproto, member)
 
-    member = getattr(xcb.xproto, member)
-    cbs = filter(lambda (et, win, cb): et == member and win == window,
-                 __callbacks)
-    for item in cbs:
-        __callbacks.remove(item)
+    key = (getattr(xproto, member), window)
+    if key in __callbacks:
+        del __callbacks[key]
 
 def read(block=False):
     if block:
@@ -110,22 +117,24 @@ def read(block=False):
 
         __queue.appendleft(e)
 
-def event_loop():
+def main():
     try:
         while True:
             read(block=True)
             for e in queue():
                 w = None
-                if hasattr(e, 'window'):
+                if isinstance(e, xproto.MappingNotifyEvent):
+                    w = None
+                elif hasattr(e, 'window'):
                     w = e.window
                 elif hasattr(e, 'event'):
                     w = e.event
                 elif hasattr(e, 'requestor'):
                     w = e.requestor
 
-                for event_type, win, cb in __callbacks:
-                    if win == w and isinstance(e, event_type):
-                        cb(e)
+                key = (e.__class__, w)
+                for cb in __callbacks.get(key, []):
+                    cb(e)
     except xcb.Exception:
         traceback.print_exc()
         sys.exit(1)
