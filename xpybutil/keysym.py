@@ -258,6 +258,9 @@ def __regrab(changes):
 
     # XXX: todo mouse regrabbing
 
+def bind_global_key(event_type, key_string, cb):
+    return bind_key(event_type, root, key_string, cb)
+
 def bind_key(event_type, wid, key_string, cb):
     assert event_type in ('KeyPress', 'KeyRelease')
 

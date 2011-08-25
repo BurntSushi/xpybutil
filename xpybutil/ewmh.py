@@ -681,36 +681,40 @@ def set_workarea_checked(workareas):
 
 # _NET_SUPPORTING_WM_CHECK
 
-def get_supporting_wm_check():
+def get_supporting_wm_check(wid):
     """
     Returns the identifier of the child window created by the window manager.
 
+    @param wid:     The identifier of the window with the property.
+    @type wid:      WINDOW/32
     @return:        The window ID of the child window.
     @rtype:         util.PropertyCookieSingle (WINDOW/32)
     """
-    cook = util.get_property(root, '_NET_SUPPORTING_WM_CHECK')
+    cook = util.get_property(wid, '_NET_SUPPORTING_WM_CHECK')
     return util.PropertyCookieSingle(cook)
 
-def get_supporting_wm_check_unchecked():
-    cook = util.get_property_unchecked(root, '_NET_SUPPORTING_WM_CHECK')
+def get_supporting_wm_check_unchecked(wid):
+    cook = util.get_property_unchecked(wid, '_NET_SUPPORTING_WM_CHECK')
     return util.PropertyCookieSingle(cook)
 
-def set_supporting_wm_check(child):
+def set_supporting_wm_check(wid, child):
     """
     Sets the identifier of the child window created by the window manager.
 
+    @param wid:     The identifier of the window with the property.
+    @type wid:      WINDOW/32
     @param child:   The identifier of the child window.
     @type child:    WINDOW/32
     @rtype:         xcb.VoidCookie
     """
     packed = struct.pack('I', child)
-    return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, root,
+    return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, wid,
                                  atom('_NET_SUPPORTING_WM_CHECK'),
                                  WINDOW, 32, 1, packed)
 
-def set_supporting_wm_check_checked(child):
+def set_supporting_wm_check_checked(wid, child):
     packed = struct.pack('I', child)
-    return c.core.ChangePropertyChecked(xcb.xproto.PropMode.Replace, root,
+    return c.core.ChangePropertyChecked(xcb.xproto.PropMode.Replace, wid,
                                         atom('_NET_SUPPORTING_WM_CHECK'),
                                         WINDOW, 32, 1, packed)
 

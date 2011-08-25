@@ -33,9 +33,9 @@ def get_geometry(window, window_manager=None):
 
     if window_manager is WindowManagers.KWin:
         p = util.get_parent_window(window)
-        return _get_geometry(conn, util.get_parent_window(p))
+        return _get_geometry(util.get_parent_window(p))
     else:
-        return _get_geometry(conn, util.get_parent_window(window))
+        return _get_geometry(util.get_parent_window(window))
 
 def moveresize(win, x=None, y=None, w=None, h=None, window_manager=None):
     '''
