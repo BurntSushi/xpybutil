@@ -113,6 +113,8 @@ def get_property_value(property_reply):
                     s += chr(o)
         else:
             ret = str(property_reply.value.buf())
+            if 0 == property_reply.value[-1]:
+                ret = ret[:-1]
 
         return ret
     elif property_reply.format in (16, 32):
