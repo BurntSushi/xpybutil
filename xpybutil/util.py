@@ -93,7 +93,7 @@ def get_property_value(property_reply):
     assert isinstance(property_reply, xcb.xproto.GetPropertyReply)
 
     if property_reply.format == 8:
-        if 0 in property_reply.value:
+        if 0 in property_reply.value[:-1]:
             ret = []
             s = ''
             for o in property_reply.value:
