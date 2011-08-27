@@ -1,12 +1,9 @@
 import xcb.xinerama
 
+from xpybutil import conn
 import util
 
-ext = None
-
-def init(conn):
-    global ext
-    ext = conn(xcb.xinerama.key)
+ext = conn(xcb.xinerama.key)
 
 def get_monitors():
     '''
@@ -15,9 +12,6 @@ def get_monitors():
 
     @rtype: List of (x, y, w, h) rectangles
     '''
-    assert ext is not None, \
-           'call xinerama.init(conn) before using the xinerama module'
-
     retval = []
     ms = ext.QueryScreens().reply()
     if ms:
