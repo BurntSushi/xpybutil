@@ -1,7 +1,6 @@
 import xcb.xinerama
 
 from xpybutil import conn
-import util
 
 ext = conn(xcb.xinerama.key)
 

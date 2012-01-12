@@ -2,7 +2,7 @@ import struct
 
 import xcb.xproto
 
-from xpybutil import root
+from xpybutil import conn as c
 import util
 
 __atoms = ['_MOTIF_WM_HINTS']

@@ -3,7 +3,7 @@ import struct
 
 import xcb.xproto
 
-from xpybutil import root
+from xpybutil import conn as c
 import util
 
 __atoms = ['WM_PROTOCOLS', 'WM_TAKE_FOCUS', 'WM_SAVE_YOURSELF',

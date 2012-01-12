@@ -1,4 +1,5 @@
 from collections import defaultdict
+import sys
 
 import xcb.xproto as xproto
 
@@ -92,7 +93,6 @@ def get_keysym_string(keysym, col=0):
     return keycodes[keysym][col]
 
 def get_keycode(keysym):
-    res = []
     mn, mx = get_min_max_keycode()
     cols = __kbmap.keysyms_per_keycode
     for i in xrange(mn, mx + 1):
@@ -193,10 +193,10 @@ def grab_button(wid, modifiers, button, propagate=False):
 
     try:
         for mod in TRIVIAL_MODS:
-            c.core.GrabButtonChecked(True, wid, mask,
-                                     GM.Sync if propagate else GM.Async,
-                                     GM.Async, 0, 0,
-                                     button, modifiers | mod).check()
+            conn.core.GrabButtonChecked(True, wid, mask,
+                                        GM.Sync if propagate else GM.Async,
+                                        GM.Async, 0, 0,
+                                        button, modifiers | mod).check()
 
         return True
     except xproto.BadAccess:
