@@ -1,3 +1,8 @@
+"""
+A set of functions devoted to binding key presses and registering
+callbacks. This will automatically hook into the event callbacks
+in event.py.
+"""
 from collections import defaultdict
 import sys
 
@@ -89,8 +94,8 @@ def get_keysym(keycode, col=0, kbmap=None):
 
     return __kbmap.keysyms[ind]
 
-def get_keysym_string(keysym, col=0):
-    return keysym_strings[keysym][col]
+def get_keysym_string(keysym):
+    return keysym_strings[keysym][0]
 
 def get_keycode(keysym):
     mn, mx = get_min_max_keycode()
@@ -215,7 +220,6 @@ def update_keyboard_mapping(e):
     global __kbmap, __keysmods
 
     newmap = get_keyboard_mapping().reply()
-    print 'updating keyboard mapping'
 
     if e is None:
         __kbmap = newmap
