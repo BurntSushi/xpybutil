@@ -1,23 +1,16 @@
 import xcb.xinerama
 
-import util
+from xpybutil import conn
 
-ext = None
-
-def init(conn):
-    global ext
-    ext = conn(xcb.xinerama.key)
+ext = conn(xcb.xinerama.key)
 
 def get_monitors():
     '''
     Returns a list of Xinerama screen rectangles.
     They come in the order that the Xinerama extension specifies.
 
-    @rtype: List of (x, y, w, h) rectangles
+    :rtype: List of (x, y, w, h) rectangles
     '''
-    assert ext is not None, \
-           'call xinerama.init(conn) before using the xinerama module'
-
     retval = []
     ms = ext.QueryScreens().reply()
     if ms:
@@ -30,8 +23,8 @@ def get_physical_mapping(monitors):
     '''
     Returns a list of Xinerama screen indices in their physical order.
 
-    @param monitors:  List of (x, y, w, h) rectangles
-    @rtype:           List of Xinerama indices
+    :param monitors:  List of (x, y, w, h) rectangles
+    :rtype:           List of Xinerama indices
     '''
     retval = []
 

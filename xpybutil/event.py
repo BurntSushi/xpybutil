@@ -1,16 +1,19 @@
-from collections import deque
+from collections import defaultdict, deque
 import struct
 import sys
 import traceback
 
-import xcb.xproto
+import xcb
+import xcb.xproto as xproto
 
+from xpybutil import conn, root
 import util
 
 __queue = deque()
-__callbacks = []
+__callbacks = defaultdict(list)
+EM = xproto.EventMask
 
-class Event:
+class Event(object):
     KeyPressEvent = 2
     KeyReleaseEvent = 3
     ButtonPressEvent = 4
@@ -45,63 +48,93 @@ class Event:
     ClientMessageEvent = 33
     MappingNotifyEvent = 34
 
-def connect(event_name, window, callback):
-    member = '%sEvent' % event_name
-    assert hasattr(xcb.xproto, member)
+def replay_pointer():
+    conn.core.AllowEventsChecked(xproto.Allow.ReplayPointer,
+                                 xproto.Time.CurrentTime).check()
 
-    __callbacks.append((getattr(xcb.xproto, member), window, callback))
+def send_event(destination, event_mask, event, propagate=False):
+    return conn.core.SendEvent(propagate, destination, event_mask, event)
 
-def disconnect(event_name, window):
-    member = '%sEvent' % event_name
-    assert hasattr(xcb.xproto, member)
-
-    member = getattr(xcb.xproto, member)
-    cbs = filter(lambda (et, win, cb): et == member and win == window,
-                 __callbacks)
-    for item in cbs:
-        __callbacks.remove(item)
-
-def send_event(c, destination, event_mask, event, propagate=False):
-    return c.core.SendEvent(propagate, destination, event_mask, event)
+def send_event_checked(destination, event_mask, event, propagate=False):
+    return conn.core.SendEventChecked(propagate, destination, event_mask, event)
 
 def pack_client_message(window, message_type, *data):
     assert len(data) <= 5
 
-    data = list(data)
-    data += ([0] * (5 - len(data)))
+    if isinstance(message_type, basestring):
+        message_type = util.get_atom(message_type)
 
+    data = list(data)
+    data += [0] * (5 - len(data))
+
+    # Taken from
+    # http://xcb.freedesktop.org/manual/structxcb__client__message__event__t.html
     return struct.pack('BBH7I', Event.ClientMessageEvent, 32, 0, window,
                        message_type, *data)
 
-def read(c, block=False):
+def root_send_client_event(window, message_type, *data):
+    mask = EM.SubstructureNotify | EM.SubstructureRedirect
+    packed = pack_client_message(window, message_type, *data)
+    return send_event(root, mask, packed)
+
+def root_send_client_event_checked(window, message_type, *data):
+    mask = EM.SubstructureNotify | EM.SubstructureRedirect
+    packed = pack_client_message(window, message_type, *data)
+    return send_event_checked(root, mask, packed)
+
+def is_connected(event_name, window, callback):
+    member = '%sEvent' % event_name
+    assert hasattr(xproto, member)
+
+    key = (getattr(xproto, member), window)
+    return key in __callbacks and callback in __callbacks[key]
+
+def connect(event_name, window, callback):
+    member = '%sEvent' % event_name
+    assert hasattr(xproto, member)
+
+    key = (getattr(xproto, member), window)
+    __callbacks[key].append(callback)
+
+def disconnect(event_name, window):
+    member = '%sEvent' % event_name
+    assert hasattr(xproto, member)
+
+    key = (getattr(xproto, member), window)
+    if key in __callbacks:
+        del __callbacks[key]
+
+def read(block=False):
     if block:
-        e = c.wait_for_event()
+        e = conn.wait_for_event()
         __queue.appendleft(e)
 
     while True:
-        e = c.poll_for_event()
+        e = conn.poll_for_event()
 
         if not e:
             break
 
         __queue.appendleft(e)
 
-def event_loop(conn):
+def main():
     try:
         while True:
-            read(conn, block=True)
+            read(block=True)
             for e in queue():
                 w = None
-                if hasattr(e, 'window'):
+                if isinstance(e, xproto.MappingNotifyEvent):
+                    w = None
+                elif hasattr(e, 'window'):
                     w = e.window
                 elif hasattr(e, 'event'):
                     w = e.event
                 elif hasattr(e, 'requestor'):
                     w = e.requestor
 
-                for event_type, win, cb in __callbacks:
-                    if win == w and isinstance(e, event_type):
-                        cb(e)
+                key = (e.__class__, w)
+                for cb in __callbacks.get(key, []):
+                    cb(e)
     except xcb.Exception:
         traceback.print_exc()
         sys.exit(1)

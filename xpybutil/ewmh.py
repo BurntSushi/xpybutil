@@ -1,70 +1,71 @@
 import struct
-import time
 
 import xcb.xproto
 
+from xpybutil import conn as c, root
+import event
 import util
 
 __atoms = [
-           # Non-standard
-           '_NET_VISIBLE_DESKTOPS', '_NET_WM_WINDOW_OPACITY',
+   # Non-standard
+   '_NET_VISIBLE_DESKTOPS', '_NET_WM_WINDOW_OPACITY',
 
-           # Root Window Properties (and Related Messages)
-           '_NET_SUPPORTED', '_NET_CLIENT_LIST', '_NET_CLIENT_LIST_STACKING',
-           '_NET_NUMBER_OF_DESKTOPS', '_NET_DESKTOP_GEOMETRY',
-           '_NET_DESKTOP_VIEWPORT', '_NET_CURRENT_DESKTOP',
-           '_NET_DESKTOP_NAMES', '_NET_ACTIVE_WINDOW', '_NET_WORKAREA',
-           '_NET_SUPPORTING_WM_CHECK', '_NET_VIRTUAL_ROOTS',
-           '_NET_DESKTOP_LAYOUT', '_NET_SHOWING_DESKTOP',
+   # Root Window Properties (and Related Messages)
+   '_NET_SUPPORTED', '_NET_CLIENT_LIST', '_NET_CLIENT_LIST_STACKING',
+   '_NET_NUMBER_OF_DESKTOPS', '_NET_DESKTOP_GEOMETRY',
+   '_NET_DESKTOP_VIEWPORT', '_NET_CURRENT_DESKTOP',
+   '_NET_DESKTOP_NAMES', '_NET_ACTIVE_WINDOW', '_NET_WORKAREA',
+   '_NET_SUPPORTING_WM_CHECK', '_NET_VIRTUAL_ROOTS',
+   '_NET_DESKTOP_LAYOUT', '_NET_SHOWING_DESKTOP',
 
-           # Other Root Window Messages
-           '_NET_CLOSE_WINDOW', '_NET_MORERESIZE_WINDOW', '_NET_WM_MOVERESIZE',
-           '_NET_RESTACK_WINDOW', '_NET_REQUEST_FRAME_EXTENTS',
+   # Other Root Window Messages
+   '_NET_CLOSE_WINDOW', '_NET_MORERESIZE_WINDOW', '_NET_WM_MOVERESIZE',
+   '_NET_RESTACK_WINDOW', '_NET_REQUEST_FRAME_EXTENTS',
 
-           # Application Window Properties
-           '_NET_WM_NAME', '_NET_WM_VISIBLE_NAME', '_NET_WM_ICON_NAME',
-           '_NET_WM_VISIBLE_ICON_NAME', '_NET_WM_DESKTOP',
-           '_NET_WM_WINDOW_TYPE', '_NET_WM_STATE', '_NET_WM_ALLOWED_ACTIONS',
-           '_NET_WM_STRUT', '_NET_WM_STRUT_PARTIAL', '_NET_WM_ICON_GEOMETRY',
-           '_NET_WM_ICON', '_NET_WM_PID', '_NET_WM_HANDLED_ICONS',
-           '_NET_WM_USER_TIME', '_NET_WM_USER_TIME_WINDOW',
-           '_NET_FRAME_EXTENTS',
+   # Application Window Properties
+   '_NET_WM_NAME', '_NET_WM_VISIBLE_NAME', '_NET_WM_ICON_NAME',
+   '_NET_WM_VISIBLE_ICON_NAME', '_NET_WM_DESKTOP',
+   '_NET_WM_WINDOW_TYPE', '_NET_WM_STATE', '_NET_WM_ALLOWED_ACTIONS',
+   '_NET_WM_STRUT', '_NET_WM_STRUT_PARTIAL', '_NET_WM_ICON_GEOMETRY',
+   '_NET_WM_ICON', '_NET_WM_PID', '_NET_WM_HANDLED_ICONS',
+   '_NET_WM_USER_TIME', '_NET_WM_USER_TIME_WINDOW',
+   '_NET_FRAME_EXTENTS',
 
-           # Window Manager Protocols
-           '_NET_WM_PING', '_NET_WM_SYNC_REQUEST',
-           '_NET_WM_FULLSCREEN_MONITORS',
+   # Window Manager Protocols
+   '_NET_WM_PING', '_NET_WM_SYNC_REQUEST',
+   '_NET_WM_FULLSCREEN_MONITORS',
 
-           # Other Properties
-           '_NET_WM_FULL_PLACEMENT',
+   # Other Properties
+   '_NET_WM_FULL_PLACEMENT',
 
-           # _NET_WM_WINDOW_TYPE_*
-           '_NET_WM_WINDOW_TYPE_DESKTOP', '_NET_WM_WINDOW_TYPE_DOCK',
-           '_NET_WM_WINDOW_TYPE_TOOLBAR', '_NET_WM_WINDOW_TYPE_MENU',
-           '_NET_WM_WINDOW_TYPE_UTILITY', '_NET_WM_WINDOW_TYPE_SPLASH',
-           '_NET_WM_WINDOW_TYPE_DIALOG', '_NET_WM_WINDOW_TYPE_DROPDOWN_MENU',
-           '_NET_WM_WINDOW_TYPE_POPUP_MENU', '_NET_WM_WINDOW_TYPE_TOOLTIP',
-           '_NET_WM_WINDOW_TYPE_NOTIFICATION', '_NET_WM_WINDOW_TYPE_COMBO',
-           '_NET_WM_WINDOW_TYPE_DND', '_NET_WM_WINDOW_TYPE_NORMAL',
+   # _NET_WM_WINDOW_TYPE_*
+   '_NET_WM_WINDOW_TYPE_DESKTOP', '_NET_WM_WINDOW_TYPE_DOCK',
+   '_NET_WM_WINDOW_TYPE_TOOLBAR', '_NET_WM_WINDOW_TYPE_MENU',
+   '_NET_WM_WINDOW_TYPE_UTILITY', '_NET_WM_WINDOW_TYPE_SPLASH',
+   '_NET_WM_WINDOW_TYPE_DIALOG', '_NET_WM_WINDOW_TYPE_DROPDOWN_MENU',
+   '_NET_WM_WINDOW_TYPE_POPUP_MENU', '_NET_WM_WINDOW_TYPE_TOOLTIP',
+   '_NET_WM_WINDOW_TYPE_NOTIFICATION', '_NET_WM_WINDOW_TYPE_COMBO',
+   '_NET_WM_WINDOW_TYPE_DND', '_NET_WM_WINDOW_TYPE_NORMAL',
 
-           # _NET_WM_STATE_*
-           '_NET_WM_STATE_MODAL', '_NET_WM_STATE_STICKY',
-           '_NET_WM_STATE_MAXIMIZED_VERT', '_NET_WM_STATE_MAXIMIZED_HORZ',
-           '_NET_WM_STATE_SHADED', '_NET_WM_STATE_SKIP_TASKBAR',
-           '_NET_WM_STATE_SKIP_PAGER', '_NET_WM_STATE_HIDDEN',
-           '_NET_WM_STATE_FULLSCREEN', '_NET_WM_STATE_ABOVE',
-           '_NET_WM_STATE_BELOW', '_NET_WM_STATE_DEMANDS_ATTENTION',
+   # _NET_WM_STATE_*
+   '_NET_WM_STATE_MODAL', '_NET_WM_STATE_STICKY',
+   '_NET_WM_STATE_MAXIMIZED_VERT', '_NET_WM_STATE_MAXIMIZED_HORZ',
+   '_NET_WM_STATE_SHADED', '_NET_WM_STATE_SKIP_TASKBAR',
+   '_NET_WM_STATE_SKIP_PAGER', '_NET_WM_STATE_HIDDEN',
+   '_NET_WM_STATE_FULLSCREEN', '_NET_WM_STATE_ABOVE',
+   '_NET_WM_STATE_BELOW', '_NET_WM_STATE_DEMANDS_ATTENTION',
 
-           # _NET_WM_ACTION_*
-           '_NET_WM_ACTION_MOVE', '_NET_WM_ACTION_RESIZE',
-           '_NET_WM_ACTION_MINIMIZE', '_NET_WM_ACTION_SHADE',
-           '_NET_WM_ACTION_STICK', '_NET_WM_ACTION_MAXIMIZE_HORZ',
-           '_NET_WM_ACTION_MAXIMIZE_VERT', '_NET_WM_ACTION_FULLSCREEN',
-           '_NET_WM_ACTION_CHANGE_DESKTOP', '_NET_WM_ACTION_CLOSE',
-           '_NET_WM_ACTION_ABOVE', '_NET_WM_ACTION_BELOW',
+   # _NET_WM_ACTION_*
+   '_NET_WM_ACTION_MOVE', '_NET_WM_ACTION_RESIZE',
+   '_NET_WM_ACTION_MINIMIZE', '_NET_WM_ACTION_SHADE',
+   '_NET_WM_ACTION_STICK', '_NET_WM_ACTION_MAXIMIZE_HORZ',
+   '_NET_WM_ACTION_MAXIMIZE_VERT', '_NET_WM_ACTION_FULLSCREEN',
+   '_NET_WM_ACTION_CHANGE_DESKTOP', '_NET_WM_ACTION_CLOSE',
+   '_NET_WM_ACTION_ABOVE', '_NET_WM_ACTION_BELOW',
 
-           # Additional TEXT Type
-           'UTF8_STRING'
-           ]
+   # Additional TEXT Type
+   'UTF8_STRING'
+]
 
 class Orientation:
     Horz = 0
@@ -97,190 +98,166 @@ class State:
 
 # Some aliases
 atom = util.get_atom
-root = util.get_root
-revent = util.root_send_client_event
-revent_checked = util.root_send_client_event_checked
+revent = event.root_send_client_event
+revent_checked = event.root_send_client_event_checked
+ATOM = xcb.xproto.Atom.ATOM
 CARDINAL = xcb.xproto.Atom.CARDINAL
+WINDOW = xcb.xproto.Atom.WINDOW
+
+# Build the atom cache for quicker access
+util.build_atom_cache(__atoms)
+
 
 # _NET_SUPPORTED
 
-def get_supported(c, window):
+def get_supported():
     """
     Returns a list of hints supported by the window manager.
 
-    @param c:       An xpyb connection object.
-    @param window:  A window identifier.
-    @return:        A list of atoms in the _NET_SUPPORTED property.
-    @rtype:         util.PropertyCookie (ATOM[]/32)
+    :return:        A list of atoms in the _NET_SUPPORTED property.
+    :rtype:         util.PropertyCookie (ATOM[]/32)
     """
-    return util.PropertyCookie(
-        util.get_property(c, window, atom(c, '_NET_SUPPORTED')))
+    return util.PropertyCookie(util.get_property(root, '_NET_SUPPORTED'))
 
-def get_supported_unchecked(c, window):
-    return util.PropertyCookie(
-        util.get_property_unchecked(c, window, atom(c, '_NET_SUPPORTED')))
+def get_supported_unchecked():
+    return util.PropertyCookie(util.get_property_unchecked(root, 
+                                                           '_NET_SUPPORTED'))
 
-def set_supported(c, window, atoms):
+def set_supported(atoms):
     """
     Sets the list of hints supported by the window manager.
 
-    @param c:       An xpyb connection object.
-    @param window:  A window identifier.
-    @param atoms:   A list of atom identifiers.
-    @type atoms:    ATOM[]/32
-    @rtype:         xcb.VoidCookie
+    :param atoms:   A list of atom identifiers.
+    :type atoms:    ATOM[]/32
+    :rtype:         xcb.VoidCookie
     """
     packed = struct.pack('I' * len(atoms), *atoms)
-    return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, window,
-                                 atom(c, '_NET_SUPPORTED'),
-                                 xcb.xproto.Atom.ATOM, 32, len(atoms),
+    return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, root,
+                                 atom('_NET_SUPPORTED'), ATOM, 32, len(atoms),
                                  packed)
 
-def set_supported_checked(c, window, atoms):
+def set_supported_checked(atoms):
     packed = struct.pack('I' * len(atoms), *atoms)
-    return c.core.ChangePropertyChecked(xcb.xproto.PropMode.Replace, window,
-                                 atom(c, '_NET_SUPPORTED'),
-                                 xcb.xproto.Atom.ATOM, 32, len(atoms),
-                                 packed)
+    return c.core.ChangePropertyChecked(xcb.xproto.PropMode.Replace, root,
+                                        atom('_NET_SUPPORTED'),
+                                        ATOM, 32, len(atoms), packed)
 
 # _NET_CLIENT_LIST
 
-def get_client_list(c, window):
+def get_client_list():
     """
     Returns a list of windows managed by the window manager.
 
-    @param c:       An xpyb connection object.
-    @param window:  A window identifier.
-    @return:        A list of window identifiers.
-    @rtype:         util.PropertyCookie (ATOM[]/32)
+    :return:        A list of window identifiers.
+    :rtype:         util.PropertyCookie (ATOM[]/32)
     """
-    return util.PropertyCookie(
-        util.get_property(c, window, atom(c, '_NET_CLIENT_LIST')))
+    return util.PropertyCookie(util.get_property(root, '_NET_CLIENT_LIST'))
 
-def get_client_list_unchecked(c, window):
-    return util.PropertyCookie(
-        util.get_property_unchecked(c, window, atom(c, '_NET_CLIENT_LIST')))
+def get_client_list_unchecked():
+    return util.PropertyCookie(util.get_property_unchecked(root, 
+                                                           '_NET_CLIENT_LIST'))
 
-def set_client_list(c, window, windows):
+def set_client_list(windows):
     """
     Sets the list of windows managed by the window manager.
 
-    @param c:       An xpyb connection object.
-    @param window:  A window identifier.
-    @param windows: A list of atom identifiers.
-    @type windows:  ATOM[]/32
-    @rtype:         xcb.VoidCookie
+    :param windows: A list of atom identifiers.
+    :type windows:  ATOM[]/32
+    :rtype:         xcb.VoidCookie
     """
     packed = struct.pack('I' * len(windows), *windows)
-    return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, window,
-                                 atom(c, '_NET_CLIENT_LIST'),
-                                 xcb.xproto.Atom.WINDOW, 32, len(windows),
-                                 packed)
+    return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, root,
+                                 atom('_NET_CLIENT_LIST'),
+                                 WINDOW, 32, len(windows), packed)
 
-def set_client_list_checked(c, window, windows):
+def set_client_list_checked(windows):
     packed = struct.pack('I' * len(windows), *windows)
-    return c.core.ChangePropertyChecked(xcb.xproto.PropMode.Replace, window,
-                                 atom(c, '_NET_CLIENT_LIST'),
-                                 xcb.xproto.Atom.WINDOW, 32, len(windows),
-                                 packed)
+    return c.core.ChangePropertyChecked(xcb.xproto.PropMode.Replace, root,
+                                        atom('_NET_CLIENT_LIST'),
+                                        WINDOW, 32, len(windows), packed)
 
 # _NET_CLIENT_LIST_STACKING
 
-def get_client_list_stacking(c, window):
+def get_client_list_stacking():
     """
     Returns the window stacking order.
 
-    @param c:       An xpyb connection object.
-    @param window:  A window identifier.
-    @return:        A list of window identifiers.
-    @rtype:         util.PropertyCookie (ATOM[]/32)
+    :return:        A list of window identifiers.
+    :rtype:         util.PropertyCookie (ATOM[]/32)
     """
-    return util.PropertyCookie(
-        util.get_property(c, window, atom(c, '_NET_CLIENT_LIST_STACKING')))
+    return util.PropertyCookie(util.get_property(root, 
+                                                 '_NET_CLIENT_LIST_STACKING'))
 
-def get_client_list_stacking_unchecked(c, window):
-    return util.PropertyCookie(
-        util.get_property_unchecked(c, window,
-                                    atom(c, '_NET_CLIENT_LIST_STACKING')))
+def get_client_list_stacking_unchecked():
+    cook = util.get_property_unchecked(root, '_NET_CLIENT_LIST_STACKING')
+    return util.PropertyCookie(cook)
 
-def set_client_list_stacking(c, window, windows):
+def set_client_list_stacking(windows):
     """
     Sets the window stacking order.
 
-    @param c:       An xpyb connection object.
-    @param window:  A window identifier.
-    @param windows: A list of atom identifiers.
-    @type windows:  ATOM[]/32
-    @rtype:         xcb.VoidCookie
+    :param windows: A list of atom identifiers.
+    :type windows:  ATOM[]/32
+    :rtype:         xcb.VoidCookie
     """
     packed = struct.pack('I' * len(windows), *windows)
-    return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, window,
-                                 atom(c, '_NET_CLIENT_LIST_STACKING'),
-                                 xcb.xproto.Atom.WINDOW, 32, len(windows),
-                                 packed)
+    return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, root,
+                                 atom('_NET_CLIENT_LIST_STACKING'),
+                                 WINDOW, 32, len(windows), packed)
 
-def set_client_list_stacking_checked(c, window, windows):
+def set_client_list_stacking_checked(windows):
     packed = struct.pack('I' * len(windows), *windows)
-    return c.core.ChangePropertyChecked(xcb.xproto.PropMode.Replace, window,
-                                 atom(c, '_NET_CLIENT_LIST_STACKING'),
-                                 xcb.xproto.Atom.WINDOW, 32, len(windows),
-                                 packed)
+    return c.core.ChangePropertyChecked(xcb.xproto.PropMode.Replace, root,
+                                 atom('_NET_CLIENT_LIST_STACKING'),
+                                 WINDOW, 32, len(windows), packed)
 
 # _NET_NUMBER_DESKTOPS
 
-def get_number_of_desktops(c, window):
+def get_number_of_desktops():
     """
     Returns the number of virtual desktops.
 
-    @param c:       An xpyb connection object.
-    @param window:  A window identifier.
-    @return:        The number of desktops.
-    @rtype:         util.PropertyCookieSingle (CARDINAL/32)
+    :return:        The number of desktops.
+    :rtype:         util.PropertyCookieSingle (CARDINAL/32)
     """
-    return util.PropertyCookieSingle(
-        util.get_property(c, window, atom(c, '_NET_NUMBER_OF_DESKTOPS')))
+    cook = util.get_property(root, '_NET_NUMBER_OF_DESKTOPS')
+    return util.PropertyCookieSingle(cook)
 
-def get_number_of_desktops_unchecked(c, window):
-    return util.PropertyCookieSingle(
-        util.get_property_unchecked(c, window,
-                                    atom(c, '_NET_NUMBER_OF_DESKTOPS')))
+def get_number_of_desktops_unchecked():
+    cook = util.get_property_unchecked(root, '_NET_NUMBER_OF_DESKTOPS')
+    return util.PropertyCookieSingle(cook)
 
-def set_number_of_desktops(c, window, number_of_desktops):
+def set_number_of_desktops(number_of_desktops):
     """
     Sets the number of desktops.
 
-    @param c:                   An xpyb connection object.
-    @param window:              A window identifier.
-    @param number_of_desktops:  The number of desktops.
-    @type number_of_desktops:   CARDINAL/32
-    @rtype:                     xcb.VoidCookie
+    :param number_of_desktops:  The number of desktops.
+    :type number_of_desktops:   CARDINAL/32
+    :rtype:                     xcb.VoidCookie
     """
-    return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, window,
-                                 atom(c, '_NET_NUMBER_OF_DESKTOPS'),
-                                 CARDINAL, 32, len(str(number_of_desktops)),
-                                 [number_of_desktops])
+    packed = struct.pack('I', number_of_desktops)
+    return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, root,
+                                 atom('_NET_NUMBER_OF_DESKTOPS'), CARDINAL, 32, 
+                                 1, packed)
 
-def set_number_of_desktops_checked(c, window, number_of_desktops):
-    return c.core.ChangePropertyChecked(xcb.xproto.PropMode.Replace, window,
-                                 atom(c, '_NET_NUMBER_OF_DESKTOPS'),
-                                 CARDINAL, 32, len(str(number_of_desktops)),
-                                 [number_of_desktops])
+def set_number_of_desktops_checked(number_of_desktops):
+    packed = struct.pack('I', number_of_desktops)
+    return c.core.ChangePropertyChecked(xcb.xproto.PropMode.Replace, root,
+                                        atom('_NET_NUMBER_OF_DESKTOPS'),
+                                        CARDINAL, 32, 1, packed)
 
-def request_number_of_desktops(c, number_of_desktops):
+def request_number_of_desktops(number_of_desktops):
     """
     Sends event to root window to set the number of desktops.
 
-    @param c:                   An xpyb connection object.
-    @param number_of_desktops:  The number of desktops.
-    @type number_of_desktops:   CARDINAL/32
-    @rtype:                     xcb.VoidCookie
+    :param number_of_desktops:  The number of desktops.
+    :type number_of_desktops:   CARDINAL/32
+    :rtype:                     xcb.VoidCookie
     """
-    return revent(c, root(c), atom(c, '_NET_NUMBER_OF_DESKTOPS'),
-                  [number_of_desktops])
+    return revent(root, '_NET_NUMBER_OF_DESKTOPS', number_of_desktops)
 
-def request_number_of_desktops_checked(c, number_of_desktops):
-    return revent_checked(c, root(c), atom(c, '_NET_NUMBER_OF_DESKTOPS'),
-                          [number_of_desktops])
+def request_number_of_desktops_checked(number_of_desktops):
+    return revent_checked(root, '_NET_NUMBER_OF_DESKTOPS', number_of_desktops)
 
 # _NET_DESKTOP_GEOMETRY
 
@@ -296,67 +273,55 @@ class DesktopGeometryCookie(util.PropertyCookie):
             'height': v[1]
         }
 
-def get_desktop_geometry(c, window):
-    """
-    Returns the desktop geometry.
+def get_desktop_geometry():
+    """Returns the desktop geometry.
 
-    @param c:       An xpyb connection object.
-    @param window:  A window identifier.
-    @return:        A desktop geometry dictionary.
-
+    :return:        A desktop geometry dictionary.
                     Keys: width, height
-    @rtype:         DesktopGeometryCookie (CARDINAL[2]/32)
+    :rtype:         DesktopGeometryCookie (CARDINAL[2]/32)
     """
-    return DesktopGeometryCookie(
-        util.get_property(c, window, atom(c, '_NET_DESKTOP_GEOMETRY')))
+    return DesktopGeometryCookie(util.get_property(root, 
+                                                   '_NET_DESKTOP_GEOMETRY'))
 
-def get_desktop_geometry_unchecked(c, window):
-    return DesktopGeometryCookie(
-        util.get_property_unchecked(c, window,
-                                    atom(c, '_NET_DESKTOP_GEOMETRY')))
+def get_desktop_geometry_unchecked():
+    cook = util.get_property_unchecked(root, '_NET_DESKTOP_GEOMETRY')
+    return DesktopGeometryCookie(cook)
 
-def set_desktop_geometry(c, window, width, height):
+def set_desktop_geometry(width, height):
     """
     Sets the desktop geometry.
 
-    @param c:                   An xpyb connection object.
-    @param window:              A window identifier.
-    @param width:               The width of the desktop.
-    @type width:                CARDINAL/32
-    @param height:              The height of the desktop.
-    @type height:               CARDINAL/32
-    @rtype:                     xcb.VoidCookie
+    :param width:               The width of the desktop.
+    :type width:                CARDINAL/32
+    :param height:              The height of the desktop.
+    :type height:               CARDINAL/32
+    :rtype:                     xcb.VoidCookie
     """
     packed = struct.pack('II', width, height)
-    return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, window,
-                                 atom(c, '_NET_DESKTOP_GEOMETRY'),
-                                 CARDINAL, 32, 2,
+    return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, root,
+                                 atom('_NET_DESKTOP_GEOMETRY'), CARDINAL, 32, 2,
                                  packed)
 
-def set_desktop_geometry_checked(c, window, width, height):
+def set_desktop_geometry_checked(width, height):
     packed = struct.pack('II', width, height)
-    return c.core.ChangePropertyChecked(xcb.xproto.PropMode.Replace, window,
-                                 atom(c, '_NET_DESKTOP_GEOMETRY'),
-                                 CARDINAL, 32, 2,
-                                 packed)
+    return c.core.ChangePropertyChecked(xcb.xproto.PropMode.Replace, root,
+                                        atom('_NET_DESKTOP_GEOMETRY'),
+                                        CARDINAL, 32, 2, packed)
 
-def request_desktop_geometry(c, width, height):
+def request_desktop_geometry(width, height):
     """
     Sends event to root window to set the desktop geometry.
 
-    @param c:                   An xpyb connection object.
-    @param width:               The width of the desktop.
-    @type width:                CARDINAL/32
-    @param height:              The height of the desktop.
-    @type height:               CARDINAL/32
-    @rtype:                     xcb.VoidCookie
+    :param width:               The width of the desktop.
+    :type width:                CARDINAL/32
+    :param height:              The height of the desktop.
+    :type height:               CARDINAL/32
+    :rtype:                     xcb.VoidCookie
     """
-    return revent(c, root(c), atom(c, '_NET_NUMBER_OF_DESKTOPS'),
-                  [width, height])
+    return revent(root, '_NET_NUMBER_OF_DESKTOPS', width, height)
 
-def request_desktop_geometry_checked(c, width, height):
-    return revent_checked(c, root(c), atom(c, '_NET_NUMBER_OF_DESKTOPS'),
-                  [width, height])
+def request_desktop_geometry_checked(width, height):
+    return revent_checked(root, '_NET_NUMBER_OF_DESKTOPS', width, height)
 
 # _NET_DESKTOP_VIEWPORT
 
@@ -376,26 +341,23 @@ class DesktopViewportCookie(util.PropertyCookie):
 
         return ret
 
-def get_desktop_viewport(c, window):
+def get_desktop_viewport():
     """
     Returns x,y pairs defining the top-left corner of each desktop's viewport.
 
-    @param c:       An xpyb connection object.
-    @param window:  A window identifier.
-    @return:        A list of desktop viewport dictionaries.
+    :return:        A list of desktop viewport dictionaries.
 
                     Keys: x, y
-    @rtype:         DesktopViewportCookie (CARDINAL[][2]/32)
+    :rtype:         DesktopViewportCookie (CARDINAL[][2]/32)
     """
-    return DesktopViewportCookie(
-        util.get_property(c, window, atom(c, '_NET_DESKTOP_VIEWPORT')))
+    return DesktopViewportCookie(util.get_property(root, 
+                                                   '_NET_DESKTOP_VIEWPORT'))
 
-def get_desktop_viewport_unchecked(c, window):
-    return DesktopViewportCookie(
-        util.get_property_unchecked(c, window,
-                                    atom(c, '_NET_DESKTOP_VIEWPORT')))
+def get_desktop_viewport_unchecked():
+    cook = util.get_property_unchecked(root, '_NET_DESKTOP_VIEWPORT')
+    return DesktopViewportCookie(cook)
 
-def set_desktop_viewport(c, window, pairs):
+def set_desktop_viewport(pairs):
     """
     Sets the x,y pairs defining the top-left corner of each desktop's viewport.
 
@@ -417,11 +379,9 @@ def set_desktop_viewport(c, window, pairs):
     Which would set desktop 0's viewport top-left corner to 0,0 and desktop
     1's viewport top-left corner to 500,500.
 
-    @param c:                   An xpyb connection object.
-    @param window:              A window identifier.
-    @param pairs:               A list of x,y dictionary pairs.
-    @type pairs:                CARDINAL[][2]/32
-    @rtype:                     xcb.VoidCookie
+    :param pairs:               A list of x,y dictionary pairs.
+    :type pairs:                CARDINAL[][2]/32
+    :rtype:                     xcb.VoidCookie
     """
     flatten = []
     for pair in pairs:
@@ -429,173 +389,147 @@ def set_desktop_viewport(c, window, pairs):
         flatten.append(pair['y'])
 
     packed = struct.pack('I' * len(flatten), *flatten)
-    return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, window,
-                                 atom(c, '_NET_DESKTOP_VIEWPORT'),
-                                 CARDINAL, 32, len(flatten),
-                                 packed)
+    return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, root,
+                                 atom('_NET_DESKTOP_VIEWPORT'),
+                                 CARDINAL, 32, len(flatten), packed)
 
-def set_desktop_viewport_checked(c, window, pairs):
+def set_desktop_viewport_checked(pairs):
     flatten = []
     for pair in pairs:
         flatten.append(pair['x'])
         flatten.append(pair['y'])
 
     packed = struct.pack('I' * len(flatten), *flatten)
-    return c.core.ChangePropertyChecked(xcb.xproto.PropMode.Replace, window,
-                                 atom(c, '_NET_DESKTOP_VIEWPORT'),
-                                 CARDINAL, 32, len(flatten),
-                                 packed)
+    return c.core.ChangePropertyChecked(xcb.xproto.PropMode.Replace, root,
+                                        atom('_NET_DESKTOP_VIEWPORT'),
+                                        CARDINAL, 32, len(flatten), packed)
 
-def request_desktop_viewport(c, x, y):
+def request_desktop_viewport(x, y):
     """
     Sends event to root window to set the viewport position of current desktop.
 
-    @param c:       An xpyb connection object.
-    @param x:       The x position of the top-left corner.
-    @type x:        CARDINAL/32
-    @param y:       The y position of the top-left corner.
-    @type y:        CARDINAL/32
-    @rtype:         xcb.VoidCookie
+    :param x:       The x position of the top-left corner.
+    :type x:        CARDINAL/32
+    :param y:       The y position of the top-left corner.
+    :type y:        CARDINAL/32
+    :rtype:         xcb.VoidCookie
     """
-    return revent(c, root(c), atom(c, '_NET_DESKTOP_VIEWPORT'),
-                  [x, y])
+    return revent(root, '_NET_DESKTOP_VIEWPORT', x, y)
 
-def request_desktop_viewport_checked(c, x, y):
-    return revent_checked(c, root(c), atom(c, '_NET_DESKTOP_VIEWPORT'),
-                  [x, y])
+def request_desktop_viewport_checked(x, y):
+    return revent_checked(root, '_NET_DESKTOP_VIEWPORT', x, y)
 
 # _NET_CURRENT_DESKTOP
 
-def get_current_desktop(c, window):
+def get_current_desktop():
     """
     Returns the current desktop number.
 
-    @param c:       An xpyb connection object.
-    @param window:  A window identifier.
-    @return:        The index of the current desktop.
-    @rtype:         util.PropertyCookieSingle (CARDINAL/32)
+    :return:        The index of the current desktop.
+    :rtype:         util.PropertyCookieSingle (CARDINAL/32)
     """
-    return util.PropertyCookieSingle(
-        util.get_property(c, window, atom(c, '_NET_CURRENT_DESKTOP')))
+    return util.PropertyCookieSingle(util.get_property(root,
+                                                       '_NET_CURRENT_DESKTOP'))
 
-def get_current_desktop_unchecked(c, window):
-    return util.PropertyCookieSingle(
-        util.get_property_unchecked(c, window,
-                                    atom(c, '_NET_CURRENT_DESKTOP')))
+def get_current_desktop_unchecked():
+    cook = util.get_property_unchecked(root, '_NET_CURRENT_DESKTOP')
+    return util.PropertyCookieSingle(cook)
 
-def set_current_desktop(c, window, current_desktop):
+def set_current_desktop(current_desktop):
     """
     Sets the current desktop number.
 
-    @param c:                   An xpyb connection object.
-    @param window:              A window identifier.
-    @param current_desktop:     The current desktop index.
-    @type current_desktop:      CARDINAL/32
-    @rtype:                     xcb.VoidCookie
+    :param current_desktop:     The current desktop index.
+    :type current_desktop:      CARDINAL/32
+    :rtype:                     xcb.VoidCookie
     """
-    return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, window,
-                                 atom(c, '_NET_CURRENT_DESKTOP'),
-                                 CARDINAL, 32, len(str(current_desktop)),
-                                 [current_desktop])
+    packed = struct.pack('I', current_desktop)
+    return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, root,
+                                 atom('_NET_CURRENT_DESKTOP'), CARDINAL, 32, 1, 
+                                 packed)
 
-def set_current_desktop_checked(c, window, current_desktop):
-    return c.core.ChangePropertyChecked(xcb.xproto.PropMode.Replace, window,
-                                 atom(c, '_NET_CURRENT_DESKTOP'),
-                                 CARDINAL, 32, len(str(current_desktop)),
-                                 [current_desktop])
+def set_current_desktop_checked(current_desktop):
+    packed = struct.pack('I', current_desktop)
+    return c.core.ChangePropertyChecked(xcb.xproto.PropMode.Replace, root,
+                                        atom('_NET_CURRENT_DESKTOP'),
+                                        CARDINAL, 32, 1, packed)
 
-def request_current_desktop(c, desktop_number,
+def request_current_desktop(desktop_number,
                             timestamp=xcb.xproto.Time.CurrentTime):
     """
     Sends event to root window to set the current desktop.
 
-    @param c:                   An xpyb connection object.
-    @param desktop_number:      The current desktop index.
-    @type desktop_number:       CARDINAL/32
-    @type timestamp:            Milliseconds.
-    @rtype:                     xcb.VoidCookie
+    :param desktop_number:      The current desktop index.
+    :type desktop_number:       CARDINAL/32
+    :type timestamp:            Milliseconds.
+    :rtype:                     xcb.VoidCookie
     """
-    return revent(c, root(c), atom(c, '_NET_CURRENT_DESKTOP'),
-                  [desktop_number, timestamp])
+    return revent(root, '_NET_CURRENT_DESKTOP', desktop_number, timestamp)
 
-def request_current_desktop_checked(c, desktop_number,
+def request_current_desktop_checked(desktop_number,
                                     timestamp=xcb.xproto.Time.CurrentTime):
-    return revent_checked(c, root(c), atom(c, '_NET_CURRENT_DESKTOP'),
-                  [desktop_number, timestamp])
+    return revent_checked(root, '_NET_CURRENT_DESKTOP',
+                          desktop_number, timestamp)
 
 # _NET_VISIBLE_DESKTOPS
 
-def get_visible_desktops(c, window):
+def get_visible_desktops():
     """
     Returns a list of visible desktops.
 
     The first desktop is on Xinerama screen 0, the second is on Xinerama
     screen 1, etc.
 
-    @param c:       An xpyb connection object.
-    @param window:  A window identifier.
-    @return:        A list of visible desktops.
-    @rtype:         util.PropertyCookie (ATOM[]/32)
+    :return:        A list of visible desktops.
+    :rtype:         util.PropertyCookie (ATOM[]/32)
     """
-    return util.PropertyCookie(
-        util.get_property(c, window, atom(c, '_NET_VISIBLE_DESKTOPS')))
+    return util.PropertyCookie(util.get_property(root, '_NET_VISIBLE_DESKTOPS'))
 
-def get_visible_desktops_unchecked(c, window):
-    return util.PropertyCookie(
-        util.get_property_unchecked(c, window, 
-                                    atom(c, '_NET_VISIBLE_DESKTOPS')))
+def get_visible_desktops_unchecked():
+    cook = util.get_property_unchecked(root, '_NET_VISIBLE_DESKTOPS')
+    return util.PropertyCookie(cook)
 
-def set_visible_desktops(c, window, desktops):
+def set_visible_desktops(desktops):
     """
     Sets the list of visible desktops.
 
-    @param c:        An xpyb connection object.
-    @param window:   A window identifier.
-    @param desktops: A list of desktops.
-    @type desktops:  ATOM[]/32
-    @rtype:          xcb.VoidCookie
+    :param desktops: A list of desktops.
+    :type desktops:  ATOM[]/32
+    :rtype:          xcb.VoidCookie
     """
     packed = struct.pack('I' * len(desktops), *desktops)
-    return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, window,
-                                 atom(c, '_NET_VISIBLE_DESKTOPS'),
-                                 xcb.xproto.Atom.WINDOW, 32, len(desktops),
-                                 packed)
+    return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, root,
+                                 atom('_NET_VISIBLE_DESKTOPS'),
+                                 WINDOW, 32, len(desktops), packed)
 
-def set_visible_desktops_checked(c, window, desktops):
+def set_visible_desktops_checked(desktops):
     packed = struct.pack('I' * len(desktops), *desktops)
-    return c.core.ChangePropertyChecked(xcb.xproto.PropMode.Replace, window,
-                                 atom(c, '_NET_VISIBLE_DESKTOPS'),
-                                 xcb.xproto.Atom.WINDOW, 32, len(desktops),
-                                 packed)
+    return c.core.ChangePropertyChecked(xcb.xproto.PropMode.Replace, root,
+                                        atom('_NET_VISIBLE_DESKTOPS'),
+                                        WINDOW, 32, len(desktops), packed)
 
 # _NET_DESKTOP_NAMES
 
-def get_desktop_names(c, window):
+def get_desktop_names():
     """
     Returns a list of names of the virtual desktops.
 
-    @param c:       An xpyb connection object.
-    @param window:  A window identifier.
-    @return:        A list of virutal desktop names.
-    @rtype:         util.PropertyCookie (UTF8_STRING[])
+    :return:        A list of virutal desktop names.
+    :rtype:         util.PropertyCookie (UTF8_STRING[])
     """
-    return util.PropertyCookie(
-        util.get_property(c, window, atom(c, '_NET_DESKTOP_NAMES')))
+    return util.PropertyCookie(util.get_property(root, '_NET_DESKTOP_NAMES'))
 
-def get_desktop_names_unchecked(c, window):
-    return util.PropertyCookie(
-        util.get_property_unchecked(c, window,
-                                    atom(c, '_NET_DESKTOP_NAMES')))
+def get_desktop_names_unchecked():
+    cook = util.get_property_unchecked(root, '_NET_DESKTOP_NAMES')
+    return util.PropertyCookie(cook)
 
-def set_desktop_names(c, window, desktop_names):
+def set_desktop_names(desktop_names):
     """
     Sets the current list of desktop names.
 
-    @param c:               An xpyb connection object.
-    @param window:          A window identifier.
-    @param desktop_names:   A list of new desktop names.
-    @type desktop_names:    UTF8_STRING[]
-    @rtype:                 xcb.VoidCookie
+    :param desktop_names:   A list of new desktop names.
+    :type desktop_names:    UTF8_STRING[]
+    :rtype:                 xcb.VoidCookie
     """
     # Null terminate the list of desktop names
     nullterm = []
@@ -603,91 +537,78 @@ def set_desktop_names(c, window, desktop_names):
         nullterm.append(desktop_name + chr(0))
     nullterm = ''.join(nullterm)
 
-    return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, window,
-                                 atom(c, '_NET_DESKTOP_NAMES'),
-                                 atom(c, 'UTF8_STRING'), 8,
-                                 len(nullterm),
-                                 nullterm)
+    return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, root,
+                                 atom('_NET_DESKTOP_NAMES'),
+                                 atom('UTF8_STRING'), 8,
+                                 len(nullterm), nullterm)
 
-def set_desktop_names_checked(c, window, desktop_names):
+def set_desktop_names_checked(desktop_names):
     # Null terminate the list of desktop names
     nullterm = []
     for desktop_name in desktop_names:
         nullterm.append(desktop_name + chr(0))
     nullterm = ''.join(nullterm)
 
-    return c.core.ChangePropertyChecked(xcb.xproto.PropMode.Replace, window,
-                                 atom(c, '_NET_DESKTOP_NAMES'),
-                                 atom(c, 'UTF8_STRING'), 8,
-                                 len(nullterm),
-                                 nullterm)
+    return c.core.ChangePropertyChecked(xcb.xproto.PropMode.Replace, root,
+                                        atom('_NET_DESKTOP_NAMES'),
+                                        atom('UTF8_STRING'), 8,
+                                        len(nullterm), nullterm)
 
 # _NET_ACTIVE_WINDOW
 
-def get_active_window(c, window):
+def get_active_window():
     """
     Returns the identifier of the currently active window.
 
-    @param c:       An xpyb connection object.
-    @param window:  A window identifier.
-    @return:        The window ID of the active window.
-    @rtype:         util.PropertyCookieSingle (WINDOW/32)
+    :return:        The window ID of the active window.
+    :rtype:         util.PropertyCookieSingle (WINDOW/32)
     """
-    return util.PropertyCookieSingle(
-        util.get_property(c, window, atom(c, '_NET_ACTIVE_WINDOW')))
+    return util.PropertyCookieSingle(util.get_property(root, 
+                                                       '_NET_ACTIVE_WINDOW'))
 
-def get_active_window_unchecked(c, window):
-    return util.PropertyCookieSingle(
-        util.get_property_unchecked(c, window,
-                                    atom(c, '_NET_ACTIVE_WINDOW')))
+def get_active_window_unchecked():
+    cook = util.get_property_unchecked(root, '_NET_ACTIVE_WINDOW')
+    return util.PropertyCookieSingle(cook)
 
-def set_active_window(c, window, active):
+def set_active_window(active):
     """
     Sets the identifier of the currently active window.
 
-    @param c:       An xpyb connection object.
-    @param window:  A window identifier.
-    @param active:  The identifier of the window that is active.
-    @type active:   WINDOW/32
-    @rtype:         xcb.VoidCookie
+    :param active:  The identifier of the window that is active.
+    :type active:   WINDOW/32
+    :rtype:         xcb.VoidCookie
     """
     packed = struct.pack('I', active)
-    return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, window,
-                                 atom(c, '_NET_ACTIVE_WINDOW'),
-                                 xcb.xproto.Atom.WINDOW, 32,
-                                 1,
-                                 packed)
+    return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, root,
+                                 atom('_NET_ACTIVE_WINDOW'),
+                                 WINDOW, 32, 1, packed)
 
-def set_active_window_checked(c, window, active):
+def set_active_window_checked(active):
     packed = struct.pack('I', active)
-    return c.core.ChangePropertyChecked(xcb.xproto.PropMode.Replace, window,
-                                 atom(c, '_NET_ACTIVE_WINDOW'),
-                                 xcb.xproto.Atom.WINDOW, 32,
-                                 1,
-                                 packed)
+    return c.core.ChangePropertyChecked(xcb.xproto.PropMode.Replace, root,
+                                        atom('_NET_ACTIVE_WINDOW'),
+                                        WINDOW, 32, 1, packed)
 
-def request_active_window(c, active, source=1,
-                            timestamp=xcb.xproto.Time.CurrentTime,
-                            current=0):
+def request_active_window(active, source=1,
+                          timestamp=xcb.xproto.Time.CurrentTime,
+                          current=0):
     """
     Sends event to root window to set the active window.
 
-    @param c:           An xpyb connection object.
-    @param active:      The window ID of the window to make active.
-    @type active:       WINDOW/32
-    @param source:      The source indication.
-    @type timestamp:    Milliseconds
-    @param current:     Client's active toplevel window
-    @rtype:             xcb.VoidCookie
+    :param active:      The window ID of the window to make active.
+    :type active:       WINDOW/32
+    :param source:      The source indication.
+    :type timestamp:    Milliseconds
+    :param current:     Client's active toplevel window
+    :rtype:             xcb.VoidCookie
     """
-    return revent(c, active, atom(c, '_NET_ACTIVE_WINDOW'),
-                  [source, timestamp, current])
+    return revent(active, '_NET_ACTIVE_WINDOW', source, timestamp, current)
 
-def request_active_window_checked(c, active, source=1,
+def request_active_window_checked(active, source=1,
                                   timestamp=xcb.xproto.Time.CurrentTime,
                                   current=0):
-    return revent_checked(c, active, atom(c, '_NET_ACTIVE_WINDOW'),
-                  [source, timestamp, current])
+    return revent_checked(active, '_NET_ACTIVE_WINDOW', source, timestamp, 
+                          current)
 
 # _NET_WORKAREA
 
@@ -709,33 +630,27 @@ class WorkareaCookie(util.PropertyCookie):
 
         return ret
 
-def get_workarea(c, window):
+def get_workarea():
     """
     Returns the x, y, width and height defining the desktop workarea.
 
-    @param c:       An xpyb connection object.
-    @param window:  A window identifier.
-    @return:        A list of workarea dictionaries.
+    :return:        A list of workarea dictionaries.
 
                     Keys: x, y, width, height
-    @rtype:         util.WorkareaCookie (CARDINAL[][4]/32)
+    :rtype:         util.WorkareaCookie (CARDINAL[][4]/32)
     """
-    return WorkareaCookie(
-        util.get_property(c, window, atom(c, '_NET_WORKAREA')))
+    return WorkareaCookie(util.get_property(root, '_NET_WORKAREA'))
 
-def get_workarea_unchecked(c, window):
-    return WorkareaCookie(
-        util.get_property_unchecked(c, window, atom(c, '_NET_WORKAREA')))
+def get_workarea_unchecked():
+    return WorkareaCookie(util.get_property_unchecked(root, '_NET_WORKAREA'))
 
-def set_workarea(c, window, workareas):
+def set_workarea(workareas):
     """
     Sets the workarea (x, y, width, height) for each desktop.
 
-    @param c:           An xpyb connection object.
-    @param window:      A window identifier.
-    @param workareas:   A list of x,y,width,height dictionaries.
-    @type workareas:    CARDINAL[][4]/32
-    @rtype:             xcb.VoidCookie
+    :param workareas:   A list of x,y,width,height dictionaries.
+    :type workareas:    CARDINAL[][4]/32
+    :rtype:             xcb.VoidCookie
     """
     flatten = []
     for workarea in workareas:
@@ -745,13 +660,11 @@ def set_workarea(c, window, workareas):
         flatten.append(workarea['height'])
     packed = struct.pack('I' * len(flatten), *flatten)
 
-    return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, window,
-                                 atom(c, '_NET_WORKAREA'),
-                                 CARDINAL, 32,
-                                 len(flatten),
-                                 packed)
+    return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, root,
+                                 atom('_NET_WORKAREA'), CARDINAL, 32,
+                                 len(flatten), packed)
 
-def set_workarea_checked(c, window, workareas):
+def set_workarea_checked(workareas):
     flatten = []
     for workarea in workareas:
         flatten.append(workarea['x'])
@@ -760,99 +673,82 @@ def set_workarea_checked(c, window, workareas):
         flatten.append(workarea['height'])
     packed = struct.pack('I' * len(flatten), *flatten)
 
-    return c.core.ChangePropertyChecked(xcb.xproto.PropMode.Replace, window,
-                                 atom(c, '_NET_WORKAREA'),
-                                 CARDINAL, 32,
-                                 len(flatten),
-                                 packed)
+    return c.core.ChangePropertyChecked(xcb.xproto.PropMode.Replace, root,
+                                        atom('_NET_WORKAREA'), CARDINAL, 32,
+                                        len(flatten), packed)
 
 # _NET_SUPPORTING_WM_CHECK
 
-def get_supporting_wm_check(c, window):
+def get_supporting_wm_check(wid):
     """
     Returns the identifier of the child window created by the window manager.
 
-    @param c:       An xpyb connection object.
-    @param window:  A window identifier.
-    @return:        The window ID of the child window.
-    @rtype:         util.PropertyCookieSingle (WINDOW/32)
+    :param wid:     The identifier of the window with the property.
+    :type wid:      WINDOW/32
+    :return:        The window ID of the child window.
+    :rtype:         util.PropertyCookieSingle (WINDOW/32)
     """
-    return util.PropertyCookieSingle(
-        util.get_property(c, window, atom(c, '_NET_SUPPORTING_WM_CHECK')))
+    cook = util.get_property(wid, '_NET_SUPPORTING_WM_CHECK')
+    return util.PropertyCookieSingle(cook)
 
-def get_supporting_wm_check_unchecked(c, window):
-    return util.PropertyCookieSingle(
-        util.get_property_unchecked(c, window,
-                                    atom(c, '_NET_SUPPORTING_WM_CHECK')))
+def get_supporting_wm_check_unchecked(wid):
+    cook = util.get_property_unchecked(wid, '_NET_SUPPORTING_WM_CHECK')
+    return util.PropertyCookieSingle(cook)
 
-def set_supporting_wm_check(c, window, child):
+def set_supporting_wm_check(wid, child):
     """
     Sets the identifier of the child window created by the window manager.
 
-    @param c:       An xpyb connection object.
-    @param window:  A window identifier.
-    @param child:   The identifier of the child window.
-    @type child:    WINDOW/32
-    @rtype:         xcb.VoidCookie
+    :param wid:     The identifier of the window with the property.
+    :type wid:      WINDOW/32
+    :param child:   The identifier of the child window.
+    :type child:    WINDOW/32
+    :rtype:         xcb.VoidCookie
     """
     packed = struct.pack('I', child)
-    return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, window,
-                                 atom(c, '_NET_SUPPORTING_WM_CHECK'),
-                                 xcb.xproto.Atom.WINDOW, 32,
-                                 1,
-                                 packed)
+    return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, wid,
+                                 atom('_NET_SUPPORTING_WM_CHECK'),
+                                 WINDOW, 32, 1, packed)
 
-def set_supporting_wm_check_checked(c, window, child):
+def set_supporting_wm_check_checked(wid, child):
     packed = struct.pack('I', child)
-    return c.core.ChangePropertyChecked(xcb.xproto.PropMode.Replace, window,
-                                 atom(c, '_NET_SUPPORTING_WM_CHECK'),
-                                 xcb.xproto.Atom.WINDOW, 32,
-                                 1,
-                                 packed)
+    return c.core.ChangePropertyChecked(xcb.xproto.PropMode.Replace, wid,
+                                        atom('_NET_SUPPORTING_WM_CHECK'),
+                                        WINDOW, 32, 1, packed)
 
 # _NET_VIRTUAL_ROOTS
 
-def get_virtual_roots(c, window):
+def get_virtual_roots():
     """
     Returns a list of identifiers for the virtual root windows.
 
-    @param c:       An xpyb connection object.
-    @param window:  A window identifier.
-    @return:        A list of window identifiers for the virtual root windows.
-    @rtype:         util.PropertyCookie (WINDOW[]/32)
+    :return:        A list of window identifiers for the virtual root windows.
+    :rtype:         util.PropertyCookie (WINDOW[]/32)
     """
-    return util.PropertyCookie(
-        util.get_property(c, window, atom(c, '_NET_VIRTUAL_ROOTS')))
+    return util.PropertyCookie(util.get_property(root, '_NET_VIRTUAL_ROOTS'))
 
-def get_virtual_roots_unchecked(c, window):
-    return util.PropertyCookie(
-        util.get_property_unchecked(c, window,
-                                    atom(c, '_NET_VIRTUAL_ROOTS')))
+def get_virtual_roots_unchecked():
+    cook = util.get_property_unchecked(root, '_NET_VIRTUAL_ROOTS')
+    return util.PropertyCookie(cook)
 
-def set_virtual_roots(c, window, vroots):
+def set_virtual_roots(vroots):
     """
     Sets the identifiers of the virtual root windows.
 
-    @param c:       An xpyb connection object.
-    @param window:  A window identifier.
-    @param vroots:  A list of window identifiers for the virtual root windows.
-    @type vroots:   WINDOW[]/32
-    @rtype:         xcb.VoidCookie
+    :param vroots:  A list of window identifiers for the virtual root windows.
+    :type vroots:   WINDOW[]/32
+    :rtype:         xcb.VoidCookie
     """
     packed = struct.pack('I' * len(vroots), *vroots)
-    return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, window,
-                                 atom(c, '_NET_VIRTUAL_ROOTS'),
-                                 xcb.xproto.Atom.WINDOW, 32,
-                                 len(vroots),
-                                 packed)
+    return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, root,
+                                 atom('_NET_VIRTUAL_ROOTS'),
+                                 WINDOW, 32, len(vroots), packed)
 
-def set_virtual_roots_checked(c, window, vroots):
+def set_virtual_roots_checked(vroots):
     packed = struct.pack('I' * len(vroots), *vroots)
-    return c.core.ChangePropertyChecked(xcb.xproto.PropMode.Replace, window,
-                                 atom(c, '_NET_VIRTUAL_ROOTS'),
-                                 xcb.xproto.Atom.WINDOW, 32,
-                                 len(vroots),
-                                 packed)
+    return c.core.ChangePropertyChecked(xcb.xproto.PropMode.Replace, root,
+                                        atom('_NET_VIRTUAL_ROOTS'),
+                                        WINDOW, 32, len(vroots), packed)
 
 # _NET_DESKTOP_LAYOUT
 
@@ -870,65 +766,48 @@ class DesktopLayoutCookie(util.PropertyCookie):
             'starting_corner': v[3] if len(v) > 3 else StartingCorner.TopLeft
         }
 
-def get_desktop_layout(c, window):
+def get_desktop_layout():
     """
     Returns the desktop layout.
 
-    @param c:       An xpyb connection object.
-    @param window:  A window identifier.
-    @return:        A desktop layout dictionary.
+    :return:        A desktop layout dictionary.
 
                     Keys: orientation, columns, rows, starting_corner
-    @rtype:         DesktopLayoutCookie (CARDINAL[4]/32)
+    :rtype:         DesktopLayoutCookie (CARDINAL[4]/32)
     """
-    return DesktopLayoutCookie(
-        util.get_property(c, window, atom(c, '_NET_DESKTOP_LAYOUT')))
+    return DesktopLayoutCookie(util.get_property(root, '_NET_DESKTOP_LAYOUT'))
 
-def get_desktop_layout_unchecked(c, window):
-    """
-    Returns the desktop layout.
+def get_desktop_layout_unchecked():
+    cook = util.get_property_unchecked(root, '_NET_DESKTOP_LAYOUT')
+    return DesktopLayoutCookie(cook)
 
-    @param c:       An xpyb connection object.
-    @param window:  A window identifier.
-    @return:        A desktop layout dictionary.
-
-                    Keys: orientation, columns, rows, starting_corner
-    @rtype:         DesktopLayoutCookie (CARDINAL[4]/32)
-    """
-    return DesktopLayoutCookie(
-        util.get_property_unchecked(c, window, atom(c, '_NET_DESKTOP_LAYOUT')))
-
-def set_desktop_layout(c, window, orientation, columns, rows,
+def set_desktop_layout(orientation, columns, rows,
                        starting_corner=StartingCorner.TopLeft):
     """
     Sets the desktop layout.
 
-    @param c:                   An xpyb connection object.
-    @param window:              A window identifier.
-    @param orientation:         Horizontal or vertical orientation.
-    @type orientation:          CARDINAL/32
-    @param columns:             Number of columns.
-    @type columns:              CARDINAL/32
-    @param rows:                Number of rows.
-    @type rows:                 CARDINAL/32
-    @param starting_corner:     Top left, top right, bottom right, or bottom
+    :param orientation:         Horizontal or vertical orientation.
+    :type orientation:          CARDINAL/32
+    :param columns:             Number of columns.
+    :type columns:              CARDINAL/32
+    :param rows:                Number of rows.
+    :type rows:                 CARDINAL/32
+    :param starting_corner:     Top left, top right, bottom right, or bottom
                                 left may be specified as a starting corner.
-    @type starting_corner:      CARDINAL/32
-    @rtype:                     xcb.VoidCookie
+    :type starting_corner:      CARDINAL/32
+    :rtype:                     xcb.VoidCookie
     """
     packed = struct.pack('IIII', orientation, columns, rows, starting_corner)
-    return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, window,
-                                 atom(c, '_NET_DESKTOP_LAYOUT'),
-                                 CARDINAL, 32, 4,
-                                 packed)
+    return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, root,
+                                 atom('_NET_DESKTOP_LAYOUT'),
+                                 CARDINAL, 32, 4, packed)
 
-def set_desktop_layout_checked(c, window, orientation, columns, rows,
+def set_desktop_layout_checked(orientation, columns, rows,
                                starting_corner=StartingCorner.TopLeft):
     packed = struct.pack('IIII', orientation, columns, rows, starting_corner)
-    return c.core.ChangePropertyChecked(xcb.xproto.PropMode.Replace, window,
-                                 atom(c, '_NET_DESKTOP_LAYOUT'),
-                                 CARDINAL, 32, 4,
-                                 packed)
+    return c.core.ChangePropertyChecked(xcb.xproto.PropMode.Replace, root,
+                                        atom('_NET_DESKTOP_LAYOUT'),
+                                        CARDINAL, 32, 4, packed)
 
 # _NET_SHOWING_DESKTOP
 
@@ -943,104 +822,89 @@ class ShowingDesktopCookie(util.PropertyCookieSingle):
             return True
         return False
 
-def get_showing_desktop(c, window):
+def get_showing_desktop():
     """
     Returns whether the window manager is in "showing the desktop" mode.
 
-    @param c:       An xpyb connection object.
-    @param window:  A window identifier.
-    @return:        Boolean whether the window manager is in "showing desktop"
+    :return:        Boolean whether the window manager is in "showing desktop"
                     mode or not.
-    @rtype:         ShowingDesktopCookie (CARDINAL/32)
+    :rtype:         ShowingDesktopCookie (CARDINAL/32)
     """
-    return ShowingDesktopCookie(
-        util.get_property(c, window, atom(c, '_NET_SHOWING_DESKTOP')))
+    return ShowingDesktopCookie(util.get_property(root, '_NET_SHOWING_DESKTOP'))
 
-def get_showing_desktop_unchecked(c, window):
-    return ShowingDesktopCookie(
-        util.get_property_unchecked(c, window,
-                                    atom(c, '_NET_SHOWING_DESKTOP')))
+def get_showing_desktop_unchecked():
+    cook = util.get_property_unchecked(root, '_NET_SHOWING_DESKTOP')
+    return ShowingDesktopCookie(cook)
 
-def set_showing_desktop(c, window, showing_desktop):
+def set_showing_desktop(showing_desktop):
     """
     Sets whether the window is in "showing the desktop" mode.
 
-    @param c:                An xpyb connection object.
-    @param window:           A window identifier.
-    @param showing_desktop:  Boolean whether the window manager is in "showing
+    :param showing_desktop:  Boolean whether the window manager is in "showing
                              desktop" mode or not.
-    @type showing_desktop:   CARDINAL/32
-    @rtype:                  xcb.VoidCookie
+    :type showing_desktop:   CARDINAL/32
+    :rtype:                  xcb.VoidCookie
     """
-    return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, window,
-                                 atom(c, '_NET_SHOWING_DESKTOP'),
-                                 CARDINAL, 32, 1,
+    return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, root,
+                                 atom('_NET_SHOWING_DESKTOP'), CARDINAL, 32, 1,
                                  [showing_desktop])
 
-def set_showing_desktop_checked(c, window, showing_desktop):
-    return c.core.ChangePropertyChecked(xcb.xproto.PropMode.Replace, window,
-                                 atom(c, '_NET_SHOWING_DESKTOP'),
-                                 CARDINAL, 32, 1,
-                                 [showing_desktop])
+def set_showing_desktop_checked(showing_desktop):
+    return c.core.ChangePropertyChecked(xcb.xproto.PropMode.Replace, root,
+                                        atom('_NET_SHOWING_DESKTOP'),
+                                        CARDINAL, 32, 1, [showing_desktop])
 
-def request_showing_desktop(c, showing_desktop):
+def request_showing_desktop(showing_desktop):
     """
     Sends event to root window to put window manager in "showing desktop" mode.
 
-    @param c:                An xpyb connection object.
-    @param showing_desktop:  Boolean whether the window manager is in "showing
+    :param showing_desktop:  Boolean whether the window manager is in "showing
                              desktop" mode or not.
-    @type showing_desktop:   CARDINAL/32
-    @rtype:                  xcb.VoidCookie
+    :type showing_desktop:   CARDINAL/32
+    :rtype:                  xcb.VoidCookie
     """
-    return revent(c, root(c), atom(c, '_NET_SHOWING_DESKTOP'),
-                  [showing_desktop])
+    return revent(root, '_NET_SHOWING_DESKTOP', showing_desktop)
 
-def request_showing_desktop_checked(c, showing_desktop):
-    return revent_checked(c, root(c), atom(c, '_NET_SHOWING_DESKTOP'),
-                          [showing_desktop])
+def request_showing_desktop_checked(showing_desktop):
+    return revent_checked(root, '_NET_SHOWING_DESKTOP', showing_desktop)
 
 # _NET_CLOSE_WINDOW
 
-def request_close_window(c, window, timestamp=xcb.xproto.Time.CurrentTime,
+def request_close_window(window, timestamp=xcb.xproto.Time.CurrentTime,
                          source=1):
     """
     Sends event to root window to close a window.
 
-    @param c:           An xpyb connection object.
-    @param window:      A window identifier.
-    @param source:      The source indication.
-    @type timestamp:    Milliseconds
-    @rtype:             xcb.VoidCookie
+    :param window:      A window identifier.
+    :param source:      The source indication.
+    :type timestamp:    Milliseconds
+    :rtype:             xcb.VoidCookie
     """
-    return revent(c, window, atom(c, '_NET_CLOSE_WINDOW'),
-                  [timestamp, source])
+    return revent(window, '_NET_CLOSE_WINDOW', timestamp, source)
 
-def request_close_window_checked(c, window, timestamp=xcb.xproto.Time.CurrentTime,
+def request_close_window_checked(window, timestamp=xcb.xproto.Time.CurrentTime,
                                  source=1):
-    return revent_checked(c, window, atom(c, '_NET_CLOSE_WINDOW'),
-                          [timestamp, source])
+    return revent_checked(window, '_NET_CLOSE_WINDOW', timestamp, source)
 
 # _NET_MOVERESIZE_WINDOW
 
-def request_moveresize_window(c, window, x=None, y=None, width=None,
+def request_moveresize_window(window, x=None, y=None, width=None,
                               height=None,
                               gravity=xcb.xproto.Gravity.BitForget, source=1):
     """
     Sends event to root window to move/resize a window.
 
-    @param c:           An xpyb connection object.
-    @param window:      A window identifier.
-    @param x:           x coordinate
-    @param y:           y coordinate
-    @param width:       Width
-    @param height:      Height
-    @param gravity:     Should be one of NorthWest, North, NorthEast, West,
+    :param window:      A window identifier.
+    :param x:           x coordinate
+    :param y:           y coordinate
+    :param width:       Width
+    :param height:      Height
+    :param gravity:     Should be one of NorthWest, North, NorthEast, West,
                         Center, East, SouthWest, South, SouthEast, and Static.
                         If set to 0, the window manager should use the default
                         gravity for the window.
-    @param source:      The source indication.
-    @rtype:             xcb.VoidCookie
+    :param source:      The source indication.
+    :rtype:             xcb.VoidCookie
     """
     flags = gravity
     flags |= source << 12
@@ -1053,10 +917,10 @@ def request_moveresize_window(c, window, x=None, y=None, width=None,
     if height is not None:
         flags |= 1 << 11
 
-    return revent(c, window, atom(c, '_NET_MOVERESIZE_WINDOW'),
-                  [flags, x or 0, y or 0, width or 0, height or 0])
+    return revent(window, '_NET_MOVERESIZE_WINDOW',
+                  flags, x or 0, y or 0, width or 0, height or 0)
 
-def request_moveresize_window_checked(c, window, x=None, y=None, width=None,
+def request_moveresize_window_checked(window, x=None, y=None, width=None,
                                       height=None,
                                       gravity=xcb.xproto.Gravity.BitForget,
                                       source=1):
@@ -1071,19 +935,18 @@ def request_moveresize_window_checked(c, window, x=None, y=None, width=None,
     if height is not None:
         flags |= 1 << 11
 
-    return revent_checked(c, window, atom(c, '_NET_MOVERESIZE_WINDOW'),
-                          [flags, x, y, width, height])
+    return revent_checked(window, '_NET_MOVERESIZE_WINDOW',
+                          flags, x, y, width, height)
 
 # _NET_WM_MOVERESIZE
 
-def request_wm_moveresize(c, window, direction, x_root=0, y_root=0,
+def request_wm_moveresize(window, direction, x_root=0, y_root=0,
                           button=0, source=1):
     """
     Sends event to root window to initiate window movement or resizing.
 
-    @param c:           An xpyb connection object.
-    @param window:      A window identifier.
-    @param direction:   Whether it is moving or resizing, and if resizing,
+    :param window:      A window identifier.
+    :param direction:   Whether it is moving or resizing, and if resizing,
                         the direction. Can be one of the following flags:
 
                         _NET_WM_MOVERESIZE_SIZE_TOPLEFT         = 0
@@ -1109,215 +972,195 @@ def request_wm_moveresize(c, window, direction, x_root=0, y_root=0,
                         _NET_WM_MOVERESIZE_MOVE_KEYBOARD        = 10
 
                         _NET_WM_MOVERESIZE_CANCEL               = 11
-    @param x_root:      x coordinate of the pointer.
-    @param y_root:      y coordinate of the pointer.
-    @param button:      Which button was pressed, if a mouse button was used
+    :param x_root:      x coordinate of the pointer.
+    :param y_root:      y coordinate of the pointer.
+    :param button:      Which button was pressed, if a mouse button was used
                         to initiate this request.
-    @param source:      The source indication.
-    @rtype:             xcb.VoidCookie
+    :param source:      The source indication.
+    :rtype:             xcb.VoidCookie
     """
-    return revent(c, window, atom(c, '_NET_WM_MOVERESIZE'),
-                  [x_root, y_root, direction, button, source])
+    return revent(window, '_NET_WM_MOVERESIZE',
+                  x_root, y_root, direction, button, source)
 
-def request_wm_moveresize_checked(c, window, direction, x_root=0, y_root=0,
+def request_wm_moveresize_checked(window, direction, x_root=0, y_root=0,
                                   button=0, source=1):
-    return revent_checked(c, window, atom(c, '_NET_WM_MOVERESIZE'),
-                          [x_root, y_root, direction, button, source])
+    return revent_checked(window, '_NET_WM_MOVERESIZE',
+                          x_root, y_root, direction, button, source)
 
 # _NET_RESTACK_WINDOW
 
-def request_restack_window(c, window, stack_mode=xcb.xproto.StackMode.Above,
+def request_restack_window(window, stack_mode=xcb.xproto.StackMode.Above,
                            sibling=0, source=1):
     """
     Sends event to root window to restack a window.
 
-    @param c:           An xpyb connection object.
-    @param window:      A window identifier.
-    @param stack_mode:  Stacking mode of window. Can be one of the following
+    :param window:      A window identifier.
+    :param stack_mode:  Stacking mode of window. Can be one of the following
                         flags: Above, Below, TopIf, BottomIf, Opposite
-    @param sibling:     A sibling window identifier.
-    @param source:      The source indication.
-    @rtype:             xcb.VoidCookie
+    :param sibling:     A sibling window identifier.
+    :param source:      The source indication.
+    :rtype:             xcb.VoidCookie
     """
-    return revent(c, window, atom(c, '_NET_RESTACK_WINDOW'),
-                  [source, sibling, stack_mode])
+    return revent(window, '_NET_RESTACK_WINDOW', source, sibling, stack_mode)
 
-def request_restack_window_checked(c, window,
+def request_restack_window_checked(window,
                                    stack_mode=xcb.xproto.StackMode.Above,
-                                   sibling=0,
-                                   source=2):
-    return revent_checked(c, window, atom(c, '_NET_RESTACK_WINDOW'),
-                          [source, sibling, stack_mode])
+                                   sibling=0, source=2):
+    return revent_checked(window, '_NET_RESTACK_WINDOW',
+                          source, sibling, stack_mode)
 
 # _NET_REQUEST_FRAME_EXTENTS
 
-def request_request_frame_extents(c, window):
+def request_request_frame_extents(window):
     """
     Sends event to root window ask the WM to estimate the frame extents.
 
-    @param c:           An xpyb connection object.
-    @param window:      A window identifier.
-    @rtype:             xcb.VoidCookie
+    :param window:      A window identifier.
+    :rtype:             xcb.VoidCookie
     """
-    return revent(c, window, atom(c, '_NET_REQUEST_FRAME_EXTENTS'), [])
+    return revent(window, '_NET_REQUEST_FRAME_EXTENTS')
 
-def request_request_frame_extents_checked(c, window):
-    return revent_checked(c, window, atom(c, '_NET_REQUEST_FRAME_EXTENTS'), [])
+def request_request_frame_extents_checked(window):
+    return revent_checked(window, '_NET_REQUEST_FRAME_EXTENTS')
 
 # _NET_WM_NAME
 
-def get_wm_name(c, window):
+def get_wm_name(window):
     """
     Get the title of a window.
 
-    @param c:       An xpyb connection object.
-    @param window:  A window identifier.
-    @return:        The window's title.
-    @rtype:         util.PropertyCookie (UTF8_STRING)
+    :param window:  A window identifier.
+    :return:        The window's title.
+    :rtype:         util.PropertyCookie (UTF8_STRING)
     """
-    return util.PropertyCookie(
-        util.get_property(c, window, atom(c, '_NET_WM_NAME')))
+    return util.PropertyCookie(util.get_property(window, '_NET_WM_NAME'))
 
-def get_wm_name_unchecked(c, window):
-    return util.PropertyCookie(
-        util.get_property_unchecked(c, window, atom(c, '_NET_WM_NAME')))
+def get_wm_name_unchecked(window):
+    return util.PropertyCookie(util.get_property_unchecked(window, 
+                                                           '_NET_WM_NAME'))
 
-def set_wm_name(c, window, wm_name):
+def set_wm_name(window, wm_name):
     """
     Sets the title of a window.
 
-    @param c:       An xpyb connection object.
-    @param window:  A window identifier.
-    @param wm_name: The title of the window.
-    @rtype:         xcb.VoidCookie
+    :param window:  A window identifier.
+    :param wm_name: The title of the window.
+    :rtype:         xcb.VoidCookie
     """
     return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, window,
-                                    atom(c, '_NET_WM_NAME'),
-                                    atom(c, 'UTF8_STRING'), 8, len(wm_name),
-                                    wm_name)
+                                 atom('_NET_WM_NAME'),
+                                 atom('UTF8_STRING'), 8, len(wm_name), wm_name)
 
-def set_wm_name_checked(c, window, wm_name):
+def set_wm_name_checked(window, wm_name):
     return c.core.ChangePropertyChecked(xcb.xproto.PropMode.Replace, window,
-                                    atom(c, '_NET_WM_NAME'),
-                                    atom(c, 'UTF8_STRING'), 8, len(wm_name),
-                                    wm_name)
+                                        atom('_NET_WM_NAME'),
+                                        atom('UTF8_STRING'), 8, len(wm_name),
+                                        wm_name)
 
 # _NET_WM_VISIBLE_NAME
 
-def get_wm_visible_name(c, window):
+def get_wm_visible_name(window):
     """
     Get the visible title of a window.
 
-    @param c:       An xpyb connection object.
-    @param window:  A window identifier.
-    @return:        The window's visible title.
-    @rtype:         util.PropertyCookie (UTF8_STRING)
+    :param window:  A window identifier.
+    :return:        The window's visible title.
+    :rtype:         util.PropertyCookie (UTF8_STRING)
     """
-    return util.PropertyCookie(
-        util.get_property(c, window, atom(c, '_NET_WM_VISIBLE_NAME')))
+    return util.PropertyCookie(util.get_property(window, 
+                                                 '_NET_WM_VISIBLE_NAME'))
 
-def get_wm_visible_name_unchecked(c, window):
-    return util.PropertyCookie(
-        util.get_property_unchecked(c, window,
-                                    atom(c, '_NET_WM_VISIBLE_NAME')))
+def get_wm_visible_name_unchecked(window):
+    cook = util.get_property_unchecked(window, '_NET_WM_VISIBLE_NAME')
+    return util.PropertyCookie(cook)
 
-def set_wm_visible_name(c, window, wm_name):
+def set_wm_visible_name(window, wm_name):
     """
     Sets the visible title of a window.
 
-    @param c:       An xpyb connection object.
-    @param window:  A window identifier.
-    @param wm_name: The title of the window.
-    @rtype:         xcb.VoidCookie
+    :param window:  A window identifier.
+    :param wm_name: The title of the window.
+    :rtype:         xcb.VoidCookie
     """
     return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, window,
-                                    atom(c, '_NET_WM_VISIBLE_NAME'),
-                                    atom(c, 'UTF8_STRING'), 8, len(wm_name),
-                                    wm_name)
+                                 atom('_NET_WM_VISIBLE_NAME'),
+                                 atom('UTF8_STRING'), 8, len(wm_name), wm_name)
 
-def set_wm_visible_name_checked(c, window, wm_name):
+def set_wm_visible_name_checked(window, wm_name):
     return c.core.ChangePropertyChecked(xcb.xproto.PropMode.Replace, window,
-                                    atom(c, '_NET_WM_VISIBLE_NAME'),
-                                    atom(c, 'UTF8_STRING'), 8, len(wm_name),
-                                    wm_name)
+                                        atom('_NET_WM_VISIBLE_NAME'),
+                                        atom('UTF8_STRING'), 8, len(wm_name),
+                                        wm_name)
 
 # _NET_WM_ICON_NAME
 
-def get_wm_icon_name(c, window):
+def get_wm_icon_name(window):
     """
     Get the icon name of a window.
 
-    @param c:       An xpyb connection object.
-    @param window:  A window identifier.
-    @return:        The window's icon name.
-    @rtype:         util.PropertyCookie (UTF8_STRING)
+    :param window:  A window identifier.
+    :return:        The window's icon name.
+    :rtype:         util.PropertyCookie (UTF8_STRING)
     """
-    return util.PropertyCookie(
-        util.get_property(c, window, atom(c, '_NET_WM_ICON_NAME')))
+    return util.PropertyCookie(util.get_property(window, '_NET_WM_ICON_NAME'))
 
-def get_wm_icon_name_unchecked(c, window):
-    return util.PropertyCookie(
-        util.get_property_unchecked(c, window,
-                                    atom(c, '_NET_WM_ICON_NAME')))
+def get_wm_icon_name_unchecked(window):
+    cook = util.get_property_unchecked(window, '_NET_WM_ICON_NAME')
+    return util.PropertyCookie(cook)
 
-def set_wm_icon_name(c, window, icon_name):
+def set_wm_icon_name(window, icon_name):
     """
     Sets the icon name of a window.
 
-    @param c:           An xpyb connection object.
-    @param window:      A window identifier.
-    @param icon_name:   The icon name of the window.
-    @rtype:             xcb.VoidCookie
+    :param window:      A window identifier.
+    :param icon_name:   The icon name of the window.
+    :rtype:             xcb.VoidCookie
     """
     return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, window,
-                                    atom(c, '_NET_WM_ICON_NAME'),
-                                    atom(c, 'UTF8_STRING'), 8, len(icon_name),
-                                    icon_name)
+                                 atom('_NET_WM_ICON_NAME'), atom('UTF8_STRING'), 
+                                 8, len(icon_name), icon_name)
 
-def set_wm_icon_name_checked(c, window, icon_name):
+def set_wm_icon_name_checked(window, icon_name):
     return c.core.ChangePropertyChecked(xcb.xproto.PropMode.Replace, window,
-                                    atom(c, '_NET_WM_ICON_NAME'),
-                                    atom(c, 'UTF8_STRING'), 8, len(icon_name),
-                                    icon_name)
+                                        atom('_NET_WM_ICON_NAME'),
+                                        atom('UTF8_STRING'), 8, len(icon_name),
+                                        icon_name)
 
 # _NET_WM_VISIBLE_ICON_NAME
 
-def get_wm_visible_icon_name(c, window):
+def get_wm_visible_icon_name(window):
     """
     Get the visible icon name of a window.
 
-    @param c:       An xpyb connection object.
-    @param window:  A window identifier.
-    @return:        The window's visible icon name.
-    @rtype:         util.PropertyCookie (UTF8_STRING)
+    :param window:  A window identifier.
+    :return:        The window's visible icon name.
+    :rtype:         util.PropertyCookie (UTF8_STRING)
     """
-    return util.PropertyCookie(
-        util.get_property(c, window, atom(c, '_NET_WM_VISIBLE_ICON_NAME')))
+    return util.PropertyCookie(util.get_property(window, 
+                                                 '_NET_WM_VISIBLE_ICON_NAME'))
 
-def get_wm_visible_icon_name_unchecked(c, window):
-    return util.PropertyCookie(
-        util.get_property_unchecked(c, window,
-                                    atom(c, '_NET_WM_VISIBLE_ICON_NAME')))
+def get_wm_visible_icon_name_unchecked(window):
+    cook = util.get_property_unchecked(window, '_NET_WM_VISIBLE_ICON_NAME')
+    return util.PropertyCookie(cook)
 
-def set_wm_visible_icon_name(c, window, icon_name):
+def set_wm_visible_icon_name(window, icon_name):
     """
     Sets the visible icon name of a window.
 
-    @param c:           An xpyb connection object.
-    @param window:      A window identifier.
-    @param icon_name:   The icon name of the window.
-    @rtype:             xcb.VoidCookie
+    :param window:      A window identifier.
+    :param icon_name:   The icon name of the window.
+    :rtype:             xcb.VoidCookie
     """
     return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, window,
-                                    atom(c, '_NET_WM_VISIBLE_ICON_NAME'),
-                                    atom(c, 'UTF8_STRING'), 8, len(icon_name),
-                                    icon_name)
+                                 atom('_NET_WM_VISIBLE_ICON_NAME'),
+                                 atom('UTF8_STRING'), 8, len(icon_name),
+                                 icon_name)
 
-def set_wm_visible_icon_name_checked(c, window, icon_name):
+def set_wm_visible_icon_name_checked(window, icon_name):
     return c.core.ChangePropertyChecked(xcb.xproto.PropMode.Replace, window,
-                                    atom(c, '_NET_WM_VISIBLE_ICON_NAME'),
-                                    atom(c, 'UTF8_STRING'), 8, len(icon_name),
-                                    icon_name)
+                                        atom('_NET_WM_VISIBLE_ICON_NAME'),
+                                        atom('UTF8_STRING'), 8, len(icon_name),
+                                        icon_name)
 
 # _NET_WM_WINDOW_OPACITY
 
@@ -1330,260 +1173,233 @@ class OpacityCookieSingle(util.PropertyCookieSingle):
 
         return float(v) / float(0xffffffff)
 
-def get_wm_window_opacity(c, window):
+def get_wm_window_opacity(window):
     """
     Get the opacity of the current window.
 
     N.B. If your window manager uses decorations, you'll typically want to pass
     your client's *parent* window to this function.
 
-    @param c:       An xpyb connection object.
-    @param window:  A window identifier.
-    @return:        An opacity percentage between 0 and 1 (inclusive)
-    @rtype:         util.PropertyCookieSingle (CARDINAL/32)
+    :param window:  A window identifier.
+    :return:        An opacity percentage between 0 and 1 (inclusive)
+    :rtype:         util.PropertyCookieSingle (CARDINAL/32)
     """
-    return OpacityCookieSingle(
-        util.get_property(c, window, atom(c, '_NET_WM_WINDOW_OPACITY')))
+    return OpacityCookieSingle(util.get_property(window, 
+                                                 '_NET_WM_WINDOW_OPACITY'))
 
-def get_wm_window_opacity_unchecked(c, window):
-    return OpacityCookieSingle(
-        util.get_property_unchecked(c, window, 
-                                    atom(c, '_NET_WM_WINDOW_OPACITY')))
+def get_wm_window_opacity_unchecked(window):
+    cook = util.get_property_unchecked(window, '_NET_WM_WINDOW_OPACITY')
+    return OpacityCookieSingle(cook)
 
-def set_wm_window_opacity(c, window, opacity):
+def set_wm_window_opacity(window, opacity):
     """
     Sets the opacity of the current window.
 
     N.B. If your window manager uses decorations, you'll typically want to pass
     your client's *parent* window to this function.
 
-    @param c:       An xpyb connection object.
-    @param window:  A window identifier.
-    @param opacity: A float between 0 and 1 inclusive.
+    :param window:  A window identifier.
+    :param opacity: A float between 0 and 1 inclusive.
 
                     0 is completely transparent and 1 is completely opaque.
-    @type opacity:  CARDINAL/32
-    @rtype:         xcb.VoidCookie
+    :type opacity:  CARDINAL/32
+    :rtype:         xcb.VoidCookie
     """
     assert 0 <= opacity <= 1
     packed = struct.pack('I', int(opacity * 0xffffffff))
     return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, window,
-                                    atom(c, '_NET_WM_WINDOW_OPACITY'),
-                                    CARDINAL, 32, 1, packed)
+                                 atom('_NET_WM_WINDOW_OPACITY'),
+                                 CARDINAL, 32, 1, packed)
 
-def set_wm_window_opacity_checked(c, window, opacity):
+def set_wm_window_opacity_checked(window, opacity):
     assert 0 <= opacity <= 1
     packed = struct.pack('I', int(opacity * 0xffffffff))
     return c.core.ChangePropertyChecked(xcb.xproto.PropMode.Replace, window,
-                                    atom(c, '_NET_WM_WINDOW_OPACITY'),
-                                    CARDINAL, 32, 1,
-                                    packed)
+                                        atom('_NET_WM_WINDOW_OPACITY'),
+                                        CARDINAL, 32, 1, packed)
 
 # _NET_WM_DESKTOP
 
-def get_wm_desktop(c, window):
+def get_wm_desktop(window):
     """
     Get the desktop index of the window.
 
-    @param c:       An xpyb connection object.
-    @param window:  A window identifier.
-    @return:        The window's virtual desktop index.
-    @rtype:         util.PropertyCookieSingle (CARDINAL/32)
+    :param window:  A window identifier.
+    :return:        The window's virtual desktop index.
+    :rtype:         util.PropertyCookieSingle (CARDINAL/32)
     """
-    return util.PropertyCookieSingle(
-        util.get_property(c, window, atom(c, '_NET_WM_DESKTOP')))
+    return util.PropertyCookieSingle(util.get_property(window, 
+                                                       '_NET_WM_DESKTOP'))
 
-def get_wm_desktop_unchecked(c, window):
-    return util.PropertyCookieSingle(
-        util.get_property_unchecked(c, window, atom(c, '_NET_WM_DESKTOP')))
+def get_wm_desktop_unchecked(window):
+    cook = util.get_property_unchecked(window, '_NET_WM_DESKTOP')
+    return util.PropertyCookieSingle(cook)
 
-def set_wm_desktop(c, window, desktop):
+def set_wm_desktop(window, desktop):
     """
     Sets the desktop index of the window.
 
-    @param c:       An xpyb connection object.
-    @param window:  A window identifier.
-    @param desktop: A desktop index.
-    @type desktop:  CARDINAL/32
-    @rtype:         xcb.VoidCookie
+    :param window:  A window identifier.
+    :param desktop: A desktop index.
+    :type desktop:  CARDINAL/32
+    :rtype:         xcb.VoidCookie
     """
     return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, window,
-                                    atom(c, '_NET_WM_DESKTOP'),
-                                    CARDINAL, 32, 1,
-                                    [desktop])
+                                 atom('_NET_WM_DESKTOP'),
+                                 CARDINAL, 32, 1, [desktop])
 
-def set_wm_desktop_checked(c, window, desktop):
+def set_wm_desktop_checked(window, desktop):
     return c.core.ChangePropertyChecked(xcb.xproto.PropMode.Replace, window,
-                                    atom(c, '_NET_WM_DESKTOP'),
-                                    CARDINAL, 32, 1,
-                                    [desktop])
+                                        atom('_NET_WM_DESKTOP'),
+                                        CARDINAL, 32, 1, [desktop])
 
-def request_wm_desktop(c, window, desktop, source=1):
+def request_wm_desktop(window, desktop, source=1):
     """
     Sends an event to root window to change the desktop of the window.
 
-    @param c:       An xpyb connection object.
-    @param window:  A window identifier.
-    @param desktop: A desktop index.
-    @type desktop:  CARDINAL/32
-    @param source:  The source indication.
-    @rtype:         xcb.VoidCookie
+    :param window:  A window identifier.
+    :param desktop: A desktop index.
+    :type desktop:  CARDINAL/32
+    :param source:  The source indication.
+    :rtype:         xcb.VoidCookie
     """
-    return revent(c, window, atom(c, '_NET_WM_DESKTOP'), [desktop, source])
+    return revent(window, '_NET_WM_DESKTOP', desktop, source)
 
-def request_wm_desktop_checked(c, window, desktop, source=1):
-    return revent_checked(c, window, atom(c, '_NET_WM_DESKTOP'),
-                          [desktop, source])
+def request_wm_desktop_checked(window, desktop, source=1):
+    return revent_checked(window, '_NET_WM_DESKTOP', desktop, source)
 
 # _NET_WM_WINDOW_TYPE
 
-def get_wm_window_type(c, window):
+def get_wm_window_type(window):
     """
     Get a list of atoms representing the type of the window.
 
-    @param c:       An xpyb connection object.
-    @param window:  A window identifier.
-    @return:        A list of atoms corresponding to this window's type.
-    @rtype:         util.PropertyCookie (ATOM[]/32)
+    :param window:  A window identifier.
+    :return:        A list of atoms corresponding to this window's type.
+    :rtype:         util.PropertyCookie (ATOM[]/32)
     """
-    return util.PropertyCookie(
-        util.get_property(c, window, atom(c, '_NET_WM_WINDOW_TYPE')))
+    return util.PropertyCookie(util.get_property(window, '_NET_WM_WINDOW_TYPE'))
 
-def get_wm_window_type_unchecked(c, window):
-    return util.PropertyCookie(
-        util.get_property_unchecked(c, window, atom(c, '_NET_WM_WINDOW_TYPE')))
+def get_wm_window_type_unchecked(window):
+    cook = util.get_property_unchecked(window, '_NET_WM_WINDOW_TYPE')
+    return util.PropertyCookie(cook)
 
-def set_wm_window_type(c, window, types):
+def set_wm_window_type(window, types):
     """
     Sets the list of atoms representing this window's type.
 
-    @param c:       An xpyb connection object.
-    @param window:  A window identifier.
-    @param types:   A list of window type atoms.
-    @type types:    ATOM[]/32
-    @rtype:         xcb.VoidCookie
+    :param window:  A window identifier.
+    :param types:   A list of window type atoms.
+    :type types:    ATOM[]/32
+    :rtype:         xcb.VoidCookie
     """
     packed = struct.pack('I' * len(types), *types)
     return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, window,
-                                 atom(c, '_NET_WM_WINDOW_TYPE'),
-                                 xcb.xproto.Atom.ATOM, 32, len(types),
-                                 packed)
+                                 atom('_NET_WM_WINDOW_TYPE'),
+                                 ATOM, 32, len(types), packed)
 
-def set_wm_window_type_checked(c, window, types):
+def set_wm_window_type_checked(window, types):
     packed = struct.pack('I' * len(types), *types)
     return c.core.ChangePropertyChecked(xcb.xproto.PropMode.Replace, window,
-                                        atom(c, '_NET_WM_WINDOW_TYPE'),
-                                        xcb.xproto.Atom.ATOM, 32, len(types),
-                                        packed)
+                                        atom('_NET_WM_WINDOW_TYPE'),
+                                        ATOM, 32, len(types), packed)
 
 # _NET_WM_STATE
 
-def get_wm_state(c, window):
+def get_wm_state(window):
     """
     Get a list of atoms representing the state of the window.
 
-    @param c:       An xpyb connection object.
-    @param window:  A window identifier.
-    @return:        A list of atoms corresponding to this window's state.
-    @rtype:         util.PropertyCookie (ATOM[]/32)
+    :param window:  A window identifier.
+    :return:        A list of atoms corresponding to this window's state.
+    :rtype:         util.PropertyCookie (ATOM[]/32)
     """
-    return util.PropertyCookie(
-        util.get_property(c, window, atom(c, '_NET_WM_STATE')))
+    return util.PropertyCookie(util.get_property(window, '_NET_WM_STATE'))
 
-def get_wm_state_unchecked(c, window):
-    return util.PropertyCookie(
-        util.get_property_unchecked(c, window, atom(c, '_NET_WM_STATE')))
+def get_wm_state_unchecked(window):
+    return util.PropertyCookie(util.get_property_unchecked(window, 
+                                                           '_NET_WM_STATE'))
 
-def set_wm_state(c, window, states):
+def set_wm_state(window, states):
     """
     Sets the list of atoms representing this window's state.
 
-    @param c:       An xpyb connection object.
-    @param window:  A window identifier.
-    @param states:  A list of window state atoms.
-    @type states:   ATOM[]/32
-    @rtype:         xcb.VoidCookie
+    :param window:  A window identifier.
+    :param states:  A list of window state atoms.
+    :type states:   ATOM[]/32
+    :rtype:         xcb.VoidCookie
     """
     packed = struct.pack('I' * len(states), *states)
     return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, window,
-                                 atom(c, '_NET_WM_STATE'),
-                                 xcb.xproto.Atom.ATOM, 32, len(states),
+                                 atom('_NET_WM_STATE'), ATOM, 32, len(states),
                                  packed)
 
-def set_wm_state_checked(c, window, states):
+def set_wm_state_checked(window, states):
     packed = struct.pack('I' * len(states), *states)
     return c.core.ChangePropertyChecked(xcb.xproto.PropMode.Replace, window,
-                                        atom(c, '_NET_WM_STATE'),
-                                        xcb.xproto.Atom.ATOM, 32, len(states),
-                                        packed)
+                                        atom('_NET_WM_STATE'),
+                                        ATOM, 32, len(states), packed)
 
-def request_wm_state(c, window, action, first, second=0, source=1):
+def request_wm_state(window, action, first, second=0, source=1):
     """
     Sends an event to root window to change the state of the window.
 
-    @param c:       An xpyb connection object.
-    @param window:  A window identifier.
-    @param action:  The kind of state action to perform. I tshould be one
+    :param window:  A window identifier.
+    :param action:  The kind of state action to perform. I tshould be one
                     of the following flags:
 
                     _NET_WM_STATE_REMOVE    = 0
                     _NET_WM_STATE_ADD       = 1
                     _NET_WM_STATE_TOGGLE    = 2
-    @param first:   The first property to be changed.
-    @param second:  The second property to be changed (should be 0 if only
+    :param first:   The first property to be changed.
+    :param second:  The second property to be changed (should be 0 if only
                     one property is being changed).
-    @param source:  The source indication.
-    @rtype:         xcb.VoidCookie
+    :param source:  The source indication.
+    :rtype:         xcb.VoidCookie
     """
-    return revent(c, window, atom(c, '_NET_WM_STATE'), [action, first,
-                  second, source])
+    return revent(window, '_NET_WM_STATE', action, first, second, source)
 
-def request_wm_state_checked(c, window, action, first, second=0, source=1):
-    return revent_checked(c, window, atom(c, '_NET_WM_STATE'), [action, first,
-                  second, source])
+def request_wm_state_checked(window, action, first, second=0, source=1):
+    return revent_checked(window, '_NET_WM_STATE', 
+                          action, first, second, source)
 
 # _NET_WM_ALLOWED_ACTIONS
 
-def get_wm_allowed_actions(c, window):
+def get_wm_allowed_actions(window):
     """
     Get a list of atoms representing the WM supported actions on a window.
 
-    @param c:       An xpyb connection object.
-    @param window:  A window identifier.
-    @return:        A list of atoms corresponding to this window's supported
+    :param window:  A window identifier.
+    :return:        A list of atoms corresponding to this window's supported
                     actions through the window manager.
-    @rtype:         util.PropertyCookie (ATOM[]/32)
+    :rtype:         util.PropertyCookie (ATOM[]/32)
     """
-    return util.PropertyCookie(
-        util.get_property(c, window, atom(c, '_NET_WM_ALLOWED_ACTIONS')))
+    return util.PropertyCookie(util.get_property(window, 
+                                                 '_NET_WM_ALLOWED_ACTIONS'))
 
-def get_wm_allowed_actions_unchecked(c, window):
-    return util.PropertyCookie(
-        util.get_property_unchecked(c, window,
-                                    atom(c, '_NET_WM_ALLOWED_ACTIONS')))
+def get_wm_allowed_actions_unchecked(window):
+    cook = util.get_property_unchecked(window, '_NET_WM_ALLOWED_ACTIONS')
+    return util.PropertyCookie(cook)
 
-def set_wm_allowed_actions(c, window, actions):
+def set_wm_allowed_actions(window, actions):
     """
     Sets the list of atoms representing the WM supported actions on a window.
 
-    @param c:       An xpyb connection object.
-    @param window:  A window identifier.
-    @param actions:  A list of allowable action atoms.
-    @type actions:   ATOM[]/32
-    @rtype:         xcb.VoidCookie
+    :param window:  A window identifier.
+    :param actions:  A list of allowable action atoms.
+    :type actions:   ATOM[]/32
+    :rtype:         xcb.VoidCookie
     """
     packed = struct.pack('I' * len(actions), *actions)
     return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, window,
-                                 atom(c, '_NET_WM_ALLOWED_ACTIONS'),
-                                 xcb.xproto.Atom.ATOM, 32, len(actions),
-                                 packed)
+                                 atom('_NET_WM_ALLOWED_ACTIONS'),
+                                 ATOM, 32, len(actions), packed)
 
-def set_wm_allowed_actions_checked(c, window, actions):
+def set_wm_allowed_actions_checked(window, actions):
     packed = struct.pack('I' * len(actions), *actions)
     return c.core.ChangePropertyChecked(xcb.xproto.PropMode.Replace, window,
-                                        atom(c, '_NET_WM_ALLOWED_ACTIONS'),
-                                        xcb.xproto.Atom.ATOM, 32, len(actions),
-                                        packed)
+                                        atom('_NET_WM_ALLOWED_ACTIONS'),
+                                        ATOM, 32, len(actions), packed)
 
 # _NET_WM_STRUT
 
@@ -1601,52 +1417,45 @@ class StrutCookie(util.PropertyCookie):
             'bottom': v[3]
         }
 
-def get_wm_strut(c, window):
+def get_wm_strut(window):
     """
     Returns the struts for a window.
 
-    @param c:       An xpyb connection object.
-    @param window:  A window identifier.
-    @return:        A strut dictionary.
+    :param window:  A window identifier.
+    :return:        A strut dictionary.
 
                     Keys: left, right, top, bottom
-    @rtype:         StrutCookie (CARDINAL[4]/32)
+    :rtype:         StrutCookie (CARDINAL[4]/32)
     """
-    return StrutCookie(
-        util.get_property(c, window, atom(c, '_NET_WM_STRUT')))
+    return StrutCookie(util.get_property(window, '_NET_WM_STRUT'))
 
-def get_wm_strut_unchecked(c, window):
-    return StrutCookie(
-        util.get_property_unchecked(c, window, atom(c, '_NET_WM_STRUT')))
+def get_wm_strut_unchecked(window):
+    return StrutCookie(util.get_property_unchecked(window, '_NET_WM_STRUT'))
 
-def set_wm_strut(c, window, left, right, top, bottom):
+def set_wm_strut(window, left, right, top, bottom):
     """
     Sets the struts for a window.
 
-    @param c:       An xpyb connection object.
-    @param window:  A window identifier.
-    @param left:    Width of area at left side of screen.
-    @type left:     CARDINAL/32
-    @param right:   Width of area at right side of screen.
-    @type right:    CARDINAL/32
-    @param top:     Height of area at top side of screen.
-    @type top:      CARDINAL/32
-    @param bottom:  Height of area at bottom side of screen.
-    @type bottom:   CARDINAL/32
-    @rtype:         xcb.VoidCookie
+    :param window:  A window identifier.
+    :param left:    Width of area at left side of screen.
+    :type left:     CARDINAL/32
+    :param right:   Width of area at right side of screen.
+    :type right:    CARDINAL/32
+    :param top:     Height of area at top side of screen.
+    :type top:      CARDINAL/32
+    :param bottom:  Height of area at bottom side of screen.
+    :type bottom:   CARDINAL/32
+    :rtype:         xcb.VoidCookie
     """
     packed = struct.pack('IIII', left, right, top, bottom)
     return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, window,
-                                 atom(c, '_NET_WM_STRUT'),
-                                 CARDINAL, 32, 4,
-                                 packed)
+                                 atom('_NET_WM_STRUT'), CARDINAL, 32, 4, packed)
 
-def set_wm_strut_checked(c, window, left, right, top, bottom):
+def set_wm_strut_checked(window, left, right, top, bottom):
     packed = struct.pack('IIII', left, right, top, bottom)
     return c.core.ChangePropertyChecked(xcb.xproto.PropMode.Replace, window,
-                                        atom(c, '_NET_WM_STRUT'),
-                                        CARDINAL, 32, 4,
-                                        packed)
+                                        atom('_NET_WM_STRUT'),
+                                        CARDINAL, 32, 4, packed)
 
 # _NET_WM_STRUT_PARTIAL
 
@@ -1672,62 +1481,58 @@ class StrutPartialCookie(util.PropertyCookie):
             'bottom_end_x': v[11]
         }
 
-def get_wm_strut_partial(c, window):
+def get_wm_strut_partial(window):
     """
     Returns the partial struts for a window.
 
-    @param c:       An xpyb connection object.
-    @param window:  A window identifier.
-    @return:        A strut dictionary.
+    :param window:  A window identifier.
+    :return:        A strut dictionary.
 
                     Keys: left, right, top, bottom, left_start_y, left_end_y,
                     right_start_y, right_end_y, top_start_x, top_end_x,
                     bottom_start_x, bottom_end_x
-    @rtype:         StrutPartialCookie (CARDINAL[12]/32)
+    :rtype:         StrutPartialCookie (CARDINAL[12]/32)
     """
-    return StrutPartialCookie(
-        util.get_property(c, window, atom(c, '_NET_WM_STRUT_PARTIAL')))
+    return StrutPartialCookie(util.get_property(window, 
+                                                '_NET_WM_STRUT_PARTIAL'))
 
-def get_wm_strut_partial_unchecked(c, window):
-    return StrutPartialCookie(
-        util.get_property_unchecked(c, window,
-                                    atom(c, '_NET_WM_STRUT_PARTIAL')))
+def get_wm_strut_partial_unchecked(window):
+    cook = util.get_property_unchecked(window, '_NET_WM_STRUT_PARTIAL')
+    return StrutPartialCookie(cook)
 
-def set_wm_strut_partial(c, window, left, right, top, bottom, left_start_y,
+def set_wm_strut_partial(window, left, right, top, bottom, left_start_y,
                          left_end_y, right_start_y, right_end_y, top_start_x,
                          top_end_x, bottom_start_x, bottom_end_x):
     """
     Sets the partial struts for a window.
 
-    @param c:               An xpyb connection object.
-    @param window:          A window identifier.
-    @param left:            Width of area at left side of screen.
-    @type left:             CARDINAL/32
-    @param right:           Width of area at right side of screen.
-    @type right:            CARDINAL/32
-    @param top:             Height of area at top side of screen.
-    @type top:              CARDINAL/32
-    @param bottom:          Height of area at bottom side of screen.
-    @type bottom:           CARDINAL/32
-    @param left_start_y:
-    @param left_end_y:
-    @param right_start_y:
-    @param right_end_y:
-    @param top_start_x:
-    @param top_end_x:
-    @param bottom_start_x:
-    @param bottom_end_x:
-    @rtype:                 xcb.VoidCookie
+    :param window:          A window identifier.
+    :param left:            Width of area at left side of screen.
+    :type left:             CARDINAL/32
+    :param right:           Width of area at right side of screen.
+    :type right:            CARDINAL/32
+    :param top:             Height of area at top side of screen.
+    :type top:              CARDINAL/32
+    :param bottom:          Height of area at bottom side of screen.
+    :type bottom:           CARDINAL/32
+    :param left_start_y:
+    :param left_end_y:
+    :param right_start_y:
+    :param right_end_y:
+    :param top_start_x:
+    :param top_end_x:
+    :param bottom_start_x:
+    :param bottom_end_x:
+    :rtype:                 xcb.VoidCookie
     """
     packed = struct.pack('I' * 12, left, right, top, bottom, left_start_y,
                          left_end_y, right_start_y, right_end_y, top_start_x,
                          top_end_x, bottom_start_x, bottom_end_x)
     return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, window,
-                                 atom(c, '_NET_WM_STRUT_PARTIAL'),
-                                 CARDINAL, 32, 12,
-                                 packed)
+                                 atom('_NET_WM_STRUT_PARTIAL'),
+                                 CARDINAL, 32, 12, packed)
 
-def set_wm_strut_partial_checked(c, window, left, right, top, bottom,
+def set_wm_strut_partial_checked(window, left, right, top, bottom,
                                  left_start_y, left_end_y, right_start_y,
                                  right_end_y, top_start_x, top_end_x,
                                  bottom_start_x, bottom_end_x):
@@ -1735,9 +1540,8 @@ def set_wm_strut_partial_checked(c, window, left, right, top, bottom,
                          left_end_y, right_start_y, right_end_y, top_start_x,
                          top_end_x, bottom_start_x, bottom_end_x)
     return c.core.ChangePropertyChecked(xcb.xproto.PropMode.Replace, window,
-                                        atom(c, '_NET_WM_STRUT_PARTIAL'),
-                                        CARDINAL, 32, 12,
-                                        packed)
+                                        atom('_NET_WM_STRUT_PARTIAL'),
+                                        CARDINAL, 32, 12, packed)
 
 # _NET_WM_ICON_GEOMETRY
 
@@ -1755,53 +1559,48 @@ class IconGeometryCookie(util.PropertyCookie):
             'height': v[3]
         }
 
-def get_wm_icon_geometry(c, window):
+def get_wm_icon_geometry(window):
     """
     Returns the icon geometry for a window.
 
-    @param c:       An xpyb connection object.
-    @param window:  A window identifier.
-    @return:        An icon geometry dictionary.
+    :param window:  A window identifier.
+    :return:        An icon geometry dictionary.
 
                     Keys: x, y, width, height
-    @rtype:         IconGeometryCookie (CARDINAL[4]/32)
+    :rtype:         IconGeometryCookie (CARDINAL[4]/32)
     """
-    return IconGeometryCookie(
-        util.get_property(c, window, atom(c, '_NET_WM_ICON_GEOMETRY')))
+    return IconGeometryCookie(util.get_property(window, 
+                                                '_NET_WM_ICON_GEOMETRY'))
 
-def get_wm_icon_geometry_unchecked(c, window):
-    return IconGeometryCookie(
-        util.get_property_unchecked(c, window,
-                                    atom(c, '_NET_WM_ICON_GEOMETRY')))
+def get_wm_icon_geometry_unchecked(window):
+    cook = util.get_property_unchecked(window, '_NET_WM_ICON_GEOMETRY')
+    return IconGeometryCookie(cook)
 
-def set_wm_icon_geometry(c, window, x, y, width, height):
+def set_wm_icon_geometry(window, x, y, width, height):
     """
     Sets the icon geometry for a window.
 
-    @param c:       An xpyb connection object.
-    @param window:  A window identifier.
-    @param x:       x coordinate of icon area.
-    @type x:        CARDINAL/32
-    @param y:       y coordinate of icon area.
-    @type y:        CARDINAL/32
-    @param width:   Width of icon area.
-    @type width:    CARDINAL/32
-    @param height:  Height of icon area.
-    @type height:   CARDINAL/32
-    @rtype:         xcb.VoidCookie
+    :param window:  A window identifier.
+    :param x:       x coordinate of icon area.
+    :type x:        CARDINAL/32
+    :param y:       y coordinate of icon area.
+    :type y:        CARDINAL/32
+    :param width:   Width of icon area.
+    :type width:    CARDINAL/32
+    :param height:  Height of icon area.
+    :type height:   CARDINAL/32
+    :rtype:         xcb.VoidCookie
     """
     packed = struct.pack('IIII', x, y, width, height)
     return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, window,
-                                 atom(c, '_NET_WM_ICON_GEOMETRY'),
-                                 CARDINAL, 32, 4,
-                                 packed)
+                                 atom('_NET_WM_ICON_GEOMETRY'),
+                                 CARDINAL, 32, 4, packed)
 
-def set_wm_icon_geometry_checked(c, window, x, y, width, height):
+def set_wm_icon_geometry_checked(window, x, y, width, height):
     packed = struct.pack('IIII', x, y, width, height)
     return c.core.ChangePropertyChecked(xcb.xproto.PropMode.Replace, window,
-                                        atom(c, '_NET_WM_ICON_GEOMETRY'),
-                                        CARDINAL, 32, 4,
-                                        packed)
+                                        atom('_NET_WM_ICON_GEOMETRY'),
+                                        CARDINAL, 32, 4, packed)
 
 # _NET_WM_ICON
 
@@ -1828,35 +1627,30 @@ class IconCookie(util.PropertyCookie):
 
         return ret
 
-def get_wm_icon(c, window):
+def get_wm_icon(window):
     """
     Returns an array of possible icons for a window.
 
-    @param c:       An xpyb connection object.
-    @param window:  A window identifier.
-    @return:        A list of icon dictionaries.
+    :param window:  A window identifier.
+    :return:        A list of icon dictionaries.
 
                     Keys: width, height, data
-    @rtype:         IconCookie (CARDINAL[][2+n]/32)
+    :rtype:         IconCookie (CARDINAL[][2+n]/32)
     """
-    return IconCookie(
-        util.get_property(c, window, atom(c, '_NET_WM_ICON')))
+    return IconCookie(util.get_property(window, '_NET_WM_ICON'))
 
-def get_wm_icon_unchecked(c, window):
-    return IconCookie(
-        util.get_property_unchecked(c, window,
-                                    atom(c, '_NET_WM_ICON')))
+def get_wm_icon_unchecked(window):
+    return IconCookie(util.get_property_unchecked(window, '_NET_WM_ICON'))
 
-def set_wm_icon(c, window, icons):
+def set_wm_icon(window, icons):
     """
     Sets the array of possible icons for a window.
 
-    @param c:       An xpyb connection object.
-    @param window:  A window identifier.
-    @param icons:   A list icon dictionaries. Each dictionary should have
+    :param window:  A window identifier.
+    :param icons:   A list icon dictionaries. Each dictionary should have
                     the following keys: width, height and data.
-    @type icons:    CARDINAL[][2+n]/32
-    @rtype:         xcb.VoidCookie
+    :type icons:    CARDINAL[][2+n]/32
+    :rtype:         xcb.VoidCookie
     """
     flatten = []
     for icon in icons:
@@ -1867,11 +1661,10 @@ def set_wm_icon(c, window, icons):
     packed = struct.pack('I' * len(flatten), *flatten)
 
     return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, window,
-                                 atom(c, '_NET_WM_ICON'),
-                                 CARDINAL, 32, len(flatten),
-                                 packed)
+                                 atom('_NET_WM_ICON'),
+                                 CARDINAL, 32, len(flatten), packed)
 
-def set_wm_icon_checked(c, window, icons):
+def set_wm_icon_checked(window, icons):
     flatten = []
     for icon in icons:
         flatten.append(icon['width'])
@@ -1881,166 +1674,145 @@ def set_wm_icon_checked(c, window, icons):
     packed = struct.pack('I' * len(flatten), *flatten)
 
     return c.core.ChangePropertyChecked(xcb.xproto.PropMode.Replace, window,
-                                        atom(c, '_NET_WM_ICON'),
-                                        CARDINAL, 32, len(flatten),
-                                        packed)
+                                        atom('_NET_WM_ICON'),
+                                        CARDINAL, 32, len(flatten), packed)
 
 # _NET_WM_PID
 
-def get_wm_pid(c, window):
+def get_wm_pid(window):
     """
     Get the process ID of the client owning a window.
 
-    @param c:       An xpyb connection object.
-    @param window:  A window identifier.
-    @return:        The window's client's process ID.
-    @rtype:         util.PropertyCookieSingle (CARDINAL/32)
+    :param window:  A window identifier.
+    :return:        The window's client's process ID.
+    :rtype:         util.PropertyCookieSingle (CARDINAL/32)
     """
-    return util.PropertyCookieSingle(
-        util.get_property(c, window, atom(c, '_NET_WM_PID')))
+    return util.PropertyCookieSingle(util.get_property(window, '_NET_WM_PID'))
 
-def get_wm_pid_unchecked(c, window):
-    return util.PropertyCookieSingle(
-        util.get_property_unchecked(c, window, atom(c, '_NET_WM_PID')))
+def get_wm_pid_unchecked(window):
+    cook = util.get_property_unchecked(window, '_NET_WM_PID')
+    return util.PropertyCookieSingle(cook)
 
-def set_wm_pid(c, window, pid):
+def set_wm_pid(window, pid):
     """
     Sets the process ID of the client owning a window.
 
-    @param c:       An xpyb connection object.
-    @param window:  A window identifier.
-    @param pid:     A process ID.
-    @type pid:      CARDINAL/32
-    @rtype:         xcb.VoidCookie
+    :param window:  A window identifier.
+    :param pid:     A process ID.
+    :type pid:      CARDINAL/32
+    :rtype:         xcb.VoidCookie
     """
     return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, window,
-                                 atom(c, '_NET_WM_PID'),
-                                 CARDINAL, 32, 1,
-                                 [pid])
+                                 atom('_NET_WM_PID'), CARDINAL, 32, 1, [pid])
 
-def set_wm_pid_checked(c, window, pid):
+def set_wm_pid_checked(window, pid):
     return c.core.ChangePropertyChecked(xcb.xproto.PropMode.Replace, window,
-                                        atom(c, '_NET_WM_PID'),
-                                        CARDINAL, 32, 1,
+                                        atom('_NET_WM_PID'), CARDINAL, 32, 1,
                                         [pid])
 
 # _NET_WM_HANDLED_ICONS
 
-def get_wm_handled_icons(c, window):
+def get_wm_handled_icons(window):
     """
     Gets the "handled icons" property.
 
-    @param c:       An xpyb connection object.
-    @param window:  A window identifier.
-    @return:        Whether this property is set or not.
-    @rtype:         util.PropertyCookieSingle (CARDINAL/32)
+    :param window:  A window identifier.
+    :return:        Whether this property is set or not.
+    :rtype:         util.PropertyCookieSingle (CARDINAL/32)
     """
-    return util.PropertyCookieSingle(
-        util.get_property(c, window, atom(c, '_NET_WM_HANDLED_ICONS')))
+    return util.PropertyCookieSingle(util.get_property(window, 
+                                                       '_NET_WM_HANDLED_ICONS'))
 
-def get_wm_handled_icons_unchecked(c, window):
-    return util.PropertyCookieSingle(
-        util.get_property_unchecked(c, window,
-                                    atom(c, '_NET_WM_HANDLED_ICONS')))
+def get_wm_handled_icons_unchecked(window):
+    cook = util.get_property_unchecked(window, '_NET_WM_HANDLED_ICONS')
+    return util.PropertyCookieSingle(cook)
 
-def set_wm_handled_icons(c, window):
+def set_wm_handled_icons(window):
     """
     Sets the "handled icons" property.
 
-    @param c:       An xpyb connection object.
-    @param window:  A window identifier.
-    @return:        Whether this property is set or not.
-    @rtype:         xcb.VoidCookie
+    :param window:  A window identifier.
+    :return:        Whether this property is set or not.
+    :rtype:         xcb.VoidCookie
     """
     return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, window,
-                                 atom(c, '_NET_WM_HANDLED_ICONS'),
-                                 CARDINAL, 32, 1,
+                                 atom('_NET_WM_HANDLED_ICONS'), CARDINAL, 32, 1,
                                  [1])
 
-def set_wm_handled_icons_checked(c, window):
+def set_wm_handled_icons_checked(window):
     return c.core.ChangePropertyChecked(xcb.xproto.PropMode.Replace, window,
-                                        atom(c, '_NET_WM_HANDLED_ICONS'),
-                                        CARDINAL, 32, 1,
-                                        [1])
+                                        atom('_NET_WM_HANDLED_ICONS'),
+                                        CARDINAL, 32, 1, [1])
 
 # _NET_WM_USER_TIME
 
-def get_wm_user_time(c, window):
+def get_wm_user_time(window):
     """
     Get the time at which the last user activity occurred on a window.
 
-    @param c:       An xpyb connection object.
-    @param window:  A window identifier.
-    @return:        The XServer time when user activity last occurred.
-    @rtype:         util.PropertyCookieSingle (CARDINAL/32)
+    :param window:  A window identifier.
+    :return:        The XServer time when user activity last occurred.
+    :rtype:         util.PropertyCookieSingle (CARDINAL/32)
     """
-    return util.PropertyCookieSingle(
-        util.get_property(c, window, atom(c, '_NET_WM_USER_TIME')))
+    return util.PropertyCookieSingle(util.get_property(window, 
+                                                       '_NET_WM_USER_TIME'))
 
-def get_wm_user_time_unchecked(c, window):
-    return util.PropertyCookieSingle(
-        util.get_property_unchecked(c, window, atom(c, '_NET_WM_USER_TIME')))
+def get_wm_user_time_unchecked(window):
+    cook = util.get_property_unchecked(window, '_NET_WM_USER_TIME')
+    return util.PropertyCookieSingle(cook)
 
-def set_wm_user_time(c, window, user_time):
+def set_wm_user_time(window, user_time):
     """
     Sets the time that user activity last occurred on this window.
 
-    @param c:           An xpyb connection object.
-    @param window:      A window identifier.
-    @param user_time:   Last user activity time.
-    @type user_time:    CARDINAL/32
-    @rtype:             xcb.VoidCookie
+    :param window:      A window identifier.
+    :param user_time:   Last user activity time.
+    :type user_time:    CARDINAL/32
+    :rtype:             xcb.VoidCookie
     """
     return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, window,
-                                 atom(c, '_NET_WM_USER_TIME'),
-                                 CARDINAL, 32, 1,
+                                 atom('_NET_WM_USER_TIME'), CARDINAL, 32, 1,
                                  [user_time])
 
-def set_wm_user_time_checked(c, window, user_time):
+def set_wm_user_time_checked(window, user_time):
     return c.core.ChangePropertyChecked(xcb.xproto.PropMode.Replace, window,
-                                        atom(c, '_NET_WM_USER_TIME'),
-                                        CARDINAL, 32, 1,
-                                        [user_time])
+                                        atom('_NET_WM_USER_TIME'),
+                                        CARDINAL, 32, 1, [user_time])
 
 # _NET_WM_USER_TIME_WINDOW
 
-def get_wm_user_time_window(c, window):
+def get_wm_user_time_window(window):
     """
     Gets the window that sets the _NET_WM_USER_TIME property.
 
-    @param c:       An xpyb connection object.
-    @param window:  A window identifier.
-    @return:        Window identifier that sets the _NET_WM_USER_TIME property.
-    @rtype:         util.PropertyCookieSingle (WINDOW/32)
+    :param window:  A window identifier.
+    :return:        Window identifier that sets the _NET_WM_USER_TIME property.
+    :rtype:         util.PropertyCookieSingle (WINDOW/32)
     """
-    return util.PropertyCookieSingle(
-        util.get_property(c, window, atom(c, '_NET_WM_USER_TIME_WINDOW')))
+    cook = util.get_property(window, '_NET_WM_USER_TIME_WINDOW')
+    return util.PropertyCookieSingle(cook)
 
-def get_wm_user_time_window_unchecked(c, window):
-    return util.PropertyCookieSingle(
-        util.get_property_unchecked(c, window,
-                                    atom(c, '_NET_WM_USER_TIME_WINDOW')))
+def get_wm_user_time_window_unchecked(window):
+    cook = util.get_property_unchecked(window, '_NET_WM_USER_TIME_WINDOW')
+    return util.PropertyCookieSingle(cook)
 
-def set_wm_user_time_window(c, window, time_win):
+def set_wm_user_time_window(window, time_win):
     """
     Sets the window identifier that sets the _NET_WM_USER_TIME property.
 
-    @param c:           An xpyb connection object.
-    @param window:      A window identifier.
-    @param time_win:    Window ID that sets the _NET_WM_USER_TIME property.
-    @type time_win:     WINDOW/32
-    @rtype:             xcb.VoidCookie
+    :param window:      A window identifier.
+    :param time_win:    Window ID that sets the _NET_WM_USER_TIME property.
+    :type time_win:     WINDOW/32
+    :rtype:             xcb.VoidCookie
     """
     return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, window,
-                                 atom(c, '_NET_WM_USER_TIME_WINDOW'),
-                                 xcb.xproto.Atom.WINDOW, 32, 1,
-                                 [time_win])
+                                 atom('_NET_WM_USER_TIME_WINDOW'),
+                                 WINDOW, 32, 1, [time_win])
 
-def set_wm_user_time_window_checked(c, window, time_win):
+def set_wm_user_time_window_checked(window, time_win):
     return c.core.ChangePropertyChecked(xcb.xproto.PropMode.Replace, window,
-                                        atom(c, '_NET_WM_USER_TIME_WINDOW'),
-                                        xcb.xproto.Atom.WINDOW, 32, 1,
-                                        [time_win])
+                                        atom('_NET_WM_USER_TIME_WINDOW'),
+                                        WINDOW, 32, 1, [time_win])
 
 # _NET_FRAME_EXTENTS
 
@@ -2058,146 +1830,130 @@ class FrameExtentsCookie(util.PropertyCookie):
             'bottom': v[3]
         }
 
-def get_frame_extents(c, window):
+def get_frame_extents(window):
     """
     Returns the frame extents for a window.
 
-    @param c:       An xpyb connection object.
-    @param window:  A window identifier.
-    @return:        A frame extents dictionary.
+    :param window:  A window identifier.
+    :return:        A frame extents dictionary.
 
                     Keys: left, right, top, bottom
-    @rtype:         FrameExtentsCookie (CARDINAL[4]/32)
+    :rtype:         FrameExtentsCookie (CARDINAL[4]/32)
     """
-    return FrameExtentsCookie(
-        util.get_property(c, window, atom(c, '_NET_FRAME_EXTENTS')))
+    return FrameExtentsCookie(util.get_property(window, '_NET_FRAME_EXTENTS'))
 
-def get_frame_extents_unchecked(c, window):
-    return FrameExtentsCookie(
-        util.get_property_unchecked(c, window,
-                                    atom(c, '_NET_FRAME_EXTENTS')))
+def get_frame_extents_unchecked(window):
+    cook = util.get_property_unchecked(window, '_NET_FRAME_EXTENTS')
+    return FrameExtentsCookie(cook)
 
-def set_frame_extents(c, window, left, right, top, bottom):
+def set_frame_extents(window, left, right, top, bottom):
     """
     Sets the frame extents for a window.
 
-    @param c:       An xpyb connection object.
-    @param window:  A window identifier.
-    @param left:    Width of left border.
-    @type left:     CARDINAL/32
-    @param right:   Width of right border.
-    @type right:    CARDINAL/32
-    @param top:     Height of top border.
-    @type top:      CARDINAL/32
-    @param bottom:  Height of bottom border.
-    @type bottom:   CARDINAL/32
-    @rtype:         xcb.VoidCookie
+    :param window:  A window identifier.
+    :param left:    Width of left border.
+    :type left:     CARDINAL/32
+    :param right:   Width of right border.
+    :type right:    CARDINAL/32
+    :param top:     Height of top border.
+    :type top:      CARDINAL/32
+    :param bottom:  Height of bottom border.
+    :type bottom:   CARDINAL/32
+    :rtype:         xcb.VoidCookie
     """
     packed = struct.pack('IIII', left, right, top, bottom)
     return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, window,
-                                 atom(c, '_NET_FRAME_EXTENTS'),
-                                 CARDINAL, 32, 4,
+                                 atom('_NET_FRAME_EXTENTS'), CARDINAL, 32, 4,
                                  packed)
 
-def set_frame_extents_checked(c, window, left, right, top, bottom):
+def set_frame_extents_checked(window, left, right, top, bottom):
     packed = struct.pack('IIII', left, right, top, bottom)
     return c.core.ChangePropertyChecked(xcb.xproto.PropMode.Replace, window,
-                                        atom(c, '_NET_FRAME_EXTENTS'),
-                                        CARDINAL, 32, 4,
-                                        packed)
+                                        atom('_NET_FRAME_EXTENTS'),
+                                        CARDINAL, 32, 4, packed)
 
 # _NET_WM_PING
 
-def request_wm_ping(c, window, response=False,
+def request_wm_ping(window, response=False,
                     timestamp=xcb.xproto.Time.CurrentTime):
     """
     Sends an event to root window to ping a window or respond to a ping.
 
-    @param c:           An xpyb connection object.
-    @param window:      A window identifier.
-    @param response:    Whether this is a response to a ping request or not.
-    @type timestamp:    Milliseconds
-    @rtype:             xcb.VoidCookie
+    :param window:      A window identifier.
+    :param response:    Whether this is a response to a ping request or not.
+    :type timestamp:    Milliseconds
+    :rtype:             xcb.VoidCookie
     """
-    return revent(c, window if not response else root(c),
-                  atom(c, 'WM_PROTOCOLS'), [atom(c, '_NET_WM_PING'), timestamp,
-                                            window])
+    return revent(window if not response else root(c),
+                  'WM_PROTOCOLS', atom('_NET_WM_PING'), timestamp, window)
 
-def request_wm_ping_checked(c, window, response=False,
+def request_wm_ping_checked(window, response=False,
                             timestamp=xcb.xproto.Time.CurrentTime):
-    return revent_checked(c, window if not response else root(c),
-                          atom(c, 'WM_PROTOCOLS'), [atom(c, '_NET_WM_PING'),
-                                                    timestamp, window])
+    return revent_checked(window if not response else root(c), 'WM_PROTOCOLS', 
+                          atom('_NET_WM_PING'), timestamp, window)
 
 # _NET_WM_SYNC_REQUEST
 
-def request_wm_sync_request(c, window, req_num,
+def request_wm_sync_request(window, req_num,
                             timestamp=xcb.xproto.Time.CurrentTime):
     """
     Sends an event to root window to sync with a client.
 
-    @param c:           An xpyb connection object.
-    @param window:      A window identifier.
-    @param req_num:     The XSync request number.
-    @type timestamp:    Milliseconds
-    @rtype:             xcb.VoidCookie
+    :param window:      A window identifier.
+    :param req_num:     The XSync request number.
+    :type timestamp:    Milliseconds
+    :rtype:             xcb.VoidCookie
     """
     high = req_num >> 32
     low = (high << 32) ^ req_num
 
-    return revent(c, window, atom(c, 'WM_PROTOCOLS'),
-                  [atom(c, '_NET_WM_SYNC_REQUEST'), timestamp, low, high])
+    return revent(window, 'WM_PROTOCOLS',
+                  atom('_NET_WM_SYNC_REQUEST'), timestamp, low, high)
 
-def request_wm_sync_request_checked(c, window, req_num,
+def request_wm_sync_request_checked(window, req_num,
                                     timestamp=xcb.xproto.Time.CurrentTime):
     high = req_num >> 32
     low = (high << 32) ^ req_num
 
-    return revent_checked(c, window, atom(c, 'WM_PROTOCOLS'),
-                          [atom(c, '_NET_WM_SYNC_REQUEST'), timestamp, low, high])
+    return revent_checked(window, 'WM_PROTOCOLS',
+                          atom('_NET_WM_SYNC_REQUEST'), timestamp, low, high)
 
 # _NET_WM_SYNC_REQUEST_COUNTER
 
-def get_wm_sync_request_counter(c, window):
+def get_wm_sync_request_counter(window):
     """
     Gets XSync counter for this client.
 
-    @param c:       An xpyb connection object.
-    @param window:  A window identifier.
-    @return:        An XSync XID.
-    @rtype:         util.PropertyCookieSingle (CARDINAL/32)
+    :param window:  A window identifier.
+    :return:        An XSync XID.
+    :rtype:         util.PropertyCookieSingle (CARDINAL/32)
     """
-    return util.PropertyCookieSingle(
-        util.get_property(c, window, atom(c, '_NET_WM_SYNC_REQUEST_COUNTER')))
+    cook = util.get_property(window, '_NET_WM_SYNC_REQUEST_COUNTER')
+    return util.PropertyCookieSingle(cook)
 
-def get_wm_sync_request_counter_unchecked(c, window):
-    return util.PropertyCookieSingle(
-        util.get_property_unchecked(c, window,
-                                    atom(c, '_NET_WM_SYNC_REQUEST_COUNTER')))
+def get_wm_sync_request_counter_unchecked(window):
+    cook = util.get_property_unchecked(window, '_NET_WM_SYNC_REQUEST_COUNTER')
+    return util.PropertyCookieSingle(cook)
 
-def set_wm_sync_request_counter(c, window, counter):
+def set_wm_sync_request_counter(window, counter):
     """
     Sets the XSync counter for this client.
 
-    @param c:           An xpyb connection object.
-    @param window:      A window identifier.
-    @param counter:     An XSync XID.
-    @type counter:      CARDINAL
-    @rtype:             xcb.VoidCookie
+    :param window:      A window identifier.
+    :param counter:     An XSync XID.
+    :type counter:      CARDINAL
+    :rtype:             xcb.VoidCookie
     """
     packed = struct.pack('I', counter)
     return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, window,
-                                 atom(c, '_NET_WM_SYNC_REQUEST_COUNTER'),
-                                 CARDINAL, 32, 1,
-                                 packed)
+                                 atom('_NET_WM_SYNC_REQUEST_COUNTER'),
+                                 CARDINAL, 32, 1, packed)
 
-def set_wm_sync_request_counter_checked(c, window, counter):
+def set_wm_sync_request_counter_checked(window, counter):
     packed = struct.pack('I', counter)
     return c.core.ChangePropertyChecked(xcb.xproto.PropMode.Replace, window,
-                                        atom(c,
-                                             '_NET_WM_SYNC_REQUEST_COUNTER'),
-                                        CARDINAL, 32, 1,
-                                        packed)
+                                        atom('_NET_WM_SYNC_REQUEST_COUNTER'),
+                                        CARDINAL, 32, 1, packed)
 
 # _NET_WM_FULLSCREEN_MONITORS
 
@@ -2215,72 +1971,67 @@ class FullscreenMonitorsCookie(util.PropertyCookie):
             'right': v[3]
         }
 
-def get_wm_fullscreen_monitors(c, window):
+def get_wm_fullscreen_monitors(window):
     """
     Get list of monitor edges for this window.
 
-    @param c:       An xpyb connection object.
-    @param window:  A window identifier.
-    @return:        The window's monitor edges.
-    @rtype:         FullscreenMonitorsCookie (CARDINAL[4]/32)
+    :param window:  A window identifier.
+    :return:        The window's monitor edges.
+    :rtype:         FullscreenMonitorsCookie (CARDINAL[4]/32)
     """
     return FullscreenMonitorsCookie(
-        util.get_property(c, window, atom(c, '_NET_WM_FULLSCREEN_MONITORS')))
+        util.get_property(window, '_NET_WM_FULLSCREEN_MONITORS'))
 
-def get_wm_fullscreen_monitors_unchecked(c, window):
-    return FullscreenMonitorsCookie(
-        util.get_property_unchecked(c, window,
-                                    atom(c, '_NET_WM_FULLSCREEN_MONITORS')))
+def get_wm_fullscreen_monitors_unchecked(window):
+    cook = util.get_property_unchecked(window, '_NET_WM_FULLSCREEN_MONITORS')
+    return FullscreenMonitorsCookie(cook)
 
-def set_wm_fullscreen_monitors(c, window, top, bottom, left, right):
+def set_wm_fullscreen_monitors(window, top, bottom, left, right):
     """
     Sets list of monitor edges for this window.
 
-    @param c:       An xpyb connection object.
-    @param window:  A window identifier.
-    @param top:     The monitor whose top edge defines the top edge of window.
-    @param bottom:  The monitor whose bottom edge defines the bottom edge of
+    :param window:  A window identifier.
+    :param top:     The monitor whose top edge defines the top edge of window.
+    :param bottom:  The monitor whose bottom edge defines the bottom edge of
                     window.
-    @param left:    The monitor whose left edge defines the left edge of
+    :param left:    The monitor whose left edge defines the left edge of
                     window.
-    @param right:   The monitor whose right edge defines the right edge of
+    :param right:   The monitor whose right edge defines the right edge of
                     window.
-    @rtype:         xcb.VoidCookie
+    :rtype:         xcb.VoidCookie
     """
     packed = struct.pack('IIII', top, bottom, left, right)
     return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, window,
-                                 atom(c, '_NET_WM_FULLSCREEN_MONITORS'),
-                                 CARDINAL, 32, 4,
-                                 packed)
+                                 atom('_NET_WM_FULLSCREEN_MONITORS'),
+                                 CARDINAL, 32, 4, packed)
 
-def set_wm_fullscreen_monitors_checked(c, window, top, bottom, left, right):
+def set_wm_fullscreen_monitors_checked(window, top, bottom, left, right):
     packed = struct.pack('IIII', top, bottom, left, right)
     return c.core.ChangePropertyChecked(xcb.xproto.PropMode.Replace, window,
-                                        atom(c, '_NET_WM_FULLSCREEN_MONITORS'),
-                                        CARDINAL, 32, 4,
-                                        packed)
+                                        atom('_NET_WM_FULLSCREEN_MONITORS'),
+                                        CARDINAL, 32, 4, packed)
 
-def request_wm_fullscreen_monitors(c, window, top, bottom, left, right,
+def request_wm_fullscreen_monitors(window, top, bottom, left, right,
                                    source=1):
     """
     Sends an event to root window to change monitor edges for this window.
 
-    @param c:       An xpyb connection object.
-    @param window:  A window identifier.
-    @param top:     The monitor whose top edge defines the top edge of window.
-    @param bottom:  The monitor whose bottom edge defines the bottom edge of
+    :param window:  A window identifier.
+    :param top:     The monitor whose top edge defines the top edge of window.
+    :param bottom:  The monitor whose bottom edge defines the bottom edge of
                     window.
-    @param left:    The monitor whose left edge defines the left edge of
+    :param left:    The monitor whose left edge defines the left edge of
                     window.
-    @param right:   The monitor whose right edge defines the right edge of
+    :param right:   The monitor whose right edge defines the right edge of
                     window.
-    @param source:  The source indication.
-    @rtype:         xcb.VoidCookie
+    :param source:  The source indication.
+    :rtype:         xcb.VoidCookie
     """
-    return revent(c, window, atom(c, '_NET_WM_FULLSCREEN_MONITORS'),
-                  [top, bottom, left, right, source])
+    return revent(window, '_NET_WM_FULLSCREEN_MONITORS',
+                  top, bottom, left, right, source)
 
-def request_wm_fullscreen_monitors_checked(c, window, top, bottom, left, right,
+def request_wm_fullscreen_monitors_checked(window, top, bottom, left, right,
                                            source=1):
-    return revent_checked(c, window, atom(c, '_NET_WM_FULLSCREEN_MONITORS'),
-                          [top, bottom, left, right, source])
+    return revent_checked(window, '_NET_WM_FULLSCREEN_MONITORS',
+                          top, bottom, left, right, source)
+

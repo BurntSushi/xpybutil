@@ -2,6 +2,7 @@ import struct
 
 import xcb.xproto
 
+from xpybutil import conn as c
 import util
 
 __atoms = ['_MOTIF_WM_HINTS']
@@ -40,14 +41,12 @@ class Input:
 class Status:
     TearoffWindow = 1 << 0
 
-# Handle atom caching
-def build_atom_cache(c):
-    for atom in __atoms:
-        util.__atom_cache[atom] = util.get_atom_cookie(c, atom,
-                                                       only_if_exists=False)
-
 # Some aliases
 atom = util.get_atom
+preplace = xcb.xproto.PropMode.Replace
+
+# Build the atom cache for quicker access
+util.build_atom_cache(__atoms)
 
 # _MOTIF_WM_HINTS
 
@@ -71,13 +70,12 @@ class MotifHintsCookie(util.PropertyCookie):
             'status': v[4]
         }
 
-def get_hints(c, window):
-    return MotifHintsCookie(
-        util.get_property(c, window, atom(c, '_MOTIF_WM_HINTS')))
+def get_hints(window):
+    return MotifHintsCookie(util.get_property(window, '_MOTIF_WM_HINTS'))
 
-def get_hints_unchecked(c, window):
-    return MotifHintsCookie(
-        util.get_property_unchecked(c, window, atom(c, '_MOTIF_WM_HINTS')))
+def get_hints_unchecked(window):
+    cook = util.get_property_unchecked(window, '_MOTIF_WM_HINTS')
+    return MotifHintsCookie(cook)
 
 def _pack_hints(flags, function, decoration, input, status):
     hints = [0] * 5
@@ -98,20 +96,18 @@ def _pack_hints(flags, function, decoration, input, status):
 
     return struct.pack('I' * 5, *hints)
 
-def set_hints(c, window, flags, function=Function._None,
+def set_hints(window, flags, function=Function._None,
               decoration=Decoration._None, input=Input.Modeless,
               status=Status.TearoffWindow):
     packed = _pack_hints(flags, function, decoration, input, status)
-    return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, window,
-                                    atom(c, '_MOTIF_WM_HINTS'),
-                                    atom(c, '_MOTIF_WM_HINTS'), 32,
-                                    5, packed)
+    return c.core.ChangeProperty(preplace, window, atom('_MOTIF_WM_HINTS'),
+                                 atom('_MOTIF_WM_HINTS'), 32, 5, packed)
 
-def set_hints_checked(c, window, flags, function=Function._None,
+def set_hints_checked(window, flags, function=Function._None,
                       decoration=Decoration._None, input=Input.Modeless,
                       status=Status.TearoffWindow):
     packed = _pack_hints(flags, function, decoration, input, status)
-    return c.core.ChangePropertyChecked(xcb.xproto.PropMode.Replace, window,
-                                    atom(c, '_MOTIF_WM_HINTS'),
-                                    atom(c, '_MOTIF_WM_HINTS'), 32,
-                                    5, packed)
+    return c.core.ChangePropertyChecked(preplace, window,
+                                        atom('_MOTIF_WM_HINTS'),
+                                        atom('_MOTIF_WM_HINTS'), 32, 5, packed)
+

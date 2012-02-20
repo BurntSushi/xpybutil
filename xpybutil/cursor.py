@@ -1,3 +1,5 @@
+from xpybutil import conn
+
 class FontCursor:
     XCursor = 0
     Arrow = 2
@@ -77,16 +79,17 @@ class FontCursor:
     Watch = 150
     XTerm = 152
 
-def create_font_cursor(c, cursor_id, fore_red=0, fore_green=0, fore_blue=0,
+def create_font_cursor(cursor_id, fore_red=0, fore_green=0, fore_blue=0,
                        back_red=0xffff, back_green=0xffff, back_blue=0xffff):
-    font = c.generate_id()
-    cursor = c.generate_id()
+    font = conn.generate_id()
+    cursor = conn.generate_id()
 
-    c.core.OpenFontChecked(font, len('cursor'), 'cursor').check()
-    c.core.CreateGlyphCursorChecked(cursor, font, font, cursor_id,
-                                    cursor_id + 1, fore_red, fore_green,
-                                    fore_blue, back_red, back_green,
-                                    back_blue).check()
-    c.core.CloseFont(font)
+    conn.core.OpenFontChecked(font, len('cursor'), 'cursor').check()
+    conn.core.CreateGlyphCursorChecked(cursor, font, font, cursor_id,
+                                       cursor_id + 1, fore_red, fore_green,
+                                       fore_blue, back_red, back_green,
+                                       back_blue).check()
+    conn.core.CloseFont(font)
 
     return cursor
+

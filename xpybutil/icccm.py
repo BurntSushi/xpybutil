@@ -3,6 +3,7 @@ import struct
 
 import xcb.xproto
 
+from xpybutil import conn as c
 import util
 
 __atoms = ['WM_PROTOCOLS', 'WM_TAKE_FOCUS', 'WM_SAVE_YOURSELF',
@@ -38,49 +39,50 @@ class State:
     Iconic = 3
     Inactive = 4
 
+# Some aliases
+atom = util.get_atom
+atoms = xcb.xproto.Atom
+
+# Build the atom cache for quicker access
+util.build_atom_cache(__atoms)
+
 # WM_NAME
 
-def get_wm_name(c, window):
-    return util.PropertyCookie(
-        util.get_property(c, window, xcb.xproto.Atom.WM_NAME))
+def get_wm_name(window):
+    return util.PropertyCookie(util.get_property(window, atoms.WM_NAME))
 
-def get_wm_name_unchecked(c, window):
-    return util.PropertyCookie(
-        util.get_property_unchecked(c, window, xcb.xproto.Atom.WM_NAME))
+def get_wm_name_unchecked(window):
+    return util.PropertyCookie(util.get_property_unchecked(window, 
+                                                           atoms.WM_NAME))
 
-def set_wm_name(c, window, wm_name):
+def set_wm_name(window, wm_name):
     return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, window,
-                                    xcb.xproto.Atom.WM_NAME,
-                                    xcb.xproto.Atom.STRING, 8, len(wm_name),
-                                    wm_name)
+                                 atoms.WM_NAME, atoms.STRING, 8, len(wm_name),
+                                 wm_name)
 
-def set_wm_name_checked(c, window, wm_name):
+def set_wm_name_checked(window, wm_name):
     return c.core.ChangePropertyChecked(xcb.xproto.PropMode.Replace, window,
-                                    xcb.xproto.Atom.WM_NAME,
-                                    xcb.xproto.Atom.STRING, 8, len(wm_name),
-                                    wm_name)
+                                        atoms.WM_NAME, atoms.STRING, 8, 
+                                        len(wm_name), wm_name)
 
 # WM_ICON_NAME
 
-def get_wm_icon_name(c, window):
-    return util.PropertyCookie(
-        util.get_property(c, window, xcb.xproto.Atom.WM_ICON_NAME))
+def get_wm_icon_name(window):
+    return util.PropertyCookie(util.get_property(window, atoms.WM_ICON_NAME))
 
-def get_wm_icon_name_unchecked(c, window):
-    return util.PropertyCookie(
-        util.get_property_unchecked(c, window, xcb.xproto.Atom.WM_ICON_NAME))
+def get_wm_icon_name_unchecked(window):
+    return util.PropertyCookie(util.get_property_unchecked(window, 
+                                                           atoms.WM_ICON_NAME))
 
-def set_wm_icon_name(c, window, wm_icon_name):
+def set_wm_icon_name(window, wm_icon_name):
     return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, window,
-                                    xcb.xproto.Atom.WM_ICON_NAME,
-                                    xcb.xproto.Atom.STRING, 8,
-                                    len(wm_icon_name), wm_icon_name)
+                                 atoms.WM_ICON_NAME, atoms.STRING, 8,
+                                 len(wm_icon_name), wm_icon_name)
 
-def set_wm_icon_name_checked(c, window, wm_icon_name):
+def set_wm_icon_name_checked(window, wm_icon_name):
     return c.core.ChangePropertyChecked(xcb.xproto.PropMode.Replace, window,
-                                    xcb.xproto.Atom.WM_ICON_NAME,
-                                    xcb.xproto.Atom.STRING, 8,
-                                    len(wm_icon_name), wm_icon_name)
+                                        atoms.WM_ICON_NAME, atoms.STRING, 8,
+                                        len(wm_icon_name), wm_icon_name)
 
 # WM_NORMAL_HINTS
 
@@ -123,13 +125,12 @@ class NormalHintsCookie(util.PropertyCookie):
 
         return retval
 
-def get_wm_normal_hints(c, window):
-    return NormalHintsCookie(
-        util.get_property(c, window, xcb.xproto.Atom.WM_NORMAL_HINTS))
+def get_wm_normal_hints(window):
+    return NormalHintsCookie(util.get_property(window, atoms.WM_NORMAL_HINTS))
 
-def get_wm_normal_hints_unchecked(c, window):
-    return NormalHintsCookie(
-        util.get_property(c, window, xcb.xproto.Atom.WM_NORMAL_HINTS))
+def get_wm_normal_hints_unchecked(window):
+    return NormalHintsCookie(util.get_property_unchecked(window, 
+                                                         atoms.WM_NORMAL_HINTS))
 
 def _pack_normal_hints(flags, x, y, width, height, min_width, min_height,
                        max_width, max_height, width_inc, height_inc,
@@ -170,7 +171,7 @@ def _pack_normal_hints(flags, x, y, width, height, min_width, min_height,
 
     return struct.pack('I' * 18, *hints)
 
-def set_wm_normal_hints(c, window, flags, x=0, y=0, width=0,
+def set_wm_normal_hints(window, flags, x=0, y=0, width=0,
                         height=0, min_width=0, min_height=0,
                         max_width=0, max_height=0, width_inc=0,
                         height_inc=0, min_aspect_num=0,
@@ -183,11 +184,10 @@ def set_wm_normal_hints(c, window, flags, x=0, y=0, width=0,
                                 max_aspect_num, max_aspect_den, base_width,
                                 base_height, win_gravity)
     return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, window,
-                                    xcb.xproto.Atom.WM_NORMAL_HINTS,
-                                    xcb.xproto.Atom.WM_SIZE_HINTS, 32,
-                                    18, packed)
+                                 atoms.WM_NORMAL_HINTS, atoms.WM_SIZE_HINTS, 32,
+                                 18, packed)
 
-def set_wm_normal_hints_checked(c, window, flags, x=0, y=0, width=0,
+def set_wm_normal_hints_checked(window, flags, x=0, y=0, width=0,
                                 height=0, min_width=0, min_height=0,
                                 max_width=0, max_height=0, width_inc=0,
                                 height_inc=0, min_aspect_num=0,
@@ -200,9 +200,8 @@ def set_wm_normal_hints_checked(c, window, flags, x=0, y=0, width=0,
                                 max_aspect_num, max_aspect_den, base_width,
                                 base_height, win_gravity)
     return c.core.ChangePropertyChecked(xcb.xproto.PropMode.Replace, window,
-                                    xcb.xproto.Atom.WM_NORMAL_HINTS,
-                                    xcb.xproto.Atom.WM_SIZE_HINTS, 32,
-                                    18, packed)
+                                        atoms.WM_NORMAL_HINTS,
+                                        atoms.WM_SIZE_HINTS, 32, 18, packed)
 
 # WM_HINTS
 
@@ -235,13 +234,11 @@ class HintsCookie(util.PropertyCookie):
             'window_group': v[8],
         }
 
-def get_wm_hints(c, window):
-    return HintsCookie(
-        util.get_property(c, window, xcb.xproto.Atom.WM_HINTS))
+def get_wm_hints(window):
+    return HintsCookie(util.get_property(window, atoms.WM_HINTS))
 
-def get_wm_hints_unchecked(c, window):
-    return HintsCookie(
-        util.get_property_unchecked(c, window, xcb.xproto.Atom.WM_HINTS))
+def get_wm_hints_unchecked(window):
+    return HintsCookie(util.get_property_unchecked(window, atoms.WM_HINTS))
 
 def _pack_hints(flags, input, initial_state, icon_pixmap, icon_window,
                 icon_x, icon_y, icon_mask, window_group):
@@ -272,148 +269,131 @@ def _pack_hints(flags, input, initial_state, icon_pixmap, icon_window,
 
     return struct.pack('I' * 9, *hints)
 
-def set_wm_hints(c, window, flags, input=1, initial_state=State.Normal,
+def set_wm_hints(window, flags, input=1, initial_state=State.Normal,
                  icon_pixmap=0, icon_window=0, icon_x=0, icon_y=0,
                  icon_mask=0, window_group=0):
     packed = _pack_hints(flags, input, initial_state, icon_pixmap, icon_window,
                          icon_x, icon_y, icon_mask, window_group)
     return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, window,
-                                    xcb.xproto.Atom.WM_HINTS,
-                                    xcb.xproto.Atom.WM_HINTS, 32,
-                                    9, packed)
+                                 atoms.WM_HINTS, atoms.WM_HINTS, 32, 9, packed)
 
-def set_wm_hints_checked(c, window, flags, input=1,
+def set_wm_hints_checked(window, flags, input=1,
                          initial_state=State.Normal, icon_pixmap=0,
                          icon_window=0, icon_x=0, icon_y=0, icon_mask=0,
                          window_group=0):
     packed = _pack_hints(flags, input, initial_state, icon_pixmap, icon_window,
                          icon_x, icon_y, icon_mask, window_group)
     return c.core.ChangePropertyChecked(xcb.xproto.PropMode.Replace, window,
-                                    xcb.xproto.Atom.WM_HINTS,
-                                    xcb.xproto.Atom.WM_HINTS, 32,
-                                    9, packed)
+                                        atoms.WM_HINTS, atoms.WM_HINTS, 32,
+                                        9, packed)
 
 # WM_CLASS
 
-def get_wm_class(c, window):
-    return util.PropertyCookie(
-        util.get_property(c, window, xcb.xproto.Atom.WM_CLASS))
+def get_wm_class(window):
+    return util.PropertyCookie(util.get_property(window, atoms.WM_CLASS))
 
-def get_wm_class_unchecked(c, window):
-    return util.PropertyCookie(
-        util.get_property_unchecked(c, window, xcb.xproto.Atom.WM_CLASS))
+def get_wm_class_unchecked(window):
+    return util.PropertyCookie(util.get_property_unchecked(window, 
+                                                           atoms.WM_CLASS))
 
-def set_wm_class(c, window, instance, cls):
+def set_wm_class(window, instance, cls):
     return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, window,
-                                    xcb.xproto.Atom.WM_CLASS,
-                                    xcb.xproto.Atom.STRING, 8,
-                                    len(instance) + len(cls) + 2,
-                                    instance + chr(0) + cls + chr(0))
+                                 atoms.WM_CLASS, atoms.STRING, 8,
+                                 len(instance) + len(cls) + 2,
+                                 instance + chr(0) + cls + chr(0))
 
-def set_wm_class_checked(c, window, instance, cls):
+def set_wm_class_checked(window, instance, cls):
     return c.core.ChangePropertyChecked(xcb.xproto.PropMode.Replace, window,
-                                    xcb.xproto.Atom.WM_CLASS,
-                                    xcb.xproto.Atom.STRING, 8,
-                                    len(instance) + len(cls) + 2,
-                                    instance + chr(0) + cls + chr(0))
+                                        atoms.WM_CLASS, atoms.STRING, 8,
+                                        len(instance) + len(cls) + 2,
+                                        instance + chr(0) + cls + chr(0))
 
 # WM_TRANSIENT_FOR
 
-def get_wm_transient_for(c, window):
-    return util.PropertyCookie(
-        util.get_property(c, window, xcb.xproto.Atom.WM_TRANSIENT_FOR))
+def get_wm_transient_for(window):
+    return util.PropertyCookie(util.get_property(window, 
+                                                 atoms.WM_TRANSIENT_FOR))
 
-def get_wm_transient_for_unchecked(c, window):
-    return util.PropertyCookie(
-        util.get_property_unchecked(c, window,
-                                    xcb.xproto.Atom.WM_TRANSIENT_FOR))
+def get_wm_transient_for_unchecked(window):
+    cook = util.get_property_unchecked(window, atoms.WM_TRANSIENT_FOR)
+    return util.PropertyCookie(cook)
 
-def set_wm_transient_for(c, window, transient_window):
+def set_wm_transient_for(window, transient_window):
     packed = struct.pack('I', transient_window)
     return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, window,
-                                    xcb.xproto.Atom.WM_TRANSIENT_FOR,
-                                    xcb.xproto.Atom.WINDOW, 32,
-                                    1, packed)
+                                 atoms.WM_TRANSIENT_FOR, atoms.WINDOW, 32,
+                                 1, packed)
 
-def set_wm_transient_for_checked(c, window, transient_window):
+def set_wm_transient_for_checked(window, transient_window):
     packed = struct.pack('I', transient_window)
     return c.core.ChangePropertyChecked(xcb.xproto.PropMode.Replace, window,
-                                    xcb.xproto.Atom.WM_TRANSIENT_FOR,
-                                    xcb.xproto.Atom.WINDOW, 32,
-                                    1, packed)
+                                        atoms.WM_TRANSIENT_FOR,
+                                        atoms.WINDOW, 32, 1, packed)
 
 # WM_PROTOCOLS
 
-def get_wm_protocols(c, window):
-    return util.PropertyCookie(
-        util.get_property(c, window, util.get_atom(c, 'WM_PROTOCOLS')))
+def get_wm_protocols(window):
+    return util.PropertyCookie(util.get_property(window, 'WM_PROTOCOLS'))
 
-def get_wm_protocols(c, window):
-    return util.PropertyCookie(
-        util.get_property_unchecked(c, window,
-                                    util.get_atom(c, 'WM_PROTOCOLS')))
+def get_wm_protocols(window):
+    return util.PropertyCookie(util.get_property_unchecked(window, 
+                                                           'WM_PROTOCOLS'))
 
-def set_wm_protocols(c, window, protocol_atoms):
+def set_wm_protocols(window, protocol_atoms):
     packed = struct.pack('I', transient_window)
     return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, window,
-                                    xcb.xproto.Atom.WM_TRANSIENT_FOR,
-                                    xcb.xproto.Atom.WINDOW, 32,
+                                    atoms.WM_TRANSIENT_FOR,
+                                    atoms.WINDOW, 32,
                                     1, packed)
 
-def set_wm_protocols_checked(c, window, protocol_atoms):
+def set_wm_protocols_checked(window, protocol_atoms):
     packed = struct.pack('I' * len(protocol_atoms), *protocol_atoms)
     return c.core.ChangePropertyChecked(xcb.xproto.PropMode.Replace, window,
-                                    util.get_atom(c, 'WM_PROTOCOLS'),
-                                    xcb.xproto.Atom.ATOM, 32,
-                                    len(protocol_atoms), packed)
+                                        atom('WM_PROTOCOLS'), atoms.ATOM, 32,
+                                        len(protocol_atoms), packed)
 
 # WM_COLORMAP_WINDOWS
 
-def get_wm_colormap_windows(c, window):
-    return util.PropertyCookie(
-        util.get_property(c, window, util.get_atom(c, 'WM_COLORMAP_WINDOWS')))
+def get_wm_colormap_windows(window):
+    return util.PropertyCookie(util.get_property(window, 'WM_COLORMAP_WINDOWS'))
 
-def get_wm_colormap_windows_unchecked(c, window):
-    return util.PropertyCookie(
-        util.get_property_unchecked(c, window,
-                                    util.get_atom(c, 'WM_COLORMAP_WINDOWS')))
+def get_wm_colormap_windows_unchecked(window):
+    cook = util.get_property_unchecked(window, 'WM_COLORMAP_WINDOWS')
+    return util.PropertyCookie(cook)
 
-def set_wm_colormap_windows(c, window, colormap_windows):
+def set_wm_colormap_windows(window, colormap_windows):
     packed = struct.pack('I' * len(colormap_windows), *colormap_windows)
     return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, window,
-                                    util.get_atom(c, 'WM_COLORMAP_WINDOWS'),
-                                    xcb.xproto.Atom.WINDOW, 32,
-                                    len(colormap_windows), packed)
+                                 atom('WM_COLORMAP_WINDOWS'), atoms.WINDOW, 32,
+                                 len(colormap_windows), packed)
 
-def set_wm_colormap_windows_checked(c, window, transient_window):
+def set_wm_colormap_windows_checked(window, transient_window):
     packed = struct.pack('I' * len(colormap_windows), *colormap_windows)
     return c.core.ChangePropertyChecked(xcb.xproto.PropMode.Replace, window,
-                                    util.get_atom(c, 'WM_COLORMAP_WINDOWS'),
-                                    xcb.xproto.Atom.WINDOW, 32,
-                                    len(colormap_windows), packed)
+                                        atom('WM_COLORMAP_WINDOWS'),
+                                        atoms.WINDOW, 32,
+                                        len(colormap_windows), packed)
 
 # WM_CLIENT_MACHINE
 
-def get_wm_client_machine(c, window):
-    return util.PropertyCookie(
-        util.get_property(c, window, xcb.xproto.Atom.WM_CLIENT_MACHINE))
+def get_wm_client_machine(window):
+    return util.PropertyCookie(util.get_property(window, 
+                                                 atoms.WM_CLIENT_MACHINE))
 
-def get_wm_client_machine_unchecked(c, window):
-    return util.PropertyCookie(
-        util.get_property_unchecked(c, window,
-                                    xcb.xproto.Atom.WM_CLIENT_MACHINE))
+def get_wm_client_machine_unchecked(window):
+    cook = util.get_property_unchecked(window, atoms.WM_CLIENT_MACHINE)
+    return util.PropertyCookie(cook)
 
-def set_wm_client_machine(c, window, client_machine):
+def set_wm_client_machine(window, client_machine):
     return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, window,
-                                    xcb.xproto.Atom.WM_CLIENT_MACHINE,
-                                    xcb.xproto.Atom.STRING, 8,
-                                    len(client_machine), client_machine)
+                                 atoms.WM_CLIENT_MACHINE, atoms.STRING, 8,
+                                 len(client_machine), client_machine)
 
-def set_wm_client_machine_checked(c, window, client_machine):
+def set_wm_client_machine_checked(window, client_machine):
     return c.core.ChangePropertyChecked(xcb.xproto.PropMode.Replace, window,
-                                    xcb.xproto.Atom.WM_CLIENT_MACHINE,
-                                    xcb.xproto.Atom.STRING, 8,
-                                    len(client_machine), client_machine)
+                                        atoms.WM_CLIENT_MACHINE,
+                                        atoms.STRING, 8,
+                                        len(client_machine), client_machine)
 
 # WM_STATE
 
@@ -429,27 +409,23 @@ class StateCookie(util.PropertyCookie):
             'icon': v[1]
         }
 
-def get_wm_state(c, window):
-    return StateCookie(
-        util.get_property(c, window, util.get_atom(c, 'WM_STATE')))
+def get_wm_state(window):
+    return StateCookie(util.get_property(window, 'WM_STATE'))
 
-def get_wm_state_unchecked(c, window):
-    return StateCookie(
-        util.get_property_unchecked(c, window, util.get_atom(c, 'WM_STATE')))
+def get_wm_state_unchecked(window):
+    return StateCookie(util.get_property_unchecked(window, 'WM_STATE'))
 
-def set_wm_state(c, window, state, icon):
+def set_wm_state(window, state, icon):
     packed = struct.pack('II', state, icon)
     return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, window,
-                                    util.get_atom(c, 'WM_STATE'),
-                                    util.get_atom(c, 'WM_STATE'), 32,
-                                    2, packed)
+                                 atom('WM_STATE'), atom('WM_STATE'), 32,
+                                 2, packed)
 
-def set_wm_state_checked(c, window, state, icon):
+def set_wm_state_checked(window, state, icon):
     packed = struct.pack('II', state, icon)
     return c.core.ChangePropertyChecked(xcb.xproto.PropMode.Replace, window,
-                                    util.get_atom(c, 'WM_STATE'),
-                                    util.get_atom(c, 'WM_STATE'), 32,
-                                    2, packed)
+                                        atom('WM_STATE'), atom('WM_STATE'), 32,
+                                        2, packed)
 
 # WM_ICON_SIZE
 
@@ -469,28 +445,26 @@ class IconSizeCookie(util.PropertyCookie):
             'height_inc': v[5]
         }
 
-def get_icon_size(c, window):
-    return IconSizeCookie(
-        util.get_property(c, window, xcb.xproto.Atom.WM_ICON_SIZE))
+def get_icon_size(window):
+    return IconSizeCookie(util.get_property(window, atoms.WM_ICON_SIZE))
 
-def get_icon_size_unchecked(c, window):
-    return IconSizeCookie(
-        util.get_property_unchecked(c, window, xcb.xproto.Atom.WM_ICON_SIZE))
+def get_icon_size_unchecked(window):
+    return IconSizeCookie(util.get_property_unchecked(window, 
+                                                      atoms.WM_ICON_SIZE))
 
-def set_icon_size(c, window, min_width=0, min_height=0, max_width=0,
+def set_icon_size(window, min_width=0, min_height=0, max_width=0,
                  max_height=0, width_inc=0, height_inc=0):
     packed = struct.pack('I' * 6, min_width, min_height, max_width, max_height,
                                   width_inc, height_inc)
     return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, window,
-                                    xcb.xproto.Atom.WM_ICON_SIZE,
-                                    xcb.xproto.Atom.WM_ICON_SIZE, 32,
-                                    6, packed)
+                                 atoms.WM_ICON_SIZE, atoms.WM_ICON_SIZE, 32,
+                                 6, packed)
 
-def set_icon_size_checked(c, window, min_width=0, min_height=0, max_width=0,
+def set_icon_size_checked(window, min_width=0, min_height=0, max_width=0,
                          max_height=0, width_inc=0, height_inc=0):
     packed = struct.pack('I' * 6, min_width, min_height, max_width, max_height,
                                   width_inc, height_inc)
     return c.core.ChangePropertyChecked(xcb.xproto.PropMode.Replace, window,
-                                    xcb.xproto.Atom.WM_ICON_SIZE,
-                                    xcb.xproto.Atom.WM_ICON_SIZE, 32,
-                                    6, packed)
+                                        atoms.WM_ICON_SIZE,
+                                        atoms.WM_ICON_SIZE, 32, 6, packed)
+

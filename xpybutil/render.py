@@ -1,3 +1,10 @@
+# I once used the help of this module to implement a basic compositing manager
+# using xpyb. It only did transparency, and not well. (Performance was actually
+# quite nice.) It's called pycompmgr.
+#
+# This is meant to be a very close translation to the corresponding xcb-util
+# module. Mostly because I lack a depp understanding of everything here.
+
 import xcb, xcb.xproto, xcb.render
 
 class PictFormat:
@@ -209,3 +216,4 @@ def find_standard_format(formats, format):
         standardFormats[format]['template'],
         0
     )
+

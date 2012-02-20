@@ -1,3 +1,13 @@
+"""
+A module that creates a dictionary mapping from an english string of a key,
+to a keysym (an X data type) in ``keysyms``. 
+
+The module also creates a reverse mapping called ``keysym_strings`` that maps
+a keysym to a **list** of english string versions of that keysym. (There are
+more string representations than there are keysyms.)
+
+This list is taken from Xlib.
+"""
 from collections import defaultdict
 
 keysyms = {
@@ -2008,6 +2018,7 @@ keysyms = {
     'braille_dots_12345678': 0x10028ff,
 }
 
-keycodes = defaultdict(list)
-for keysym in keysyms:
-    keycodes[keysyms[keysym]].append(keysym)
+keysym_strings = defaultdict(list)
+for keysym_string, keysym in keysyms.iteritems():
+    keysym_strings[keysym].append(keysym_string)
+
