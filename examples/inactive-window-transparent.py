@@ -1,4 +1,6 @@
 # Makes all inactive windows transparent and keeps the active window opaque.
+# This should be run in the background as a daemon like so:
+# python2 inactive-window-transparent.py
 
 # Range of values: 0 <= opacity <= 1
 # where 1 is fully opaque and 0 is completely invisible
