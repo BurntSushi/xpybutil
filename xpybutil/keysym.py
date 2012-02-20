@@ -245,7 +245,6 @@ def __run_keybind_callbacks(e):
         cb()
 
 def __regrab(changes):
-    print 'regrabbing!'
     for wid, mods, kc in __keybinds:
         if kc in changes:
             ungrab_key(wid, mods, kc)
