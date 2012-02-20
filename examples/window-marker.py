@@ -8,7 +8,7 @@ import xcb.xproto
 import xpybutil
 import xpybutil.event as event
 import xpybutil.ewmh as ewmh
-import xpybutil.keysym as keysym
+import xpybutil.keybind as keybind
 
 epilog = '''
 Using window-marker is exactly like using marks in vim. Namely, by pressing the
@@ -67,16 +67,16 @@ def start_get_letter(cb):
     global grabbing
 
     GS = xcb.xproto.GrabStatus
-    if keysym.grab_keyboard(xpybutil.root).status == GS.Success:
+    if keybind.grab_keyboard(xpybutil.root).status == GS.Success:
         grabbing = cb
 
 def cb_get_letter(e):
     global grabbing
 
     if grabbing is not None:
-        keysym.ungrab_keyboard()
-        sym = keysym.get_keysym(e.detail)
-        letter = keysym.get_keysym_string(sym)
+        keybind.ungrab_keyboard()
+        sym = keybind.get_keysym(e.detail)
+        letter = keybind.get_keysym_string(sym)
 
         if len(letter) == 1 and ord(letter) in range(ord('a'), ord('z') + 1):
             grabbing(letter.lower())
@@ -92,7 +92,7 @@ for key_str, fun_str in keybinds.iteritems():
         continue
 
     fun = globals()[fun_str]
-    if not keysym.bind_global_key('KeyPress', key_str, fun):
+    if not keybind.bind_global_key('KeyPress', key_str, fun):
         print >> sys.stderr, 'Could not bind %s to %s' % (key_str, fun_str)
 
 event.main()
