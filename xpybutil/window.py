@@ -22,14 +22,14 @@ def _get_geometry(win):
     return raw.x, raw.y, raw.width, raw.height
 
 def get_geometry(window, window_manager=None):
-    '''
+    """
     Returns the geometry of a window. This function will do its best to get
     the real geometry of a window; typically by inspecting the window's
     decorations if there are any.
 
     Since decorations are different for each window manager, you'll get the
     best possible results by passing a supported window manager in.
-    '''
+    """
 
     if window_manager is WindowManagers.KWin:
         p = util.get_parent_window(window)
@@ -38,13 +38,13 @@ def get_geometry(window, window_manager=None):
         return _get_geometry(util.get_parent_window(window))
 
 def moveresize(win, x=None, y=None, w=None, h=None, window_manager=None):
-    '''
+    """
     This function attempts to properly move/resize a window, accounting for
     its decorations.
 
     It doesn't rely upon _NET_FRAME_EXTENTS, but instead, uses the actual
     parent window to adjust the width and height.
-    '''
+    """
     import ewmh
 
     if window_manager is WindowManagers.KWin:

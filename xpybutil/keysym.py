@@ -5,7 +5,7 @@ import xcb.xproto as xproto
 
 from xpybutil import conn, root
 import event
-from keysymdef import keysyms, keycodes
+from keysymdef import keysyms, keysym_strings
 
 __kbmap = None
 __keysmods = None
@@ -62,8 +62,8 @@ def lookup_string(kstr):
     return None
 
 def lookup_keysym(keysym):
-    if keysym in keycodes:
-        return keycodes[keysym][0]
+    if keysym in keysym_strings:
+        return keysym_strings[keysym][0]
     return None
 
 def get_min_max_keycode():
@@ -90,7 +90,7 @@ def get_keysym(keycode, col=0, kbmap=None):
     return __kbmap.keysyms[ind]
 
 def get_keysym_string(keysym, col=0):
-    return keycodes[keysym][col]
+    return keysym_strings[keysym][col]
 
 def get_keycode(keysym):
     mn, mx = get_min_max_keycode()

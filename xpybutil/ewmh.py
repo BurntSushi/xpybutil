@@ -114,8 +114,8 @@ def get_supported():
     """
     Returns a list of hints supported by the window manager.
 
-    @return:        A list of atoms in the _NET_SUPPORTED property.
-    @rtype:         util.PropertyCookie (ATOM[]/32)
+    :return:        A list of atoms in the _NET_SUPPORTED property.
+    :rtype:         util.PropertyCookie (ATOM[]/32)
     """
     return util.PropertyCookie(util.get_property(root, '_NET_SUPPORTED'))
 
@@ -127,9 +127,9 @@ def set_supported(atoms):
     """
     Sets the list of hints supported by the window manager.
 
-    @param atoms:   A list of atom identifiers.
-    @type atoms:    ATOM[]/32
-    @rtype:         xcb.VoidCookie
+    :param atoms:   A list of atom identifiers.
+    :type atoms:    ATOM[]/32
+    :rtype:         xcb.VoidCookie
     """
     packed = struct.pack('I' * len(atoms), *atoms)
     return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, root,
@@ -148,8 +148,8 @@ def get_client_list():
     """
     Returns a list of windows managed by the window manager.
 
-    @return:        A list of window identifiers.
-    @rtype:         util.PropertyCookie (ATOM[]/32)
+    :return:        A list of window identifiers.
+    :rtype:         util.PropertyCookie (ATOM[]/32)
     """
     return util.PropertyCookie(util.get_property(root, '_NET_CLIENT_LIST'))
 
@@ -161,9 +161,9 @@ def set_client_list(windows):
     """
     Sets the list of windows managed by the window manager.
 
-    @param windows: A list of atom identifiers.
-    @type windows:  ATOM[]/32
-    @rtype:         xcb.VoidCookie
+    :param windows: A list of atom identifiers.
+    :type windows:  ATOM[]/32
+    :rtype:         xcb.VoidCookie
     """
     packed = struct.pack('I' * len(windows), *windows)
     return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, root,
@@ -182,8 +182,8 @@ def get_client_list_stacking():
     """
     Returns the window stacking order.
 
-    @return:        A list of window identifiers.
-    @rtype:         util.PropertyCookie (ATOM[]/32)
+    :return:        A list of window identifiers.
+    :rtype:         util.PropertyCookie (ATOM[]/32)
     """
     return util.PropertyCookie(util.get_property(root, 
                                                  '_NET_CLIENT_LIST_STACKING'))
@@ -196,9 +196,9 @@ def set_client_list_stacking(windows):
     """
     Sets the window stacking order.
 
-    @param windows: A list of atom identifiers.
-    @type windows:  ATOM[]/32
-    @rtype:         xcb.VoidCookie
+    :param windows: A list of atom identifiers.
+    :type windows:  ATOM[]/32
+    :rtype:         xcb.VoidCookie
     """
     packed = struct.pack('I' * len(windows), *windows)
     return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, root,
@@ -217,8 +217,8 @@ def get_number_of_desktops():
     """
     Returns the number of virtual desktops.
 
-    @return:        The number of desktops.
-    @rtype:         util.PropertyCookieSingle (CARDINAL/32)
+    :return:        The number of desktops.
+    :rtype:         util.PropertyCookieSingle (CARDINAL/32)
     """
     cook = util.get_property(root, '_NET_NUMBER_OF_DESKTOPS')
     return util.PropertyCookieSingle(cook)
@@ -231,9 +231,9 @@ def set_number_of_desktops(number_of_desktops):
     """
     Sets the number of desktops.
 
-    @param number_of_desktops:  The number of desktops.
-    @type number_of_desktops:   CARDINAL/32
-    @rtype:                     xcb.VoidCookie
+    :param number_of_desktops:  The number of desktops.
+    :type number_of_desktops:   CARDINAL/32
+    :rtype:                     xcb.VoidCookie
     """
     packed = struct.pack('I', number_of_desktops)
     return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, root,
@@ -250,9 +250,9 @@ def request_number_of_desktops(number_of_desktops):
     """
     Sends event to root window to set the number of desktops.
 
-    @param number_of_desktops:  The number of desktops.
-    @type number_of_desktops:   CARDINAL/32
-    @rtype:                     xcb.VoidCookie
+    :param number_of_desktops:  The number of desktops.
+    :type number_of_desktops:   CARDINAL/32
+    :rtype:                     xcb.VoidCookie
     """
     return revent(root, '_NET_NUMBER_OF_DESKTOPS', number_of_desktops)
 
@@ -274,13 +274,11 @@ class DesktopGeometryCookie(util.PropertyCookie):
         }
 
 def get_desktop_geometry():
-    """
-    Returns the desktop geometry.
+    """Returns the desktop geometry.
 
-    @return:        A desktop geometry dictionary.
-
+    :return:        A desktop geometry dictionary.
                     Keys: width, height
-    @rtype:         DesktopGeometryCookie (CARDINAL[2]/32)
+    :rtype:         DesktopGeometryCookie (CARDINAL[2]/32)
     """
     return DesktopGeometryCookie(util.get_property(root, 
                                                    '_NET_DESKTOP_GEOMETRY'))
@@ -293,11 +291,11 @@ def set_desktop_geometry(width, height):
     """
     Sets the desktop geometry.
 
-    @param width:               The width of the desktop.
-    @type width:                CARDINAL/32
-    @param height:              The height of the desktop.
-    @type height:               CARDINAL/32
-    @rtype:                     xcb.VoidCookie
+    :param width:               The width of the desktop.
+    :type width:                CARDINAL/32
+    :param height:              The height of the desktop.
+    :type height:               CARDINAL/32
+    :rtype:                     xcb.VoidCookie
     """
     packed = struct.pack('II', width, height)
     return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, root,
@@ -314,11 +312,11 @@ def request_desktop_geometry(width, height):
     """
     Sends event to root window to set the desktop geometry.
 
-    @param width:               The width of the desktop.
-    @type width:                CARDINAL/32
-    @param height:              The height of the desktop.
-    @type height:               CARDINAL/32
-    @rtype:                     xcb.VoidCookie
+    :param width:               The width of the desktop.
+    :type width:                CARDINAL/32
+    :param height:              The height of the desktop.
+    :type height:               CARDINAL/32
+    :rtype:                     xcb.VoidCookie
     """
     return revent(root, '_NET_NUMBER_OF_DESKTOPS', width, height)
 
@@ -347,10 +345,10 @@ def get_desktop_viewport():
     """
     Returns x,y pairs defining the top-left corner of each desktop's viewport.
 
-    @return:        A list of desktop viewport dictionaries.
+    :return:        A list of desktop viewport dictionaries.
 
                     Keys: x, y
-    @rtype:         DesktopViewportCookie (CARDINAL[][2]/32)
+    :rtype:         DesktopViewportCookie (CARDINAL[][2]/32)
     """
     return DesktopViewportCookie(util.get_property(root, 
                                                    '_NET_DESKTOP_VIEWPORT'))
@@ -381,9 +379,9 @@ def set_desktop_viewport(pairs):
     Which would set desktop 0's viewport top-left corner to 0,0 and desktop
     1's viewport top-left corner to 500,500.
 
-    @param pairs:               A list of x,y dictionary pairs.
-    @type pairs:                CARDINAL[][2]/32
-    @rtype:                     xcb.VoidCookie
+    :param pairs:               A list of x,y dictionary pairs.
+    :type pairs:                CARDINAL[][2]/32
+    :rtype:                     xcb.VoidCookie
     """
     flatten = []
     for pair in pairs:
@@ -410,11 +408,11 @@ def request_desktop_viewport(x, y):
     """
     Sends event to root window to set the viewport position of current desktop.
 
-    @param x:       The x position of the top-left corner.
-    @type x:        CARDINAL/32
-    @param y:       The y position of the top-left corner.
-    @type y:        CARDINAL/32
-    @rtype:         xcb.VoidCookie
+    :param x:       The x position of the top-left corner.
+    :type x:        CARDINAL/32
+    :param y:       The y position of the top-left corner.
+    :type y:        CARDINAL/32
+    :rtype:         xcb.VoidCookie
     """
     return revent(root, '_NET_DESKTOP_VIEWPORT', x, y)
 
@@ -427,8 +425,8 @@ def get_current_desktop():
     """
     Returns the current desktop number.
 
-    @return:        The index of the current desktop.
-    @rtype:         util.PropertyCookieSingle (CARDINAL/32)
+    :return:        The index of the current desktop.
+    :rtype:         util.PropertyCookieSingle (CARDINAL/32)
     """
     return util.PropertyCookieSingle(util.get_property(root,
                                                        '_NET_CURRENT_DESKTOP'))
@@ -441,9 +439,9 @@ def set_current_desktop(current_desktop):
     """
     Sets the current desktop number.
 
-    @param current_desktop:     The current desktop index.
-    @type current_desktop:      CARDINAL/32
-    @rtype:                     xcb.VoidCookie
+    :param current_desktop:     The current desktop index.
+    :type current_desktop:      CARDINAL/32
+    :rtype:                     xcb.VoidCookie
     """
     packed = struct.pack('I', current_desktop)
     return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, root,
@@ -461,10 +459,10 @@ def request_current_desktop(desktop_number,
     """
     Sends event to root window to set the current desktop.
 
-    @param desktop_number:      The current desktop index.
-    @type desktop_number:       CARDINAL/32
-    @type timestamp:            Milliseconds.
-    @rtype:                     xcb.VoidCookie
+    :param desktop_number:      The current desktop index.
+    :type desktop_number:       CARDINAL/32
+    :type timestamp:            Milliseconds.
+    :rtype:                     xcb.VoidCookie
     """
     return revent(root, '_NET_CURRENT_DESKTOP', desktop_number, timestamp)
 
@@ -482,8 +480,8 @@ def get_visible_desktops():
     The first desktop is on Xinerama screen 0, the second is on Xinerama
     screen 1, etc.
 
-    @return:        A list of visible desktops.
-    @rtype:         util.PropertyCookie (ATOM[]/32)
+    :return:        A list of visible desktops.
+    :rtype:         util.PropertyCookie (ATOM[]/32)
     """
     return util.PropertyCookie(util.get_property(root, '_NET_VISIBLE_DESKTOPS'))
 
@@ -495,9 +493,9 @@ def set_visible_desktops(desktops):
     """
     Sets the list of visible desktops.
 
-    @param desktops: A list of desktops.
-    @type desktops:  ATOM[]/32
-    @rtype:          xcb.VoidCookie
+    :param desktops: A list of desktops.
+    :type desktops:  ATOM[]/32
+    :rtype:          xcb.VoidCookie
     """
     packed = struct.pack('I' * len(desktops), *desktops)
     return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, root,
@@ -516,8 +514,8 @@ def get_desktop_names():
     """
     Returns a list of names of the virtual desktops.
 
-    @return:        A list of virutal desktop names.
-    @rtype:         util.PropertyCookie (UTF8_STRING[])
+    :return:        A list of virutal desktop names.
+    :rtype:         util.PropertyCookie (UTF8_STRING[])
     """
     return util.PropertyCookie(util.get_property(root, '_NET_DESKTOP_NAMES'))
 
@@ -529,9 +527,9 @@ def set_desktop_names(desktop_names):
     """
     Sets the current list of desktop names.
 
-    @param desktop_names:   A list of new desktop names.
-    @type desktop_names:    UTF8_STRING[]
-    @rtype:                 xcb.VoidCookie
+    :param desktop_names:   A list of new desktop names.
+    :type desktop_names:    UTF8_STRING[]
+    :rtype:                 xcb.VoidCookie
     """
     # Null terminate the list of desktop names
     nullterm = []
@@ -562,8 +560,8 @@ def get_active_window():
     """
     Returns the identifier of the currently active window.
 
-    @return:        The window ID of the active window.
-    @rtype:         util.PropertyCookieSingle (WINDOW/32)
+    :return:        The window ID of the active window.
+    :rtype:         util.PropertyCookieSingle (WINDOW/32)
     """
     return util.PropertyCookieSingle(util.get_property(root, 
                                                        '_NET_ACTIVE_WINDOW'))
@@ -576,9 +574,9 @@ def set_active_window(active):
     """
     Sets the identifier of the currently active window.
 
-    @param active:  The identifier of the window that is active.
-    @type active:   WINDOW/32
-    @rtype:         xcb.VoidCookie
+    :param active:  The identifier of the window that is active.
+    :type active:   WINDOW/32
+    :rtype:         xcb.VoidCookie
     """
     packed = struct.pack('I', active)
     return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, root,
@@ -597,12 +595,12 @@ def request_active_window(active, source=1,
     """
     Sends event to root window to set the active window.
 
-    @param active:      The window ID of the window to make active.
-    @type active:       WINDOW/32
-    @param source:      The source indication.
-    @type timestamp:    Milliseconds
-    @param current:     Client's active toplevel window
-    @rtype:             xcb.VoidCookie
+    :param active:      The window ID of the window to make active.
+    :type active:       WINDOW/32
+    :param source:      The source indication.
+    :type timestamp:    Milliseconds
+    :param current:     Client's active toplevel window
+    :rtype:             xcb.VoidCookie
     """
     return revent(active, '_NET_ACTIVE_WINDOW', source, timestamp, current)
 
@@ -636,10 +634,10 @@ def get_workarea():
     """
     Returns the x, y, width and height defining the desktop workarea.
 
-    @return:        A list of workarea dictionaries.
+    :return:        A list of workarea dictionaries.
 
                     Keys: x, y, width, height
-    @rtype:         util.WorkareaCookie (CARDINAL[][4]/32)
+    :rtype:         util.WorkareaCookie (CARDINAL[][4]/32)
     """
     return WorkareaCookie(util.get_property(root, '_NET_WORKAREA'))
 
@@ -650,9 +648,9 @@ def set_workarea(workareas):
     """
     Sets the workarea (x, y, width, height) for each desktop.
 
-    @param workareas:   A list of x,y,width,height dictionaries.
-    @type workareas:    CARDINAL[][4]/32
-    @rtype:             xcb.VoidCookie
+    :param workareas:   A list of x,y,width,height dictionaries.
+    :type workareas:    CARDINAL[][4]/32
+    :rtype:             xcb.VoidCookie
     """
     flatten = []
     for workarea in workareas:
@@ -685,10 +683,10 @@ def get_supporting_wm_check(wid):
     """
     Returns the identifier of the child window created by the window manager.
 
-    @param wid:     The identifier of the window with the property.
-    @type wid:      WINDOW/32
-    @return:        The window ID of the child window.
-    @rtype:         util.PropertyCookieSingle (WINDOW/32)
+    :param wid:     The identifier of the window with the property.
+    :type wid:      WINDOW/32
+    :return:        The window ID of the child window.
+    :rtype:         util.PropertyCookieSingle (WINDOW/32)
     """
     cook = util.get_property(wid, '_NET_SUPPORTING_WM_CHECK')
     return util.PropertyCookieSingle(cook)
@@ -701,11 +699,11 @@ def set_supporting_wm_check(wid, child):
     """
     Sets the identifier of the child window created by the window manager.
 
-    @param wid:     The identifier of the window with the property.
-    @type wid:      WINDOW/32
-    @param child:   The identifier of the child window.
-    @type child:    WINDOW/32
-    @rtype:         xcb.VoidCookie
+    :param wid:     The identifier of the window with the property.
+    :type wid:      WINDOW/32
+    :param child:   The identifier of the child window.
+    :type child:    WINDOW/32
+    :rtype:         xcb.VoidCookie
     """
     packed = struct.pack('I', child)
     return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, wid,
@@ -724,8 +722,8 @@ def get_virtual_roots():
     """
     Returns a list of identifiers for the virtual root windows.
 
-    @return:        A list of window identifiers for the virtual root windows.
-    @rtype:         util.PropertyCookie (WINDOW[]/32)
+    :return:        A list of window identifiers for the virtual root windows.
+    :rtype:         util.PropertyCookie (WINDOW[]/32)
     """
     return util.PropertyCookie(util.get_property(root, '_NET_VIRTUAL_ROOTS'))
 
@@ -737,9 +735,9 @@ def set_virtual_roots(vroots):
     """
     Sets the identifiers of the virtual root windows.
 
-    @param vroots:  A list of window identifiers for the virtual root windows.
-    @type vroots:   WINDOW[]/32
-    @rtype:         xcb.VoidCookie
+    :param vroots:  A list of window identifiers for the virtual root windows.
+    :type vroots:   WINDOW[]/32
+    :rtype:         xcb.VoidCookie
     """
     packed = struct.pack('I' * len(vroots), *vroots)
     return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, root,
@@ -772,10 +770,10 @@ def get_desktop_layout():
     """
     Returns the desktop layout.
 
-    @return:        A desktop layout dictionary.
+    :return:        A desktop layout dictionary.
 
                     Keys: orientation, columns, rows, starting_corner
-    @rtype:         DesktopLayoutCookie (CARDINAL[4]/32)
+    :rtype:         DesktopLayoutCookie (CARDINAL[4]/32)
     """
     return DesktopLayoutCookie(util.get_property(root, '_NET_DESKTOP_LAYOUT'))
 
@@ -788,16 +786,16 @@ def set_desktop_layout(orientation, columns, rows,
     """
     Sets the desktop layout.
 
-    @param orientation:         Horizontal or vertical orientation.
-    @type orientation:          CARDINAL/32
-    @param columns:             Number of columns.
-    @type columns:              CARDINAL/32
-    @param rows:                Number of rows.
-    @type rows:                 CARDINAL/32
-    @param starting_corner:     Top left, top right, bottom right, or bottom
+    :param orientation:         Horizontal or vertical orientation.
+    :type orientation:          CARDINAL/32
+    :param columns:             Number of columns.
+    :type columns:              CARDINAL/32
+    :param rows:                Number of rows.
+    :type rows:                 CARDINAL/32
+    :param starting_corner:     Top left, top right, bottom right, or bottom
                                 left may be specified as a starting corner.
-    @type starting_corner:      CARDINAL/32
-    @rtype:                     xcb.VoidCookie
+    :type starting_corner:      CARDINAL/32
+    :rtype:                     xcb.VoidCookie
     """
     packed = struct.pack('IIII', orientation, columns, rows, starting_corner)
     return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, root,
@@ -828,9 +826,9 @@ def get_showing_desktop():
     """
     Returns whether the window manager is in "showing the desktop" mode.
 
-    @return:        Boolean whether the window manager is in "showing desktop"
+    :return:        Boolean whether the window manager is in "showing desktop"
                     mode or not.
-    @rtype:         ShowingDesktopCookie (CARDINAL/32)
+    :rtype:         ShowingDesktopCookie (CARDINAL/32)
     """
     return ShowingDesktopCookie(util.get_property(root, '_NET_SHOWING_DESKTOP'))
 
@@ -842,10 +840,10 @@ def set_showing_desktop(showing_desktop):
     """
     Sets whether the window is in "showing the desktop" mode.
 
-    @param showing_desktop:  Boolean whether the window manager is in "showing
+    :param showing_desktop:  Boolean whether the window manager is in "showing
                              desktop" mode or not.
-    @type showing_desktop:   CARDINAL/32
-    @rtype:                  xcb.VoidCookie
+    :type showing_desktop:   CARDINAL/32
+    :rtype:                  xcb.VoidCookie
     """
     return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, root,
                                  atom('_NET_SHOWING_DESKTOP'), CARDINAL, 32, 1,
@@ -860,10 +858,10 @@ def request_showing_desktop(showing_desktop):
     """
     Sends event to root window to put window manager in "showing desktop" mode.
 
-    @param showing_desktop:  Boolean whether the window manager is in "showing
+    :param showing_desktop:  Boolean whether the window manager is in "showing
                              desktop" mode or not.
-    @type showing_desktop:   CARDINAL/32
-    @rtype:                  xcb.VoidCookie
+    :type showing_desktop:   CARDINAL/32
+    :rtype:                  xcb.VoidCookie
     """
     return revent(root, '_NET_SHOWING_DESKTOP', showing_desktop)
 
@@ -877,10 +875,10 @@ def request_close_window(window, timestamp=xcb.xproto.Time.CurrentTime,
     """
     Sends event to root window to close a window.
 
-    @param window:      A window identifier.
-    @param source:      The source indication.
-    @type timestamp:    Milliseconds
-    @rtype:             xcb.VoidCookie
+    :param window:      A window identifier.
+    :param source:      The source indication.
+    :type timestamp:    Milliseconds
+    :rtype:             xcb.VoidCookie
     """
     return revent(window, '_NET_CLOSE_WINDOW', timestamp, source)
 
@@ -896,17 +894,17 @@ def request_moveresize_window(window, x=None, y=None, width=None,
     """
     Sends event to root window to move/resize a window.
 
-    @param window:      A window identifier.
-    @param x:           x coordinate
-    @param y:           y coordinate
-    @param width:       Width
-    @param height:      Height
-    @param gravity:     Should be one of NorthWest, North, NorthEast, West,
+    :param window:      A window identifier.
+    :param x:           x coordinate
+    :param y:           y coordinate
+    :param width:       Width
+    :param height:      Height
+    :param gravity:     Should be one of NorthWest, North, NorthEast, West,
                         Center, East, SouthWest, South, SouthEast, and Static.
                         If set to 0, the window manager should use the default
                         gravity for the window.
-    @param source:      The source indication.
-    @rtype:             xcb.VoidCookie
+    :param source:      The source indication.
+    :rtype:             xcb.VoidCookie
     """
     flags = gravity
     flags |= source << 12
@@ -947,8 +945,8 @@ def request_wm_moveresize(window, direction, x_root=0, y_root=0,
     """
     Sends event to root window to initiate window movement or resizing.
 
-    @param window:      A window identifier.
-    @param direction:   Whether it is moving or resizing, and if resizing,
+    :param window:      A window identifier.
+    :param direction:   Whether it is moving or resizing, and if resizing,
                         the direction. Can be one of the following flags:
 
                         _NET_WM_MOVERESIZE_SIZE_TOPLEFT         = 0
@@ -974,12 +972,12 @@ def request_wm_moveresize(window, direction, x_root=0, y_root=0,
                         _NET_WM_MOVERESIZE_MOVE_KEYBOARD        = 10
 
                         _NET_WM_MOVERESIZE_CANCEL               = 11
-    @param x_root:      x coordinate of the pointer.
-    @param y_root:      y coordinate of the pointer.
-    @param button:      Which button was pressed, if a mouse button was used
+    :param x_root:      x coordinate of the pointer.
+    :param y_root:      y coordinate of the pointer.
+    :param button:      Which button was pressed, if a mouse button was used
                         to initiate this request.
-    @param source:      The source indication.
-    @rtype:             xcb.VoidCookie
+    :param source:      The source indication.
+    :rtype:             xcb.VoidCookie
     """
     return revent(window, '_NET_WM_MOVERESIZE',
                   x_root, y_root, direction, button, source)
@@ -996,12 +994,12 @@ def request_restack_window(window, stack_mode=xcb.xproto.StackMode.Above,
     """
     Sends event to root window to restack a window.
 
-    @param window:      A window identifier.
-    @param stack_mode:  Stacking mode of window. Can be one of the following
+    :param window:      A window identifier.
+    :param stack_mode:  Stacking mode of window. Can be one of the following
                         flags: Above, Below, TopIf, BottomIf, Opposite
-    @param sibling:     A sibling window identifier.
-    @param source:      The source indication.
-    @rtype:             xcb.VoidCookie
+    :param sibling:     A sibling window identifier.
+    :param source:      The source indication.
+    :rtype:             xcb.VoidCookie
     """
     return revent(window, '_NET_RESTACK_WINDOW', source, sibling, stack_mode)
 
@@ -1017,8 +1015,8 @@ def request_request_frame_extents(window):
     """
     Sends event to root window ask the WM to estimate the frame extents.
 
-    @param window:      A window identifier.
-    @rtype:             xcb.VoidCookie
+    :param window:      A window identifier.
+    :rtype:             xcb.VoidCookie
     """
     return revent(window, '_NET_REQUEST_FRAME_EXTENTS')
 
@@ -1031,9 +1029,9 @@ def get_wm_name(window):
     """
     Get the title of a window.
 
-    @param window:  A window identifier.
-    @return:        The window's title.
-    @rtype:         util.PropertyCookie (UTF8_STRING)
+    :param window:  A window identifier.
+    :return:        The window's title.
+    :rtype:         util.PropertyCookie (UTF8_STRING)
     """
     return util.PropertyCookie(util.get_property(window, '_NET_WM_NAME'))
 
@@ -1045,9 +1043,9 @@ def set_wm_name(window, wm_name):
     """
     Sets the title of a window.
 
-    @param window:  A window identifier.
-    @param wm_name: The title of the window.
-    @rtype:         xcb.VoidCookie
+    :param window:  A window identifier.
+    :param wm_name: The title of the window.
+    :rtype:         xcb.VoidCookie
     """
     return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, window,
                                  atom('_NET_WM_NAME'),
@@ -1065,9 +1063,9 @@ def get_wm_visible_name(window):
     """
     Get the visible title of a window.
 
-    @param window:  A window identifier.
-    @return:        The window's visible title.
-    @rtype:         util.PropertyCookie (UTF8_STRING)
+    :param window:  A window identifier.
+    :return:        The window's visible title.
+    :rtype:         util.PropertyCookie (UTF8_STRING)
     """
     return util.PropertyCookie(util.get_property(window, 
                                                  '_NET_WM_VISIBLE_NAME'))
@@ -1080,9 +1078,9 @@ def set_wm_visible_name(window, wm_name):
     """
     Sets the visible title of a window.
 
-    @param window:  A window identifier.
-    @param wm_name: The title of the window.
-    @rtype:         xcb.VoidCookie
+    :param window:  A window identifier.
+    :param wm_name: The title of the window.
+    :rtype:         xcb.VoidCookie
     """
     return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, window,
                                  atom('_NET_WM_VISIBLE_NAME'),
@@ -1100,9 +1098,9 @@ def get_wm_icon_name(window):
     """
     Get the icon name of a window.
 
-    @param window:  A window identifier.
-    @return:        The window's icon name.
-    @rtype:         util.PropertyCookie (UTF8_STRING)
+    :param window:  A window identifier.
+    :return:        The window's icon name.
+    :rtype:         util.PropertyCookie (UTF8_STRING)
     """
     return util.PropertyCookie(util.get_property(window, '_NET_WM_ICON_NAME'))
 
@@ -1114,9 +1112,9 @@ def set_wm_icon_name(window, icon_name):
     """
     Sets the icon name of a window.
 
-    @param window:      A window identifier.
-    @param icon_name:   The icon name of the window.
-    @rtype:             xcb.VoidCookie
+    :param window:      A window identifier.
+    :param icon_name:   The icon name of the window.
+    :rtype:             xcb.VoidCookie
     """
     return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, window,
                                  atom('_NET_WM_ICON_NAME'), atom('UTF8_STRING'), 
@@ -1134,9 +1132,9 @@ def get_wm_visible_icon_name(window):
     """
     Get the visible icon name of a window.
 
-    @param window:  A window identifier.
-    @return:        The window's visible icon name.
-    @rtype:         util.PropertyCookie (UTF8_STRING)
+    :param window:  A window identifier.
+    :return:        The window's visible icon name.
+    :rtype:         util.PropertyCookie (UTF8_STRING)
     """
     return util.PropertyCookie(util.get_property(window, 
                                                  '_NET_WM_VISIBLE_ICON_NAME'))
@@ -1149,9 +1147,9 @@ def set_wm_visible_icon_name(window, icon_name):
     """
     Sets the visible icon name of a window.
 
-    @param window:      A window identifier.
-    @param icon_name:   The icon name of the window.
-    @rtype:             xcb.VoidCookie
+    :param window:      A window identifier.
+    :param icon_name:   The icon name of the window.
+    :rtype:             xcb.VoidCookie
     """
     return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, window,
                                  atom('_NET_WM_VISIBLE_ICON_NAME'),
@@ -1182,9 +1180,9 @@ def get_wm_window_opacity(window):
     N.B. If your window manager uses decorations, you'll typically want to pass
     your client's *parent* window to this function.
 
-    @param window:  A window identifier.
-    @return:        An opacity percentage between 0 and 1 (inclusive)
-    @rtype:         util.PropertyCookieSingle (CARDINAL/32)
+    :param window:  A window identifier.
+    :return:        An opacity percentage between 0 and 1 (inclusive)
+    :rtype:         util.PropertyCookieSingle (CARDINAL/32)
     """
     return OpacityCookieSingle(util.get_property(window, 
                                                  '_NET_WM_WINDOW_OPACITY'))
@@ -1200,12 +1198,12 @@ def set_wm_window_opacity(window, opacity):
     N.B. If your window manager uses decorations, you'll typically want to pass
     your client's *parent* window to this function.
 
-    @param window:  A window identifier.
-    @param opacity: A float between 0 and 1 inclusive.
+    :param window:  A window identifier.
+    :param opacity: A float between 0 and 1 inclusive.
 
                     0 is completely transparent and 1 is completely opaque.
-    @type opacity:  CARDINAL/32
-    @rtype:         xcb.VoidCookie
+    :type opacity:  CARDINAL/32
+    :rtype:         xcb.VoidCookie
     """
     assert 0 <= opacity <= 1
     packed = struct.pack('I', int(opacity * 0xffffffff))
@@ -1226,9 +1224,9 @@ def get_wm_desktop(window):
     """
     Get the desktop index of the window.
 
-    @param window:  A window identifier.
-    @return:        The window's virtual desktop index.
-    @rtype:         util.PropertyCookieSingle (CARDINAL/32)
+    :param window:  A window identifier.
+    :return:        The window's virtual desktop index.
+    :rtype:         util.PropertyCookieSingle (CARDINAL/32)
     """
     return util.PropertyCookieSingle(util.get_property(window, 
                                                        '_NET_WM_DESKTOP'))
@@ -1241,10 +1239,10 @@ def set_wm_desktop(window, desktop):
     """
     Sets the desktop index of the window.
 
-    @param window:  A window identifier.
-    @param desktop: A desktop index.
-    @type desktop:  CARDINAL/32
-    @rtype:         xcb.VoidCookie
+    :param window:  A window identifier.
+    :param desktop: A desktop index.
+    :type desktop:  CARDINAL/32
+    :rtype:         xcb.VoidCookie
     """
     return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, window,
                                  atom('_NET_WM_DESKTOP'),
@@ -1259,11 +1257,11 @@ def request_wm_desktop(window, desktop, source=1):
     """
     Sends an event to root window to change the desktop of the window.
 
-    @param window:  A window identifier.
-    @param desktop: A desktop index.
-    @type desktop:  CARDINAL/32
-    @param source:  The source indication.
-    @rtype:         xcb.VoidCookie
+    :param window:  A window identifier.
+    :param desktop: A desktop index.
+    :type desktop:  CARDINAL/32
+    :param source:  The source indication.
+    :rtype:         xcb.VoidCookie
     """
     return revent(window, '_NET_WM_DESKTOP', desktop, source)
 
@@ -1276,9 +1274,9 @@ def get_wm_window_type(window):
     """
     Get a list of atoms representing the type of the window.
 
-    @param window:  A window identifier.
-    @return:        A list of atoms corresponding to this window's type.
-    @rtype:         util.PropertyCookie (ATOM[]/32)
+    :param window:  A window identifier.
+    :return:        A list of atoms corresponding to this window's type.
+    :rtype:         util.PropertyCookie (ATOM[]/32)
     """
     return util.PropertyCookie(util.get_property(window, '_NET_WM_WINDOW_TYPE'))
 
@@ -1290,10 +1288,10 @@ def set_wm_window_type(window, types):
     """
     Sets the list of atoms representing this window's type.
 
-    @param window:  A window identifier.
-    @param types:   A list of window type atoms.
-    @type types:    ATOM[]/32
-    @rtype:         xcb.VoidCookie
+    :param window:  A window identifier.
+    :param types:   A list of window type atoms.
+    :type types:    ATOM[]/32
+    :rtype:         xcb.VoidCookie
     """
     packed = struct.pack('I' * len(types), *types)
     return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, window,
@@ -1312,9 +1310,9 @@ def get_wm_state(window):
     """
     Get a list of atoms representing the state of the window.
 
-    @param window:  A window identifier.
-    @return:        A list of atoms corresponding to this window's state.
-    @rtype:         util.PropertyCookie (ATOM[]/32)
+    :param window:  A window identifier.
+    :return:        A list of atoms corresponding to this window's state.
+    :rtype:         util.PropertyCookie (ATOM[]/32)
     """
     return util.PropertyCookie(util.get_property(window, '_NET_WM_STATE'))
 
@@ -1326,10 +1324,10 @@ def set_wm_state(window, states):
     """
     Sets the list of atoms representing this window's state.
 
-    @param window:  A window identifier.
-    @param states:  A list of window state atoms.
-    @type states:   ATOM[]/32
-    @rtype:         xcb.VoidCookie
+    :param window:  A window identifier.
+    :param states:  A list of window state atoms.
+    :type states:   ATOM[]/32
+    :rtype:         xcb.VoidCookie
     """
     packed = struct.pack('I' * len(states), *states)
     return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, window,
@@ -1346,18 +1344,18 @@ def request_wm_state(window, action, first, second=0, source=1):
     """
     Sends an event to root window to change the state of the window.
 
-    @param window:  A window identifier.
-    @param action:  The kind of state action to perform. I tshould be one
+    :param window:  A window identifier.
+    :param action:  The kind of state action to perform. I tshould be one
                     of the following flags:
 
                     _NET_WM_STATE_REMOVE    = 0
                     _NET_WM_STATE_ADD       = 1
                     _NET_WM_STATE_TOGGLE    = 2
-    @param first:   The first property to be changed.
-    @param second:  The second property to be changed (should be 0 if only
+    :param first:   The first property to be changed.
+    :param second:  The second property to be changed (should be 0 if only
                     one property is being changed).
-    @param source:  The source indication.
-    @rtype:         xcb.VoidCookie
+    :param source:  The source indication.
+    :rtype:         xcb.VoidCookie
     """
     return revent(window, '_NET_WM_STATE', action, first, second, source)
 
@@ -1371,10 +1369,10 @@ def get_wm_allowed_actions(window):
     """
     Get a list of atoms representing the WM supported actions on a window.
 
-    @param window:  A window identifier.
-    @return:        A list of atoms corresponding to this window's supported
+    :param window:  A window identifier.
+    :return:        A list of atoms corresponding to this window's supported
                     actions through the window manager.
-    @rtype:         util.PropertyCookie (ATOM[]/32)
+    :rtype:         util.PropertyCookie (ATOM[]/32)
     """
     return util.PropertyCookie(util.get_property(window, 
                                                  '_NET_WM_ALLOWED_ACTIONS'))
@@ -1387,10 +1385,10 @@ def set_wm_allowed_actions(window, actions):
     """
     Sets the list of atoms representing the WM supported actions on a window.
 
-    @param window:  A window identifier.
-    @param actions:  A list of allowable action atoms.
-    @type actions:   ATOM[]/32
-    @rtype:         xcb.VoidCookie
+    :param window:  A window identifier.
+    :param actions:  A list of allowable action atoms.
+    :type actions:   ATOM[]/32
+    :rtype:         xcb.VoidCookie
     """
     packed = struct.pack('I' * len(actions), *actions)
     return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, window,
@@ -1423,11 +1421,11 @@ def get_wm_strut(window):
     """
     Returns the struts for a window.
 
-    @param window:  A window identifier.
-    @return:        A strut dictionary.
+    :param window:  A window identifier.
+    :return:        A strut dictionary.
 
                     Keys: left, right, top, bottom
-    @rtype:         StrutCookie (CARDINAL[4]/32)
+    :rtype:         StrutCookie (CARDINAL[4]/32)
     """
     return StrutCookie(util.get_property(window, '_NET_WM_STRUT'))
 
@@ -1438,16 +1436,16 @@ def set_wm_strut(window, left, right, top, bottom):
     """
     Sets the struts for a window.
 
-    @param window:  A window identifier.
-    @param left:    Width of area at left side of screen.
-    @type left:     CARDINAL/32
-    @param right:   Width of area at right side of screen.
-    @type right:    CARDINAL/32
-    @param top:     Height of area at top side of screen.
-    @type top:      CARDINAL/32
-    @param bottom:  Height of area at bottom side of screen.
-    @type bottom:   CARDINAL/32
-    @rtype:         xcb.VoidCookie
+    :param window:  A window identifier.
+    :param left:    Width of area at left side of screen.
+    :type left:     CARDINAL/32
+    :param right:   Width of area at right side of screen.
+    :type right:    CARDINAL/32
+    :param top:     Height of area at top side of screen.
+    :type top:      CARDINAL/32
+    :param bottom:  Height of area at bottom side of screen.
+    :type bottom:   CARDINAL/32
+    :rtype:         xcb.VoidCookie
     """
     packed = struct.pack('IIII', left, right, top, bottom)
     return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, window,
@@ -1487,13 +1485,13 @@ def get_wm_strut_partial(window):
     """
     Returns the partial struts for a window.
 
-    @param window:  A window identifier.
-    @return:        A strut dictionary.
+    :param window:  A window identifier.
+    :return:        A strut dictionary.
 
                     Keys: left, right, top, bottom, left_start_y, left_end_y,
                     right_start_y, right_end_y, top_start_x, top_end_x,
                     bottom_start_x, bottom_end_x
-    @rtype:         StrutPartialCookie (CARDINAL[12]/32)
+    :rtype:         StrutPartialCookie (CARDINAL[12]/32)
     """
     return StrutPartialCookie(util.get_property(window, 
                                                 '_NET_WM_STRUT_PARTIAL'))
@@ -1508,24 +1506,24 @@ def set_wm_strut_partial(window, left, right, top, bottom, left_start_y,
     """
     Sets the partial struts for a window.
 
-    @param window:          A window identifier.
-    @param left:            Width of area at left side of screen.
-    @type left:             CARDINAL/32
-    @param right:           Width of area at right side of screen.
-    @type right:            CARDINAL/32
-    @param top:             Height of area at top side of screen.
-    @type top:              CARDINAL/32
-    @param bottom:          Height of area at bottom side of screen.
-    @type bottom:           CARDINAL/32
-    @param left_start_y:
-    @param left_end_y:
-    @param right_start_y:
-    @param right_end_y:
-    @param top_start_x:
-    @param top_end_x:
-    @param bottom_start_x:
-    @param bottom_end_x:
-    @rtype:                 xcb.VoidCookie
+    :param window:          A window identifier.
+    :param left:            Width of area at left side of screen.
+    :type left:             CARDINAL/32
+    :param right:           Width of area at right side of screen.
+    :type right:            CARDINAL/32
+    :param top:             Height of area at top side of screen.
+    :type top:              CARDINAL/32
+    :param bottom:          Height of area at bottom side of screen.
+    :type bottom:           CARDINAL/32
+    :param left_start_y:
+    :param left_end_y:
+    :param right_start_y:
+    :param right_end_y:
+    :param top_start_x:
+    :param top_end_x:
+    :param bottom_start_x:
+    :param bottom_end_x:
+    :rtype:                 xcb.VoidCookie
     """
     packed = struct.pack('I' * 12, left, right, top, bottom, left_start_y,
                          left_end_y, right_start_y, right_end_y, top_start_x,
@@ -1565,11 +1563,11 @@ def get_wm_icon_geometry(window):
     """
     Returns the icon geometry for a window.
 
-    @param window:  A window identifier.
-    @return:        An icon geometry dictionary.
+    :param window:  A window identifier.
+    :return:        An icon geometry dictionary.
 
                     Keys: x, y, width, height
-    @rtype:         IconGeometryCookie (CARDINAL[4]/32)
+    :rtype:         IconGeometryCookie (CARDINAL[4]/32)
     """
     return IconGeometryCookie(util.get_property(window, 
                                                 '_NET_WM_ICON_GEOMETRY'))
@@ -1582,16 +1580,16 @@ def set_wm_icon_geometry(window, x, y, width, height):
     """
     Sets the icon geometry for a window.
 
-    @param window:  A window identifier.
-    @param x:       x coordinate of icon area.
-    @type x:        CARDINAL/32
-    @param y:       y coordinate of icon area.
-    @type y:        CARDINAL/32
-    @param width:   Width of icon area.
-    @type width:    CARDINAL/32
-    @param height:  Height of icon area.
-    @type height:   CARDINAL/32
-    @rtype:         xcb.VoidCookie
+    :param window:  A window identifier.
+    :param x:       x coordinate of icon area.
+    :type x:        CARDINAL/32
+    :param y:       y coordinate of icon area.
+    :type y:        CARDINAL/32
+    :param width:   Width of icon area.
+    :type width:    CARDINAL/32
+    :param height:  Height of icon area.
+    :type height:   CARDINAL/32
+    :rtype:         xcb.VoidCookie
     """
     packed = struct.pack('IIII', x, y, width, height)
     return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, window,
@@ -1633,11 +1631,11 @@ def get_wm_icon(window):
     """
     Returns an array of possible icons for a window.
 
-    @param window:  A window identifier.
-    @return:        A list of icon dictionaries.
+    :param window:  A window identifier.
+    :return:        A list of icon dictionaries.
 
                     Keys: width, height, data
-    @rtype:         IconCookie (CARDINAL[][2+n]/32)
+    :rtype:         IconCookie (CARDINAL[][2+n]/32)
     """
     return IconCookie(util.get_property(window, '_NET_WM_ICON'))
 
@@ -1648,11 +1646,11 @@ def set_wm_icon(window, icons):
     """
     Sets the array of possible icons for a window.
 
-    @param window:  A window identifier.
-    @param icons:   A list icon dictionaries. Each dictionary should have
+    :param window:  A window identifier.
+    :param icons:   A list icon dictionaries. Each dictionary should have
                     the following keys: width, height and data.
-    @type icons:    CARDINAL[][2+n]/32
-    @rtype:         xcb.VoidCookie
+    :type icons:    CARDINAL[][2+n]/32
+    :rtype:         xcb.VoidCookie
     """
     flatten = []
     for icon in icons:
@@ -1685,9 +1683,9 @@ def get_wm_pid(window):
     """
     Get the process ID of the client owning a window.
 
-    @param window:  A window identifier.
-    @return:        The window's client's process ID.
-    @rtype:         util.PropertyCookieSingle (CARDINAL/32)
+    :param window:  A window identifier.
+    :return:        The window's client's process ID.
+    :rtype:         util.PropertyCookieSingle (CARDINAL/32)
     """
     return util.PropertyCookieSingle(util.get_property(window, '_NET_WM_PID'))
 
@@ -1699,10 +1697,10 @@ def set_wm_pid(window, pid):
     """
     Sets the process ID of the client owning a window.
 
-    @param window:  A window identifier.
-    @param pid:     A process ID.
-    @type pid:      CARDINAL/32
-    @rtype:         xcb.VoidCookie
+    :param window:  A window identifier.
+    :param pid:     A process ID.
+    :type pid:      CARDINAL/32
+    :rtype:         xcb.VoidCookie
     """
     return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, window,
                                  atom('_NET_WM_PID'), CARDINAL, 32, 1, [pid])
@@ -1718,9 +1716,9 @@ def get_wm_handled_icons(window):
     """
     Gets the "handled icons" property.
 
-    @param window:  A window identifier.
-    @return:        Whether this property is set or not.
-    @rtype:         util.PropertyCookieSingle (CARDINAL/32)
+    :param window:  A window identifier.
+    :return:        Whether this property is set or not.
+    :rtype:         util.PropertyCookieSingle (CARDINAL/32)
     """
     return util.PropertyCookieSingle(util.get_property(window, 
                                                        '_NET_WM_HANDLED_ICONS'))
@@ -1733,9 +1731,9 @@ def set_wm_handled_icons(window):
     """
     Sets the "handled icons" property.
 
-    @param window:  A window identifier.
-    @return:        Whether this property is set or not.
-    @rtype:         xcb.VoidCookie
+    :param window:  A window identifier.
+    :return:        Whether this property is set or not.
+    :rtype:         xcb.VoidCookie
     """
     return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, window,
                                  atom('_NET_WM_HANDLED_ICONS'), CARDINAL, 32, 1,
@@ -1752,9 +1750,9 @@ def get_wm_user_time(window):
     """
     Get the time at which the last user activity occurred on a window.
 
-    @param window:  A window identifier.
-    @return:        The XServer time when user activity last occurred.
-    @rtype:         util.PropertyCookieSingle (CARDINAL/32)
+    :param window:  A window identifier.
+    :return:        The XServer time when user activity last occurred.
+    :rtype:         util.PropertyCookieSingle (CARDINAL/32)
     """
     return util.PropertyCookieSingle(util.get_property(window, 
                                                        '_NET_WM_USER_TIME'))
@@ -1767,10 +1765,10 @@ def set_wm_user_time(window, user_time):
     """
     Sets the time that user activity last occurred on this window.
 
-    @param window:      A window identifier.
-    @param user_time:   Last user activity time.
-    @type user_time:    CARDINAL/32
-    @rtype:             xcb.VoidCookie
+    :param window:      A window identifier.
+    :param user_time:   Last user activity time.
+    :type user_time:    CARDINAL/32
+    :rtype:             xcb.VoidCookie
     """
     return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, window,
                                  atom('_NET_WM_USER_TIME'), CARDINAL, 32, 1,
@@ -1787,9 +1785,9 @@ def get_wm_user_time_window(window):
     """
     Gets the window that sets the _NET_WM_USER_TIME property.
 
-    @param window:  A window identifier.
-    @return:        Window identifier that sets the _NET_WM_USER_TIME property.
-    @rtype:         util.PropertyCookieSingle (WINDOW/32)
+    :param window:  A window identifier.
+    :return:        Window identifier that sets the _NET_WM_USER_TIME property.
+    :rtype:         util.PropertyCookieSingle (WINDOW/32)
     """
     cook = util.get_property(window, '_NET_WM_USER_TIME_WINDOW')
     return util.PropertyCookieSingle(cook)
@@ -1802,10 +1800,10 @@ def set_wm_user_time_window(window, time_win):
     """
     Sets the window identifier that sets the _NET_WM_USER_TIME property.
 
-    @param window:      A window identifier.
-    @param time_win:    Window ID that sets the _NET_WM_USER_TIME property.
-    @type time_win:     WINDOW/32
-    @rtype:             xcb.VoidCookie
+    :param window:      A window identifier.
+    :param time_win:    Window ID that sets the _NET_WM_USER_TIME property.
+    :type time_win:     WINDOW/32
+    :rtype:             xcb.VoidCookie
     """
     return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, window,
                                  atom('_NET_WM_USER_TIME_WINDOW'),
@@ -1836,11 +1834,11 @@ def get_frame_extents(window):
     """
     Returns the frame extents for a window.
 
-    @param window:  A window identifier.
-    @return:        A frame extents dictionary.
+    :param window:  A window identifier.
+    :return:        A frame extents dictionary.
 
                     Keys: left, right, top, bottom
-    @rtype:         FrameExtentsCookie (CARDINAL[4]/32)
+    :rtype:         FrameExtentsCookie (CARDINAL[4]/32)
     """
     return FrameExtentsCookie(util.get_property(window, '_NET_FRAME_EXTENTS'))
 
@@ -1852,16 +1850,16 @@ def set_frame_extents(window, left, right, top, bottom):
     """
     Sets the frame extents for a window.
 
-    @param window:  A window identifier.
-    @param left:    Width of left border.
-    @type left:     CARDINAL/32
-    @param right:   Width of right border.
-    @type right:    CARDINAL/32
-    @param top:     Height of top border.
-    @type top:      CARDINAL/32
-    @param bottom:  Height of bottom border.
-    @type bottom:   CARDINAL/32
-    @rtype:         xcb.VoidCookie
+    :param window:  A window identifier.
+    :param left:    Width of left border.
+    :type left:     CARDINAL/32
+    :param right:   Width of right border.
+    :type right:    CARDINAL/32
+    :param top:     Height of top border.
+    :type top:      CARDINAL/32
+    :param bottom:  Height of bottom border.
+    :type bottom:   CARDINAL/32
+    :rtype:         xcb.VoidCookie
     """
     packed = struct.pack('IIII', left, right, top, bottom)
     return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, window,
@@ -1881,10 +1879,10 @@ def request_wm_ping(window, response=False,
     """
     Sends an event to root window to ping a window or respond to a ping.
 
-    @param window:      A window identifier.
-    @param response:    Whether this is a response to a ping request or not.
-    @type timestamp:    Milliseconds
-    @rtype:             xcb.VoidCookie
+    :param window:      A window identifier.
+    :param response:    Whether this is a response to a ping request or not.
+    :type timestamp:    Milliseconds
+    :rtype:             xcb.VoidCookie
     """
     return revent(window if not response else root(c),
                   'WM_PROTOCOLS', atom('_NET_WM_PING'), timestamp, window)
@@ -1901,10 +1899,10 @@ def request_wm_sync_request(window, req_num,
     """
     Sends an event to root window to sync with a client.
 
-    @param window:      A window identifier.
-    @param req_num:     The XSync request number.
-    @type timestamp:    Milliseconds
-    @rtype:             xcb.VoidCookie
+    :param window:      A window identifier.
+    :param req_num:     The XSync request number.
+    :type timestamp:    Milliseconds
+    :rtype:             xcb.VoidCookie
     """
     high = req_num >> 32
     low = (high << 32) ^ req_num
@@ -1926,9 +1924,9 @@ def get_wm_sync_request_counter(window):
     """
     Gets XSync counter for this client.
 
-    @param window:  A window identifier.
-    @return:        An XSync XID.
-    @rtype:         util.PropertyCookieSingle (CARDINAL/32)
+    :param window:  A window identifier.
+    :return:        An XSync XID.
+    :rtype:         util.PropertyCookieSingle (CARDINAL/32)
     """
     cook = util.get_property(window, '_NET_WM_SYNC_REQUEST_COUNTER')
     return util.PropertyCookieSingle(cook)
@@ -1941,10 +1939,10 @@ def set_wm_sync_request_counter(window, counter):
     """
     Sets the XSync counter for this client.
 
-    @param window:      A window identifier.
-    @param counter:     An XSync XID.
-    @type counter:      CARDINAL
-    @rtype:             xcb.VoidCookie
+    :param window:      A window identifier.
+    :param counter:     An XSync XID.
+    :type counter:      CARDINAL
+    :rtype:             xcb.VoidCookie
     """
     packed = struct.pack('I', counter)
     return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, window,
@@ -1977,9 +1975,9 @@ def get_wm_fullscreen_monitors(window):
     """
     Get list of monitor edges for this window.
 
-    @param window:  A window identifier.
-    @return:        The window's monitor edges.
-    @rtype:         FullscreenMonitorsCookie (CARDINAL[4]/32)
+    :param window:  A window identifier.
+    :return:        The window's monitor edges.
+    :rtype:         FullscreenMonitorsCookie (CARDINAL[4]/32)
     """
     return FullscreenMonitorsCookie(
         util.get_property(window, '_NET_WM_FULLSCREEN_MONITORS'))
@@ -1992,15 +1990,15 @@ def set_wm_fullscreen_monitors(window, top, bottom, left, right):
     """
     Sets list of monitor edges for this window.
 
-    @param window:  A window identifier.
-    @param top:     The monitor whose top edge defines the top edge of window.
-    @param bottom:  The monitor whose bottom edge defines the bottom edge of
+    :param window:  A window identifier.
+    :param top:     The monitor whose top edge defines the top edge of window.
+    :param bottom:  The monitor whose bottom edge defines the bottom edge of
                     window.
-    @param left:    The monitor whose left edge defines the left edge of
+    :param left:    The monitor whose left edge defines the left edge of
                     window.
-    @param right:   The monitor whose right edge defines the right edge of
+    :param right:   The monitor whose right edge defines the right edge of
                     window.
-    @rtype:         xcb.VoidCookie
+    :rtype:         xcb.VoidCookie
     """
     packed = struct.pack('IIII', top, bottom, left, right)
     return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, window,
@@ -2018,16 +2016,16 @@ def request_wm_fullscreen_monitors(window, top, bottom, left, right,
     """
     Sends an event to root window to change monitor edges for this window.
 
-    @param window:  A window identifier.
-    @param top:     The monitor whose top edge defines the top edge of window.
-    @param bottom:  The monitor whose bottom edge defines the bottom edge of
+    :param window:  A window identifier.
+    :param top:     The monitor whose top edge defines the top edge of window.
+    :param bottom:  The monitor whose bottom edge defines the bottom edge of
                     window.
-    @param left:    The monitor whose left edge defines the left edge of
+    :param left:    The monitor whose left edge defines the left edge of
                     window.
-    @param right:   The monitor whose right edge defines the right edge of
+    :param right:   The monitor whose right edge defines the right edge of
                     window.
-    @param source:  The source indication.
-    @rtype:         xcb.VoidCookie
+    :param source:  The source indication.
+    :rtype:         xcb.VoidCookie
     """
     return revent(window, '_NET_WM_FULLSCREEN_MONITORS',
                   top, bottom, left, right, source)
