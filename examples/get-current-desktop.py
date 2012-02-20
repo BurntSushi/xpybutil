@@ -1,4 +1,3 @@
-from xpybutil import conn, root
 import xpybutil.ewmh as ewmh
 
 names = ewmh.get_desktop_names().reply()
