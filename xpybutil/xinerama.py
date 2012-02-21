@@ -1,3 +1,13 @@
+"""
+A couple of functions that support retrieving information about
+all active physical heads. This is done through the Xinerama
+extension, which implicitly supports RandR and TwinView.
+
+The 'get_physical_mapping' function will produce a list of
+monitor indices in a physical ordering (left to right, top to
+bottom). These indices can then be used in the list returned by
+'get_monitors'.
+"""
 import xcb.xinerama
 
 from xpybutil import conn
@@ -22,6 +32,7 @@ def get_monitors():
 def get_physical_mapping(monitors):
     '''
     Returns a list of Xinerama screen indices in their physical order.
+    Where physical order is defined as left-to-right and then top-to-bottom.
 
     :param monitors:  List of (x, y, w, h) rectangles
     :rtype:           List of Xinerama indices
@@ -30,7 +41,7 @@ def get_physical_mapping(monitors):
 
     tosort = []
     for i, (x, y, w, h) in enumerate(monitors):
-        tosort.append((y, x, i))
+        tosort.append((x, y, i))
     for x, y, xscreen in sorted(tosort):
         retval.append(xscreen)
 

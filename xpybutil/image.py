@@ -1,6 +1,7 @@
-# This module is woefully incomplete, but may be useful to anyone that wants
-# to interoperate xpyb with PIL.
-
+"""
+An incomplete and haphazard collection of functions that can 
+bridge a gap between PIL and drawing images with X.
+"""
 import xcb.xproto
 
 from xpybutil import conn

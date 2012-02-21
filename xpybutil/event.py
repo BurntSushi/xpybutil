@@ -1,3 +1,8 @@
+"""
+A module that can send client events to windows. It also allows
+registering callback functions to particular events. It can also
+run the main event loop.
+"""
 from collections import defaultdict, deque
 import struct
 import sys

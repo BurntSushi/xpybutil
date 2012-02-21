@@ -1,3 +1,8 @@
+"""
+Implements a subset of the Motif spec. This module exists 
+because some window managers still use this as the only way of
+toggling window decorations via events.
+"""
 import struct
 
 import xcb.xproto

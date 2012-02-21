@@ -1,6 +1,11 @@
-import xcb.xproto
+"""
+This module is pretty inadequate. Mostly because if you find
+yourself wanting to use this module, you're probably doing something wrong. 
+(i.e., use pycairo or PIL.)
 
-# This is woefully incomplete.
+This module will likely be removed in the future.
+"""
+import xcb.xproto
 
 def get_font_height(qfont):
     return qfont.max_bounds.ascent + qfont.max_bounds.descent

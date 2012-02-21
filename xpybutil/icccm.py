@@ -1,3 +1,10 @@
+"""
+Implements most of the ICCCM spec. The ICCCM spec can be found at:
+http://tronche.com/gui/x/icccm/
+
+See the EWMH module for some relevant information that also generally applies
+to this module.
+"""
 from collections import defaultdict
 import struct
 
@@ -335,16 +342,15 @@ def set_wm_transient_for_checked(window, transient_window):
 def get_wm_protocols(window):
     return util.PropertyCookie(util.get_property(window, 'WM_PROTOCOLS'))
 
-def get_wm_protocols(window):
+def get_wm_protocols_unchecked(window):
     return util.PropertyCookie(util.get_property_unchecked(window, 
                                                            'WM_PROTOCOLS'))
 
 def set_wm_protocols(window, protocol_atoms):
-    packed = struct.pack('I', transient_window)
+    packed = struct.pack('I' * len(protocol_atoms), *protocol_atoms)
     return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, window,
-                                    atoms.WM_TRANSIENT_FOR,
-                                    atoms.WINDOW, 32,
-                                    1, packed)
+                                 atom('WM_PROTOCOLS'), atoms.ATOM, 32,
+                                 len(protocol_atoms), packed)
 
 def set_wm_protocols_checked(window, protocol_atoms):
     packed = struct.pack('I' * len(protocol_atoms), *protocol_atoms)
@@ -367,7 +373,7 @@ def set_wm_colormap_windows(window, colormap_windows):
                                  atom('WM_COLORMAP_WINDOWS'), atoms.WINDOW, 32,
                                  len(colormap_windows), packed)
 
-def set_wm_colormap_windows_checked(window, transient_window):
+def set_wm_colormap_windows_checked(window, colormap_windows):
     packed = struct.pack('I' * len(colormap_windows), *colormap_windows)
     return c.core.ChangePropertyChecked(xcb.xproto.PropMode.Replace, window,
                                         atom('WM_COLORMAP_WINDOWS'),

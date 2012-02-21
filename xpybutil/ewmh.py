@@ -1,3 +1,74 @@
+"""
+Implements the entire EWMH spec. The spec can be found here:
+http://standards.freedesktop.org/wm-spec/wm-spec-latest.html
+
+xpybutil's primary purpose was to make accessing ICCCM and EWMH related 
+information extremely easy. This can be done by using the ewmh or icccm 
+modules. Here's a quick example (assuming xpybutil is installed):
+
+ ::
+
+  import xpybutil.ewmh as ewmh
+
+  desktop_names = ewmh.get_desktop_names().reply()
+  current_desktop = ewmh.get_current_desktop().reply()
+
+  print names.get(current_desktop, current_desktop)
+
+This imports the ewmh module (and by extension, connects to the X server) and 
+fetches a list of the current desktop names and the current desktop index 
+(starting from 0). Since not every desktop must be named, the desktop index is 
+printed if it has no name.
+
+Note that the functions in the ewmh and icccm module return *cookies*. In order 
+to pull a response from the X server, call the 'reply()' method on a cookie 
+object. To force a response sent to the X server, call the 'check()' method on 
+the corresponding cookie.
+
+Much of the EWMH and ICCCM modules encapsulate packing data from convenient 
+Python data types into C structs (using the 'struct' Python module). For 
+example, if one wants to fetch the partial struts set by some window with 
+identifier ID, you could do:
+
+ ::
+
+  import xpybutil.ewmh as ewmh
+
+  print ewmh.get_wm_strut_partial(ID).reply()
+
+Which outputs a dictionary with 12 entries, where each corresponds to a value 
+in the partial strut. (i.e., 'left', 'top_end_x', 'right_start_y', etc...).
+
+In general, particularly with the EWMH module, the ewmh module is very nearly 
+representative of the spec itself. Functions that get property values start 
+with ``get_``, functions that set property values start with ``set_``, and 
+functions that send an event to a client (which typically requests the window 
+manager to DO something) start with ``request_``.
+
+If a request has no reply (typically the ``set_`` functions), then the 
+default is to call it 'unchecked'. If you want to check the result (and force 
+retrieval), then use the '_checked' variant.
+
+The reverse goes for the ``get_`` functions. By default, they are checked, but 
+you can use the '_unchecked' variant too.
+
+Basically, you should probably almost always use the 'checked' variant of 
+everything. The cases where you don't are when you want to send a whole bunch 
+of requests to the X server at once. You could use the unchecked invariant, and 
+after you've initialized all the cookies, calling 'flush' will force 
+communication with the X server.
+
+Finally, unless you're writing a window manager or creating a client window 
+from scratch, you'll almost always want to use the ``get_`` and ``request_`` 
+functions. For exampe, if you want to change the current desktop...
+
+  DON'T DO: ``ewmh.get_current_desktop_checked(2).check()``
+
+  DO:       ``ewmh.request_current_desktop_checked(2).check()``
+
+The former will probably not work, but the latter will. Just follow the EWMH 
+spec :-)
+"""
 import struct
 
 import xcb.xproto

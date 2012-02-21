@@ -1,6 +1,13 @@
+"""
+Provides a listing of all built-in X cursors, and provides a
+function 'create_font_cursor' to create one. This object can
+then be directly used in a call to CreateWindow or
+ChangeWindowAttributes.
+"""
 from xpybutil import conn
 
 class FontCursor:
+    """Constants for all X cursors. To be used in ``create_font_cursor``."""
     XCursor = 0
     Arrow = 2
     BasedArrowDown = 4
@@ -81,6 +88,24 @@ class FontCursor:
 
 def create_font_cursor(cursor_id, fore_red=0, fore_green=0, fore_blue=0,
                        back_red=0xffff, back_green=0xffff, back_blue=0xffff):
+    """
+    Function to create cursor resources on the X server. You can use the
+    return value of this function with mousebind.grab_pointer to make the
+    mouse change when it's being grabbed.
+
+    The rest of the parameters are a way to colorize the cursor.
+
+    :param cursor_id: A numeric identifier for a cursor.
+    :type cursor_id: A class variable of FontCursor
+    :type fore_red: int
+    :type fore_green: int
+    :type fore_blue: int
+    :type back_red: int
+    :type back_green: int
+    :type back_blue: int
+    :return: A cursor X identifier.
+    :rtype: int
+    """
     font = conn.generate_id()
     cursor = conn.generate_id()
 
