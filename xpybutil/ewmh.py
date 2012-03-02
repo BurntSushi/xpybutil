@@ -552,7 +552,7 @@ def get_visible_desktops():
     screen 1, etc.
 
     :return:        A list of visible desktops.
-    :rtype:         util.PropertyCookie (ATOM[]/32)
+    :rtype:         util.PropertyCookie (CARDINAL[]/32)
     """
     return util.PropertyCookie(util.get_property(root, '_NET_VISIBLE_DESKTOPS'))
 
@@ -565,19 +565,19 @@ def set_visible_desktops(desktops):
     Sets the list of visible desktops.
 
     :param desktops: A list of desktops.
-    :type desktops:  ATOM[]/32
+    :type desktops:  CARDINAL[]/32
     :rtype:          xcb.VoidCookie
     """
     packed = struct.pack('I' * len(desktops), *desktops)
     return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, root,
                                  atom('_NET_VISIBLE_DESKTOPS'),
-                                 WINDOW, 32, len(desktops), packed)
+                                 CARDINAL, 32, len(desktops), packed)
 
 def set_visible_desktops_checked(desktops):
     packed = struct.pack('I' * len(desktops), *desktops)
     return c.core.ChangePropertyChecked(xcb.xproto.PropMode.Replace, root,
                                         atom('_NET_VISIBLE_DESKTOPS'),
-                                        WINDOW, 32, len(desktops), packed)
+                                        CARDINAL, 32, len(desktops), packed)
 
 # _NET_DESKTOP_NAMES
 
