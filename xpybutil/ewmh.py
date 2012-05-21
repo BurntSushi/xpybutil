@@ -2,8 +2,8 @@
 Implements the entire EWMH spec. The spec can be found here:
 http://standards.freedesktop.org/wm-spec/wm-spec-latest.html
 
-xpybutil's primary purpose was to make accessing ICCCM and EWMH related 
-information extremely easy. This can be done by using the ewmh or icccm 
+xpybutil's primary purpose was to make accessing ICCCM and EWMH related
+information extremely easy. This can be done by using the ewmh or icccm
 modules. Here's a quick example (assuming xpybutil is installed):
 
  ::
@@ -15,19 +15,19 @@ modules. Here's a quick example (assuming xpybutil is installed):
 
   print names.get(current_desktop, current_desktop)
 
-This imports the ewmh module (and by extension, connects to the X server) and 
-fetches a list of the current desktop names and the current desktop index 
-(starting from 0). Since not every desktop must be named, the desktop index is 
+This imports the ewmh module (and by extension, connects to the X server) and
+fetches a list of the current desktop names and the current desktop index
+(starting from 0). Since not every desktop must be named, the desktop index is
 printed if it has no name.
 
-Note that the functions in the ewmh and icccm module return *cookies*. In order 
-to pull a response from the X server, call the 'reply()' method on a cookie 
-object. To force a response sent to the X server, call the 'check()' method on 
+Note that the functions in the ewmh and icccm module return *cookies*. In order
+to pull a response from the X server, call the 'reply()' method on a cookie
+object. To force a response sent to the X server, call the 'check()' method on
 the corresponding cookie.
 
-Much of the EWMH and ICCCM modules encapsulate packing data from convenient 
-Python data types into C structs (using the 'struct' Python module). For 
-example, if one wants to fetch the partial struts set by some window with 
+Much of the EWMH and ICCCM modules encapsulate packing data from convenient
+Python data types into C structs (using the 'struct' Python module). For
+example, if one wants to fetch the partial struts set by some window with
 identifier ID, you could do:
 
  ::
@@ -36,37 +36,37 @@ identifier ID, you could do:
 
   print ewmh.get_wm_strut_partial(ID).reply()
 
-Which outputs a dictionary with 12 entries, where each corresponds to a value 
+Which outputs a dictionary with 12 entries, where each corresponds to a value
 in the partial strut. (i.e., 'left', 'top_end_x', 'right_start_y', etc...).
 
-In general, particularly with the EWMH module, the ewmh module is very nearly 
-representative of the spec itself. Functions that get property values start 
-with ``get_``, functions that set property values start with ``set_``, and 
-functions that send an event to a client (which typically requests the window 
+In general, particularly with the EWMH module, the ewmh module is very nearly
+representative of the spec itself. Functions that get property values start
+with ``get_``, functions that set property values start with ``set_``, and
+functions that send an event to a client (which typically requests the window
 manager to DO something) start with ``request_``.
 
-If a request has no reply (typically the ``set_`` functions), then the 
-default is to call it 'unchecked'. If you want to check the result (and force 
+If a request has no reply (typically the ``set_`` functions), then the
+default is to call it 'unchecked'. If you want to check the result (and force
 retrieval), then use the '_checked' variant.
 
-The reverse goes for the ``get_`` functions. By default, they are checked, but 
+The reverse goes for the ``get_`` functions. By default, they are checked, but
 you can use the '_unchecked' variant too.
 
-Basically, you should probably almost always use the 'checked' variant of 
-everything. The cases where you don't are when you want to send a whole bunch 
-of requests to the X server at once. You could use the unchecked invariant, and 
-after you've initialized all the cookies, calling 'flush' will force 
+Basically, you should probably almost always use the 'checked' variant of
+everything. The cases where you don't are when you want to send a whole bunch
+of requests to the X server at once. You could use the unchecked invariant, and
+after you've initialized all the cookies, calling 'flush' will force
 communication with the X server.
 
-Finally, unless you're writing a window manager or creating a client window 
-from scratch, you'll almost always want to use the ``get_`` and ``request_`` 
+Finally, unless you're writing a window manager or creating a client window
+from scratch, you'll almost always want to use the ``get_`` and ``request_``
 functions. For exampe, if you want to change the current desktop...
 
   DON'T DO: ``ewmh.get_current_desktop_checked(2).check()``
 
   DO:       ``ewmh.request_current_desktop_checked(2).check()``
 
-The former will probably not work, but the latter will. Just follow the EWMH 
+The former will probably not work, but the latter will. Just follow the EWMH
 spec :-)
 """
 import struct
@@ -191,7 +191,7 @@ def get_supported():
     return util.PropertyCookie(util.get_property(root, '_NET_SUPPORTED'))
 
 def get_supported_unchecked():
-    return util.PropertyCookie(util.get_property_unchecked(root, 
+    return util.PropertyCookie(util.get_property_unchecked(root,
                                                            '_NET_SUPPORTED'))
 
 def set_supported(atoms):
@@ -225,7 +225,7 @@ def get_client_list():
     return util.PropertyCookie(util.get_property(root, '_NET_CLIENT_LIST'))
 
 def get_client_list_unchecked():
-    return util.PropertyCookie(util.get_property_unchecked(root, 
+    return util.PropertyCookie(util.get_property_unchecked(root,
                                                            '_NET_CLIENT_LIST'))
 
 def set_client_list(windows):
@@ -256,7 +256,7 @@ def get_client_list_stacking():
     :return:        A list of window identifiers.
     :rtype:         util.PropertyCookie (ATOM[]/32)
     """
-    return util.PropertyCookie(util.get_property(root, 
+    return util.PropertyCookie(util.get_property(root,
                                                  '_NET_CLIENT_LIST_STACKING'))
 
 def get_client_list_stacking_unchecked():
@@ -308,7 +308,7 @@ def set_number_of_desktops(number_of_desktops):
     """
     packed = struct.pack('I', number_of_desktops)
     return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, root,
-                                 atom('_NET_NUMBER_OF_DESKTOPS'), CARDINAL, 32, 
+                                 atom('_NET_NUMBER_OF_DESKTOPS'), CARDINAL, 32,
                                  1, packed)
 
 def set_number_of_desktops_checked(number_of_desktops):
@@ -351,7 +351,7 @@ def get_desktop_geometry():
                     Keys: width, height
     :rtype:         DesktopGeometryCookie (CARDINAL[2]/32)
     """
-    return DesktopGeometryCookie(util.get_property(root, 
+    return DesktopGeometryCookie(util.get_property(root,
                                                    '_NET_DESKTOP_GEOMETRY'))
 
 def get_desktop_geometry_unchecked():
@@ -421,7 +421,7 @@ def get_desktop_viewport():
                     Keys: x, y
     :rtype:         DesktopViewportCookie (CARDINAL[][2]/32)
     """
-    return DesktopViewportCookie(util.get_property(root, 
+    return DesktopViewportCookie(util.get_property(root,
                                                    '_NET_DESKTOP_VIEWPORT'))
 
 def get_desktop_viewport_unchecked():
@@ -516,7 +516,7 @@ def set_current_desktop(current_desktop):
     """
     packed = struct.pack('I', current_desktop)
     return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, root,
-                                 atom('_NET_CURRENT_DESKTOP'), CARDINAL, 32, 1, 
+                                 atom('_NET_CURRENT_DESKTOP'), CARDINAL, 32, 1,
                                  packed)
 
 def set_current_desktop_checked(current_desktop):
@@ -634,7 +634,7 @@ def get_active_window():
     :return:        The window ID of the active window.
     :rtype:         util.PropertyCookieSingle (WINDOW/32)
     """
-    return util.PropertyCookieSingle(util.get_property(root, 
+    return util.PropertyCookieSingle(util.get_property(root,
                                                        '_NET_ACTIVE_WINDOW'))
 
 def get_active_window_unchecked():
@@ -678,7 +678,7 @@ def request_active_window(active, source=1,
 def request_active_window_checked(active, source=1,
                                   timestamp=xcb.xproto.Time.CurrentTime,
                                   current=0):
-    return revent_checked(active, '_NET_ACTIVE_WINDOW', source, timestamp, 
+    return revent_checked(active, '_NET_ACTIVE_WINDOW', source, timestamp,
                           current)
 
 # _NET_WORKAREA
@@ -1107,7 +1107,7 @@ def get_wm_name(window):
     return util.PropertyCookie(util.get_property(window, '_NET_WM_NAME'))
 
 def get_wm_name_unchecked(window):
-    return util.PropertyCookie(util.get_property_unchecked(window, 
+    return util.PropertyCookie(util.get_property_unchecked(window,
                                                            '_NET_WM_NAME'))
 
 def set_wm_name(window, wm_name):
@@ -1138,7 +1138,7 @@ def get_wm_visible_name(window):
     :return:        The window's visible title.
     :rtype:         util.PropertyCookie (UTF8_STRING)
     """
-    return util.PropertyCookie(util.get_property(window, 
+    return util.PropertyCookie(util.get_property(window,
                                                  '_NET_WM_VISIBLE_NAME'))
 
 def get_wm_visible_name_unchecked(window):
@@ -1188,7 +1188,7 @@ def set_wm_icon_name(window, icon_name):
     :rtype:             xcb.VoidCookie
     """
     return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, window,
-                                 atom('_NET_WM_ICON_NAME'), atom('UTF8_STRING'), 
+                                 atom('_NET_WM_ICON_NAME'), atom('UTF8_STRING'),
                                  8, len(icon_name), icon_name)
 
 def set_wm_icon_name_checked(window, icon_name):
@@ -1207,7 +1207,7 @@ def get_wm_visible_icon_name(window):
     :return:        The window's visible icon name.
     :rtype:         util.PropertyCookie (UTF8_STRING)
     """
-    return util.PropertyCookie(util.get_property(window, 
+    return util.PropertyCookie(util.get_property(window,
                                                  '_NET_WM_VISIBLE_ICON_NAME'))
 
 def get_wm_visible_icon_name_unchecked(window):
@@ -1255,7 +1255,7 @@ def get_wm_window_opacity(window):
     :return:        An opacity percentage between 0 and 1 (inclusive)
     :rtype:         util.PropertyCookieSingle (CARDINAL/32)
     """
-    return OpacityCookieSingle(util.get_property(window, 
+    return OpacityCookieSingle(util.get_property(window,
                                                  '_NET_WM_WINDOW_OPACITY'))
 
 def get_wm_window_opacity_unchecked(window):
@@ -1299,7 +1299,7 @@ def get_wm_desktop(window):
     :return:        The window's virtual desktop index.
     :rtype:         util.PropertyCookieSingle (CARDINAL/32)
     """
-    return util.PropertyCookieSingle(util.get_property(window, 
+    return util.PropertyCookieSingle(util.get_property(window,
                                                        '_NET_WM_DESKTOP'))
 
 def get_wm_desktop_unchecked(window):
@@ -1388,7 +1388,7 @@ def get_wm_state(window):
     return util.PropertyCookie(util.get_property(window, '_NET_WM_STATE'))
 
 def get_wm_state_unchecked(window):
-    return util.PropertyCookie(util.get_property_unchecked(window, 
+    return util.PropertyCookie(util.get_property_unchecked(window,
                                                            '_NET_WM_STATE'))
 
 def set_wm_state(window, states):
@@ -1431,7 +1431,7 @@ def request_wm_state(window, action, first, second=0, source=1):
     return revent(window, '_NET_WM_STATE', action, first, second, source)
 
 def request_wm_state_checked(window, action, first, second=0, source=1):
-    return revent_checked(window, '_NET_WM_STATE', 
+    return revent_checked(window, '_NET_WM_STATE',
                           action, first, second, source)
 
 # _NET_WM_ALLOWED_ACTIONS
@@ -1445,7 +1445,7 @@ def get_wm_allowed_actions(window):
                     actions through the window manager.
     :rtype:         util.PropertyCookie (ATOM[]/32)
     """
-    return util.PropertyCookie(util.get_property(window, 
+    return util.PropertyCookie(util.get_property(window,
                                                  '_NET_WM_ALLOWED_ACTIONS'))
 
 def get_wm_allowed_actions_unchecked(window):
@@ -1564,7 +1564,7 @@ def get_wm_strut_partial(window):
                     bottom_start_x, bottom_end_x
     :rtype:         StrutPartialCookie (CARDINAL[12]/32)
     """
-    return StrutPartialCookie(util.get_property(window, 
+    return StrutPartialCookie(util.get_property(window,
                                                 '_NET_WM_STRUT_PARTIAL'))
 
 def get_wm_strut_partial_unchecked(window):
@@ -1640,7 +1640,7 @@ def get_wm_icon_geometry(window):
                     Keys: x, y, width, height
     :rtype:         IconGeometryCookie (CARDINAL[4]/32)
     """
-    return IconGeometryCookie(util.get_property(window, 
+    return IconGeometryCookie(util.get_property(window,
                                                 '_NET_WM_ICON_GEOMETRY'))
 
 def get_wm_icon_geometry_unchecked(window):
@@ -1773,13 +1773,16 @@ def set_wm_pid(window, pid):
     :type pid:      CARDINAL/32
     :rtype:         xcb.VoidCookie
     """
+    packed = struct.pack('I', pid)
     return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, window,
-                                 atom('_NET_WM_PID'), CARDINAL, 32, 1, [pid])
+                                 atom('_NET_WM_PID'), CARDINAL, 32, 1,
+                                 packed)
 
 def set_wm_pid_checked(window, pid):
+    packed = struct.pack('I', pid)
     return c.core.ChangePropertyChecked(xcb.xproto.PropMode.Replace, window,
                                         atom('_NET_WM_PID'), CARDINAL, 32, 1,
-                                        [pid])
+                                        packed)
 
 # _NET_WM_HANDLED_ICONS
 
@@ -1791,7 +1794,7 @@ def get_wm_handled_icons(window):
     :return:        Whether this property is set or not.
     :rtype:         util.PropertyCookieSingle (CARDINAL/32)
     """
-    return util.PropertyCookieSingle(util.get_property(window, 
+    return util.PropertyCookieSingle(util.get_property(window,
                                                        '_NET_WM_HANDLED_ICONS'))
 
 def get_wm_handled_icons_unchecked(window):
@@ -1825,7 +1828,7 @@ def get_wm_user_time(window):
     :return:        The XServer time when user activity last occurred.
     :rtype:         util.PropertyCookieSingle (CARDINAL/32)
     """
-    return util.PropertyCookieSingle(util.get_property(window, 
+    return util.PropertyCookieSingle(util.get_property(window,
                                                        '_NET_WM_USER_TIME'))
 
 def get_wm_user_time_unchecked(window):
@@ -1960,7 +1963,7 @@ def request_wm_ping(window, response=False,
 
 def request_wm_ping_checked(window, response=False,
                             timestamp=xcb.xproto.Time.CurrentTime):
-    return revent_checked(window if not response else root(c), 'WM_PROTOCOLS', 
+    return revent_checked(window if not response else root(c), 'WM_PROTOCOLS',
                           atom('_NET_WM_PING'), timestamp, window)
 
 # _NET_WM_SYNC_REQUEST
