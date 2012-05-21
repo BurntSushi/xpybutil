@@ -130,6 +130,8 @@ def main():
                 w = None
                 if isinstance(e, xproto.MappingNotifyEvent):
                     w = None
+                elif isinstance(e, xproto.MapRequestEvent):
+                    w = root
                 elif hasattr(e, 'window'):
                     w = e.window
                 elif hasattr(e, 'event'):
