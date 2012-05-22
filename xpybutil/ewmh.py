@@ -389,10 +389,10 @@ def request_desktop_geometry(width, height):
     :type height:               CARDINAL/32
     :rtype:                     xcb.VoidCookie
     """
-    return revent(root, '_NET_NUMBER_OF_DESKTOPS', width, height)
+    return revent(root, '_NET_DESKTOP_GEOMETRY', width, height)
 
 def request_desktop_geometry_checked(width, height):
-    return revent_checked(root, '_NET_NUMBER_OF_DESKTOPS', width, height)
+    return revent_checked(root, '_NET_DESKTOP_GEOMETRY', width, height)
 
 # _NET_DESKTOP_VIEWPORT
 
