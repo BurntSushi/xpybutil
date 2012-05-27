@@ -136,6 +136,8 @@ def main():
                     w = e.window
                 elif hasattr(e, 'event'):
                     w = e.event
+                elif hasattr(e, 'owner'):
+                    w = e.owner
                 elif hasattr(e, 'requestor'):
                     w = e.requestor
 
