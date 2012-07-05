@@ -145,7 +145,7 @@ def ungrab_button(wid, modifiers, button):
     except xproto.BadAccess:
         return False
 
-def bind_global_key(event_type, key_string, cb):
+def bind_global_mouse(event_type, key_string, cb):
     """
     An alias for ``bind_mouse(event_type, ROOT_WINDOW, key_string, cb)``.
 
