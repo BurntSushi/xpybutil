@@ -209,7 +209,7 @@ def get_keysym(keycode, col=0, kbmap=None):
     per = kbmap.keysyms_per_keycode
     ind = (keycode - mn) * per + col
 
-    return __kbmap.keysyms[ind]
+    return kbmap.keysyms[ind]
 
 def get_keysym_string(keysym):
     """
