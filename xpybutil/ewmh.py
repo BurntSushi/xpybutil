@@ -60,7 +60,8 @@ communication with the X server.
 
 Finally, unless you're writing a window manager or creating a client window
 from scratch, you'll almost always want to use the ``get_`` and ``request_``
-functions. For exampe, if you want to change the current desktop...
+functions, not ``set_``. For example, if you want to change the current
+desktop...
 
   DON'T DO: ``ewmh.set_current_desktop_checked(2).check()``
 
