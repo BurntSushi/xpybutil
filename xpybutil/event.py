@@ -130,10 +130,16 @@ def main():
                 w = None
                 if isinstance(e, xproto.MappingNotifyEvent):
                     w = None
+                elif isinstance(e, xproto.MapRequestEvent):
+                    # Force all MapRequestEvents to go to the root window so
+                    # a window manager using xpybutil can get them.
+                    w = root
                 elif hasattr(e, 'window'):
                     w = e.window
                 elif hasattr(e, 'event'):
                     w = e.event
+                elif hasattr(e, 'owner'):
+                    w = e.owner
                 elif hasattr(e, 'requestor'):
                     w = e.requestor
 
