@@ -475,7 +475,7 @@ def __regrab(changes):
     :type changes: dict
     :rtype: void
     """
-    for wid, mods, kc in __keybinds:
+    for wid, mods, kc in __keybinds.keys():
         if kc in changes:
             ungrab_key(wid, mods, kc)
             grab_key(wid, mods, changes[kc])
