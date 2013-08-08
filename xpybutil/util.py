@@ -159,6 +159,9 @@ def build_atom_cache(atoms):
     """
     global __atom_cache, __atom_nm_cache
 
+    if conn is None:
+        return
+
     for atom in atoms:
         __atom_cache[atom] = __get_atom_cookie(atom, only_if_exists=False)
     for atom in __atom_cache:

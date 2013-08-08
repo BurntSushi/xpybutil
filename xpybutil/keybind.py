@@ -486,6 +486,7 @@ def __regrab(changes):
             __keybinds[new] = __keybinds[old]
             del __keybinds[old]
 
-update_keyboard_mapping(None)
-event.connect('MappingNotify', None, update_keyboard_mapping)
+if conn is not None:
+    update_keyboard_mapping(None)
+    event.connect('MappingNotify', None, update_keyboard_mapping)
 

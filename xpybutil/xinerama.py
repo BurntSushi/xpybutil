@@ -12,7 +12,9 @@ import xcb.xinerama
 
 from xpybutil import conn
 
-ext = conn(xcb.xinerama.key)
+ext = None
+if conn is not None:
+    ext = conn(xcb.xinerama.key)
 
 def get_monitors():
     '''
