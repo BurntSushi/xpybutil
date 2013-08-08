@@ -1,4 +1,9 @@
 import xcb, xcb.xproto
-conn = xcb.connect()
-root = conn.get_setup().roots[0].root
+
+try:
+    conn = xcb.connect()
+    root = conn.get_setup().roots[0].root
+except xcb.ConnectException:
+    conn = None
+    root = None
 
