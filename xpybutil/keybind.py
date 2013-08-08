@@ -165,7 +165,7 @@ def get_keyboard_mapping():
 
 def get_keyboard_mapping_unchecked():
     """
-    Return an unchecked keyboard mapping cookie that can be used to fetch the 
+    Return an unchecked keyboard mapping cookie that can be used to fetch the
     table of keysyms in the current X environment.
 
     :rtype: xcb.xproto.GetKeyboardMappingCookie
@@ -177,7 +177,7 @@ def get_keyboard_mapping_unchecked():
 def get_keysym(keycode, col=0, kbmap=None):
     """
     Get the keysym associated with a particular keycode in the current X
-    environment. Although we get a list of keysyms from X in 
+    environment. Although we get a list of keysyms from X in
     'get_keyboard_mapping', this list is really a table with
     'keysys_per_keycode' columns and ``mx - mn`` rows (where ``mx`` is the
     maximum keycode and ``mn`` is the minimum keycode).
@@ -187,7 +187,7 @@ def get_keysym(keycode, col=0, kbmap=None):
 
     In most cases, setting ``col`` to 0 will work.
 
-    Witness the utter complexity: 
+    Witness the utter complexity:
     http://tronche.com/gui/x/xlib/input/keyboard-encoding.html
 
     You may also pass in your own keyboard mapping using the ``kbmap``
@@ -209,7 +209,7 @@ def get_keysym(keycode, col=0, kbmap=None):
     per = kbmap.keysyms_per_keycode
     ind = (keycode - mn) * per + col
 
-    return __kbmap.keysyms[ind]
+    return kbmap.keysyms[ind]
 
 def get_keysym_string(keysym):
     """
@@ -449,7 +449,7 @@ def __run_keybind_callbacks(e):
     their corresponding callback functions. Nothing much to see here, except
     that we must mask out the trivial modifiers from the state in order to
     find the right callback.
-    
+
     Callbacks are called in the order that they have been added. (FIFO.)
 
     :param e: A Key{Press,Release} event.
@@ -462,7 +462,10 @@ def __run_keybind_callbacks(e):
 
     key = (e.event, mods, kc)
     for cb in __keybinds.get(key, []):
-        cb()
+        try:
+            cb(e)
+        except TypeError:
+            cb()
 
 def __regrab(changes):
     """
