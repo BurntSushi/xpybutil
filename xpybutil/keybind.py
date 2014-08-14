@@ -12,9 +12,8 @@ import sys
 
 import xcb.xproto as xproto
 
-from xpybutil import conn, root
-import event
-from keysymdef import keysyms, keysym_strings
+from xpybutil import conn, root, event
+from xpybutil.keysymdef import keysyms, keysym_strings
 
 __kbmap = None
 __keysmods = None
@@ -233,8 +232,8 @@ def get_keycode(keysym):
     """
     mn, mx = get_min_max_keycode()
     cols = __kbmap.keysyms_per_keycode
-    for i in xrange(mn, mx + 1):
-        for j in xrange(0, cols):
+    for i in range(mn, mx + 1):
+        for j in range(0, cols):
             ks = get_keysym(i, col=j)
             if ks == keysym:
                 return i
@@ -283,7 +282,7 @@ def get_keys_to_mods():
 
     res = {}
     keyspermod = mods.keycodes_per_modifier
-    for mmi in xrange(0, len(modmasks)):
+    for mmi in range(0, len(modmasks)):
         row = mmi * keyspermod
         for kc in mods.keycodes[row:row + keyspermod]:
             res[kc] = modmasks[mmi]
@@ -432,7 +431,7 @@ def update_keyboard_mapping(e):
 
     if e.request == xproto.Mapping.Keyboard:
         changes = {}
-        for kc in xrange(*get_min_max_keycode()):
+        for kc in range(*get_min_max_keycode()):
             knew = get_keysym(kc, kbmap=newmap)
             oldkc = get_keycode(knew)
             if oldkc != kc:

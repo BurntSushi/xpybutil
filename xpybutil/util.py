@@ -168,7 +168,7 @@ def build_atom_cache(atoms):
         if isinstance(__atom_cache[atom], AtomCookie):
             __atom_cache[atom] = __atom_cache[atom].reply()
 
-    __atom_nm_cache = dict((v, k) for k, v in __atom_cache.iteritems())
+    __atom_nm_cache = dict((v, k) for k, v in __atom_cache.items())
 
 def get_atom(atom_name, only_if_exists=False):
     """
@@ -226,8 +226,9 @@ def __get_atom_cookie(atom_name, only_if_exists=False):
     :type only_if_exists: bool
     :rtype: xcb.xproto.InternAtomCookie
     """
-    atom = conn.core.InternAtomUnchecked(only_if_exists, len(atom_name),
-                                         atom_name)
+    atom_bytes = atom_name.encode('ascii')
+    atom = conn.core.InternAtomUnchecked(only_if_exists, len(atom_bytes),
+                                         atom_bytes)
     return AtomCookie(atom)
 
 def __get_atom_name_cookie(atom):
