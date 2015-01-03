@@ -2019,6 +2019,5 @@ keysyms = {
 }
 
 keysym_strings = defaultdict(list)
-for keysym_string, keysym in keysyms.iteritems():
+for keysym_string, keysym in keysyms.items():
     keysym_strings[keysym].append(keysym_string)
-

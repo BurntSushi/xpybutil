@@ -74,9 +74,7 @@ import struct
 
 import xcb.xproto
 
-from xpybutil import conn as c, root
-import event
-import util
+from xpybutil import conn as c, root, event, util
 
 __atoms = [
    # Non-standard

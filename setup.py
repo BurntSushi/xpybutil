@@ -6,10 +6,10 @@ from distutils.core import setup
 try:
     import xcb.xproto, xcb.xcb, xcb.xinerama, xcb.randr
 except:
-    print ''
-    print 'xpybutil requires the X Python Binding'
-    print 'See: http://cgit.freedesktop.org/xcb/xpyb/'
-    print 'Or xpyb-ng can be used. See', 'https://github.com/dequis/xpyb-ng'
+    print ('')
+    print ('xpybutil requires the X Python Binding')
+    print ('See: http://cgit.freedesktop.org/xcb/xpyb/')
+    print ('Or xpyb-ng can be used. See', 'https://github.com/dequis/xpyb-ng')
     sys.exit(1)
 
 setup(
