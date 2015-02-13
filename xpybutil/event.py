@@ -17,6 +17,11 @@ __queue = deque()
 __callbacks = defaultdict(list)
 EM = xproto.EventMask
 
+
+if sys.version_info[0] >= 3:
+    basestring = str
+
+
 class Event(object):
     KeyPressEvent = 2
     KeyReleaseEvent = 3
@@ -63,10 +68,6 @@ def send_event_checked(destination, event_mask, event, propagate=False):
     return conn.core.SendEventChecked(propagate, destination, event_mask, event)
 
 def pack_client_message(window, message_type, *data):
-
-    if sys.version_info[0] >= 3:
-        basestring = str
-
     assert len(data) <= 5
 
     if isinstance(message_type, basestring):

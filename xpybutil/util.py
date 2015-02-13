@@ -1,5 +1,5 @@
 """
-A vast assortment of utility functions. The ones of interest to 
+A vast assortment of utility functions. The ones of interest to
 you are probably 'get_atom' and 'get_atom_name'. The rest are
 heavily used throughout the rest of xpybutil.
 """
@@ -69,7 +69,7 @@ def get_property_value(property_reply):
     A function that takes a property reply object, and turns its value into
     something nice for us.
 
-    In particular, if the format of the reply is '8', then assume that it 
+    In particular, if the format of the reply is '8', then assume that it
     is a string. Moreover, it could be a list of strings that are null
     terminated. In this case, return a list of Python strings. Otherwise, just
     convert it to a string and remove the null terminator if it exists.
@@ -148,8 +148,8 @@ def get_property_unchecked(window, atom):
 def build_atom_cache(atoms):
     """
     Quickly builds a cache of ATOM names to ATOM identifiers (and the reverse).
-    You'll only need to use this function if you're using atoms not defined in 
-    the ewmh, icccm or motif modules. (Otherwise, those modules will build this 
+    You'll only need to use this function if you're using atoms not defined in
+    the ewmh, icccm or motif modules. (Otherwise, those modules will build this
     cache for you.)
 
     The 'get_atom' and 'get_atom_name' function automatically use this cache.
@@ -190,7 +190,7 @@ def get_atom(atom_name, only_if_exists=False):
     global __atom_cache
 
     a = __atom_cache.setdefault(atom_name,
-                                __get_atom_cookie(atom_name, 
+                                __get_atom_cookie(atom_name,
                                                   only_if_exists).reply())
     if isinstance(a, AtomCookie):
         a = a.reply()
@@ -199,7 +199,7 @@ def get_atom(atom_name, only_if_exists=False):
 
 def get_atom_name(atom):
     """
-    Queries the X server for an ATOM name using the specified identifier. 
+    Queries the X server for an ATOM name using the specified identifier.
     If we've already cached the name, then we don't contact the X server.
 
     If the atom name is not cached, it is added to the cache.
@@ -215,7 +215,7 @@ def get_atom_name(atom):
 
     if isinstance(a, AtomNameCookie):
         a = a.reply()
-    
+
     return a
 
 def __get_atom_cookie(atom_name, only_if_exists=False):
