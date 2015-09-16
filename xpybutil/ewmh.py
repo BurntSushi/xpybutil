@@ -72,7 +72,7 @@ spec :-)
 """
 import struct
 
-import xcb.xproto
+from xpybutil.compat import xproto
 
 from xpybutil import conn as c, root, event, util
 
@@ -170,9 +170,9 @@ class State:
 atom = util.get_atom
 revent = event.root_send_client_event
 revent_checked = event.root_send_client_event_checked
-ATOM = xcb.xproto.Atom.ATOM
-CARDINAL = xcb.xproto.Atom.CARDINAL
-WINDOW = xcb.xproto.Atom.WINDOW
+ATOM = xproto.Atom.ATOM
+CARDINAL = xproto.Atom.CARDINAL
+WINDOW = xproto.Atom.WINDOW
 
 # Build the atom cache for quicker access
 util.build_atom_cache(__atoms)
@@ -202,13 +202,13 @@ def set_supported(atoms):
     :rtype:         xcb.VoidCookie
     """
     packed = struct.pack('I' * len(atoms), *atoms)
-    return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, root,
+    return c.core.ChangeProperty(xproto.PropMode.Replace, root,
                                  atom('_NET_SUPPORTED'), ATOM, 32, len(atoms),
                                  packed)
 
 def set_supported_checked(atoms):
     packed = struct.pack('I' * len(atoms), *atoms)
-    return c.core.ChangePropertyChecked(xcb.xproto.PropMode.Replace, root,
+    return c.core.ChangePropertyChecked(xproto.PropMode.Replace, root,
                                         atom('_NET_SUPPORTED'),
                                         ATOM, 32, len(atoms), packed)
 
@@ -236,13 +236,13 @@ def set_client_list(windows):
     :rtype:         xcb.VoidCookie
     """
     packed = struct.pack('I' * len(windows), *windows)
-    return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, root,
+    return c.core.ChangeProperty(xproto.PropMode.Replace, root,
                                  atom('_NET_CLIENT_LIST'),
                                  WINDOW, 32, len(windows), packed)
 
 def set_client_list_checked(windows):
     packed = struct.pack('I' * len(windows), *windows)
-    return c.core.ChangePropertyChecked(xcb.xproto.PropMode.Replace, root,
+    return c.core.ChangePropertyChecked(xproto.PropMode.Replace, root,
                                         atom('_NET_CLIENT_LIST'),
                                         WINDOW, 32, len(windows), packed)
 
@@ -271,13 +271,13 @@ def set_client_list_stacking(windows):
     :rtype:         xcb.VoidCookie
     """
     packed = struct.pack('I' * len(windows), *windows)
-    return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, root,
+    return c.core.ChangeProperty(xproto.PropMode.Replace, root,
                                  atom('_NET_CLIENT_LIST_STACKING'),
                                  WINDOW, 32, len(windows), packed)
 
 def set_client_list_stacking_checked(windows):
     packed = struct.pack('I' * len(windows), *windows)
-    return c.core.ChangePropertyChecked(xcb.xproto.PropMode.Replace, root,
+    return c.core.ChangePropertyChecked(xproto.PropMode.Replace, root,
                                  atom('_NET_CLIENT_LIST_STACKING'),
                                  WINDOW, 32, len(windows), packed)
 
@@ -306,13 +306,13 @@ def set_number_of_desktops(number_of_desktops):
     :rtype:                     xcb.VoidCookie
     """
     packed = struct.pack('I', number_of_desktops)
-    return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, root,
+    return c.core.ChangeProperty(xproto.PropMode.Replace, root,
                                  atom('_NET_NUMBER_OF_DESKTOPS'), CARDINAL, 32,
                                  1, packed)
 
 def set_number_of_desktops_checked(number_of_desktops):
     packed = struct.pack('I', number_of_desktops)
-    return c.core.ChangePropertyChecked(xcb.xproto.PropMode.Replace, root,
+    return c.core.ChangePropertyChecked(xproto.PropMode.Replace, root,
                                         atom('_NET_NUMBER_OF_DESKTOPS'),
                                         CARDINAL, 32, 1, packed)
 
@@ -368,13 +368,13 @@ def set_desktop_geometry(width, height):
     :rtype:                     xcb.VoidCookie
     """
     packed = struct.pack('II', width, height)
-    return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, root,
+    return c.core.ChangeProperty(xproto.PropMode.Replace, root,
                                  atom('_NET_DESKTOP_GEOMETRY'), CARDINAL, 32, 2,
                                  packed)
 
 def set_desktop_geometry_checked(width, height):
     packed = struct.pack('II', width, height)
-    return c.core.ChangePropertyChecked(xcb.xproto.PropMode.Replace, root,
+    return c.core.ChangePropertyChecked(xproto.PropMode.Replace, root,
                                         atom('_NET_DESKTOP_GEOMETRY'),
                                         CARDINAL, 32, 2, packed)
 
@@ -459,7 +459,7 @@ def set_desktop_viewport(pairs):
         flatten.append(pair['y'])
 
     packed = struct.pack('I' * len(flatten), *flatten)
-    return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, root,
+    return c.core.ChangeProperty(xproto.PropMode.Replace, root,
                                  atom('_NET_DESKTOP_VIEWPORT'),
                                  CARDINAL, 32, len(flatten), packed)
 
@@ -470,7 +470,7 @@ def set_desktop_viewport_checked(pairs):
         flatten.append(pair['y'])
 
     packed = struct.pack('I' * len(flatten), *flatten)
-    return c.core.ChangePropertyChecked(xcb.xproto.PropMode.Replace, root,
+    return c.core.ChangePropertyChecked(xproto.PropMode.Replace, root,
                                         atom('_NET_DESKTOP_VIEWPORT'),
                                         CARDINAL, 32, len(flatten), packed)
 
@@ -514,18 +514,18 @@ def set_current_desktop(current_desktop):
     :rtype:                     xcb.VoidCookie
     """
     packed = struct.pack('I', current_desktop)
-    return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, root,
+    return c.core.ChangeProperty(xproto.PropMode.Replace, root,
                                  atom('_NET_CURRENT_DESKTOP'), CARDINAL, 32, 1,
                                  packed)
 
 def set_current_desktop_checked(current_desktop):
     packed = struct.pack('I', current_desktop)
-    return c.core.ChangePropertyChecked(xcb.xproto.PropMode.Replace, root,
+    return c.core.ChangePropertyChecked(xproto.PropMode.Replace, root,
                                         atom('_NET_CURRENT_DESKTOP'),
                                         CARDINAL, 32, 1, packed)
 
 def request_current_desktop(desktop_number,
-                            timestamp=xcb.xproto.Time.CurrentTime):
+                            timestamp=xproto.Time.CurrentTime):
     """
     Sends event to root window to set the current desktop.
 
@@ -537,7 +537,7 @@ def request_current_desktop(desktop_number,
     return revent(root, '_NET_CURRENT_DESKTOP', desktop_number, timestamp)
 
 def request_current_desktop_checked(desktop_number,
-                                    timestamp=xcb.xproto.Time.CurrentTime):
+                                    timestamp=xproto.Time.CurrentTime):
     return revent_checked(root, '_NET_CURRENT_DESKTOP',
                           desktop_number, timestamp)
 
@@ -568,13 +568,13 @@ def set_visible_desktops(desktops):
     :rtype:          xcb.VoidCookie
     """
     packed = struct.pack('I' * len(desktops), *desktops)
-    return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, root,
+    return c.core.ChangeProperty(xproto.PropMode.Replace, root,
                                  atom('_NET_VISIBLE_DESKTOPS'),
                                  CARDINAL, 32, len(desktops), packed)
 
 def set_visible_desktops_checked(desktops):
     packed = struct.pack('I' * len(desktops), *desktops)
-    return c.core.ChangePropertyChecked(xcb.xproto.PropMode.Replace, root,
+    return c.core.ChangePropertyChecked(xproto.PropMode.Replace, root,
                                         atom('_NET_VISIBLE_DESKTOPS'),
                                         CARDINAL, 32, len(desktops), packed)
 
@@ -607,7 +607,7 @@ def set_desktop_names(desktop_names):
         nullterm.append(desktop_name + chr(0))
     nullterm = ''.join(nullterm)
 
-    return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, root,
+    return c.core.ChangeProperty(xproto.PropMode.Replace, root,
                                  atom('_NET_DESKTOP_NAMES'),
                                  atom('UTF8_STRING'), 8,
                                  len(nullterm), nullterm)
@@ -619,7 +619,7 @@ def set_desktop_names_checked(desktop_names):
         nullterm.append(desktop_name + chr(0))
     nullterm = ''.join(nullterm)
 
-    return c.core.ChangePropertyChecked(xcb.xproto.PropMode.Replace, root,
+    return c.core.ChangePropertyChecked(xproto.PropMode.Replace, root,
                                         atom('_NET_DESKTOP_NAMES'),
                                         atom('UTF8_STRING'), 8,
                                         len(nullterm), nullterm)
@@ -649,18 +649,18 @@ def set_active_window(active):
     :rtype:         xcb.VoidCookie
     """
     packed = struct.pack('I', active)
-    return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, root,
+    return c.core.ChangeProperty(xproto.PropMode.Replace, root,
                                  atom('_NET_ACTIVE_WINDOW'),
                                  WINDOW, 32, 1, packed)
 
 def set_active_window_checked(active):
     packed = struct.pack('I', active)
-    return c.core.ChangePropertyChecked(xcb.xproto.PropMode.Replace, root,
+    return c.core.ChangePropertyChecked(xproto.PropMode.Replace, root,
                                         atom('_NET_ACTIVE_WINDOW'),
                                         WINDOW, 32, 1, packed)
 
 def request_active_window(active, source=1,
-                          timestamp=xcb.xproto.Time.CurrentTime,
+                          timestamp=xproto.Time.CurrentTime,
                           current=0):
     """
     Sends event to root window to set the active window.
@@ -675,7 +675,7 @@ def request_active_window(active, source=1,
     return revent(active, '_NET_ACTIVE_WINDOW', source, timestamp, current)
 
 def request_active_window_checked(active, source=1,
-                                  timestamp=xcb.xproto.Time.CurrentTime,
+                                  timestamp=xproto.Time.CurrentTime,
                                   current=0):
     return revent_checked(active, '_NET_ACTIVE_WINDOW', source, timestamp,
                           current)
@@ -730,7 +730,7 @@ def set_workarea(workareas):
         flatten.append(workarea['height'])
     packed = struct.pack('I' * len(flatten), *flatten)
 
-    return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, root,
+    return c.core.ChangeProperty(xproto.PropMode.Replace, root,
                                  atom('_NET_WORKAREA'), CARDINAL, 32,
                                  len(flatten), packed)
 
@@ -743,7 +743,7 @@ def set_workarea_checked(workareas):
         flatten.append(workarea['height'])
     packed = struct.pack('I' * len(flatten), *flatten)
 
-    return c.core.ChangePropertyChecked(xcb.xproto.PropMode.Replace, root,
+    return c.core.ChangePropertyChecked(xproto.PropMode.Replace, root,
                                         atom('_NET_WORKAREA'), CARDINAL, 32,
                                         len(flatten), packed)
 
@@ -776,13 +776,13 @@ def set_supporting_wm_check(wid, child):
     :rtype:         xcb.VoidCookie
     """
     packed = struct.pack('I', child)
-    return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, wid,
+    return c.core.ChangeProperty(xproto.PropMode.Replace, wid,
                                  atom('_NET_SUPPORTING_WM_CHECK'),
                                  WINDOW, 32, 1, packed)
 
 def set_supporting_wm_check_checked(wid, child):
     packed = struct.pack('I', child)
-    return c.core.ChangePropertyChecked(xcb.xproto.PropMode.Replace, wid,
+    return c.core.ChangePropertyChecked(xproto.PropMode.Replace, wid,
                                         atom('_NET_SUPPORTING_WM_CHECK'),
                                         WINDOW, 32, 1, packed)
 
@@ -810,13 +810,13 @@ def set_virtual_roots(vroots):
     :rtype:         xcb.VoidCookie
     """
     packed = struct.pack('I' * len(vroots), *vroots)
-    return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, root,
+    return c.core.ChangeProperty(xproto.PropMode.Replace, root,
                                  atom('_NET_VIRTUAL_ROOTS'),
                                  WINDOW, 32, len(vroots), packed)
 
 def set_virtual_roots_checked(vroots):
     packed = struct.pack('I' * len(vroots), *vroots)
-    return c.core.ChangePropertyChecked(xcb.xproto.PropMode.Replace, root,
+    return c.core.ChangePropertyChecked(xproto.PropMode.Replace, root,
                                         atom('_NET_VIRTUAL_ROOTS'),
                                         WINDOW, 32, len(vroots), packed)
 
@@ -868,14 +868,14 @@ def set_desktop_layout(orientation, columns, rows,
     :rtype:                     xcb.VoidCookie
     """
     packed = struct.pack('IIII', orientation, columns, rows, starting_corner)
-    return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, root,
+    return c.core.ChangeProperty(xproto.PropMode.Replace, root,
                                  atom('_NET_DESKTOP_LAYOUT'),
                                  CARDINAL, 32, 4, packed)
 
 def set_desktop_layout_checked(orientation, columns, rows,
                                starting_corner=StartingCorner.TopLeft):
     packed = struct.pack('IIII', orientation, columns, rows, starting_corner)
-    return c.core.ChangePropertyChecked(xcb.xproto.PropMode.Replace, root,
+    return c.core.ChangePropertyChecked(xproto.PropMode.Replace, root,
                                         atom('_NET_DESKTOP_LAYOUT'),
                                         CARDINAL, 32, 4, packed)
 
@@ -915,12 +915,12 @@ def set_showing_desktop(showing_desktop):
     :type showing_desktop:   CARDINAL/32
     :rtype:                  xcb.VoidCookie
     """
-    return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, root,
+    return c.core.ChangeProperty(xproto.PropMode.Replace, root,
                                  atom('_NET_SHOWING_DESKTOP'), CARDINAL, 32, 1,
                                  [showing_desktop])
 
 def set_showing_desktop_checked(showing_desktop):
-    return c.core.ChangePropertyChecked(xcb.xproto.PropMode.Replace, root,
+    return c.core.ChangePropertyChecked(xproto.PropMode.Replace, root,
                                         atom('_NET_SHOWING_DESKTOP'),
                                         CARDINAL, 32, 1, [showing_desktop])
 
@@ -940,7 +940,7 @@ def request_showing_desktop_checked(showing_desktop):
 
 # _NET_CLOSE_WINDOW
 
-def request_close_window(window, timestamp=xcb.xproto.Time.CurrentTime,
+def request_close_window(window, timestamp=xproto.Time.CurrentTime,
                          source=1):
     """
     Sends event to root window to close a window.
@@ -952,7 +952,7 @@ def request_close_window(window, timestamp=xcb.xproto.Time.CurrentTime,
     """
     return revent(window, '_NET_CLOSE_WINDOW', timestamp, source)
 
-def request_close_window_checked(window, timestamp=xcb.xproto.Time.CurrentTime,
+def request_close_window_checked(window, timestamp=xproto.Time.CurrentTime,
                                  source=1):
     return revent_checked(window, '_NET_CLOSE_WINDOW', timestamp, source)
 
@@ -960,7 +960,7 @@ def request_close_window_checked(window, timestamp=xcb.xproto.Time.CurrentTime,
 
 def request_moveresize_window(window, x=None, y=None, width=None,
                               height=None,
-                              gravity=xcb.xproto.Gravity.BitForget, source=1):
+                              gravity=xproto.Gravity.BitForget, source=1):
     """
     Sends event to root window to move/resize a window.
 
@@ -992,7 +992,7 @@ def request_moveresize_window(window, x=None, y=None, width=None,
 
 def request_moveresize_window_checked(window, x=None, y=None, width=None,
                                       height=None,
-                                      gravity=xcb.xproto.Gravity.BitForget,
+                                      gravity=xproto.Gravity.BitForget,
                                       source=1):
     flags = gravity
     flags |= source << 12
@@ -1059,7 +1059,7 @@ def request_wm_moveresize_checked(window, direction, x_root=0, y_root=0,
 
 # _NET_RESTACK_WINDOW
 
-def request_restack_window(window, stack_mode=xcb.xproto.StackMode.Above,
+def request_restack_window(window, stack_mode=xproto.StackMode.Above,
                            sibling=0, source=1):
     """
     Sends event to root window to restack a window.
@@ -1074,7 +1074,7 @@ def request_restack_window(window, stack_mode=xcb.xproto.StackMode.Above,
     return revent(window, '_NET_RESTACK_WINDOW', source, sibling, stack_mode)
 
 def request_restack_window_checked(window,
-                                   stack_mode=xcb.xproto.StackMode.Above,
+                                   stack_mode=xproto.StackMode.Above,
                                    sibling=0, source=2):
     return revent_checked(window, '_NET_RESTACK_WINDOW',
                           source, sibling, stack_mode)
@@ -1117,12 +1117,12 @@ def set_wm_name(window, wm_name):
     :param wm_name: The title of the window.
     :rtype:         xcb.VoidCookie
     """
-    return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, window,
+    return c.core.ChangeProperty(xproto.PropMode.Replace, window,
                                  atom('_NET_WM_NAME'),
                                  atom('UTF8_STRING'), 8, len(wm_name), wm_name)
 
 def set_wm_name_checked(window, wm_name):
-    return c.core.ChangePropertyChecked(xcb.xproto.PropMode.Replace, window,
+    return c.core.ChangePropertyChecked(xproto.PropMode.Replace, window,
                                         atom('_NET_WM_NAME'),
                                         atom('UTF8_STRING'), 8, len(wm_name),
                                         wm_name)
@@ -1152,12 +1152,12 @@ def set_wm_visible_name(window, wm_name):
     :param wm_name: The title of the window.
     :rtype:         xcb.VoidCookie
     """
-    return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, window,
+    return c.core.ChangeProperty(xproto.PropMode.Replace, window,
                                  atom('_NET_WM_VISIBLE_NAME'),
                                  atom('UTF8_STRING'), 8, len(wm_name), wm_name)
 
 def set_wm_visible_name_checked(window, wm_name):
-    return c.core.ChangePropertyChecked(xcb.xproto.PropMode.Replace, window,
+    return c.core.ChangePropertyChecked(xproto.PropMode.Replace, window,
                                         atom('_NET_WM_VISIBLE_NAME'),
                                         atom('UTF8_STRING'), 8, len(wm_name),
                                         wm_name)
@@ -1186,12 +1186,12 @@ def set_wm_icon_name(window, icon_name):
     :param icon_name:   The icon name of the window.
     :rtype:             xcb.VoidCookie
     """
-    return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, window,
+    return c.core.ChangeProperty(xproto.PropMode.Replace, window,
                                  atom('_NET_WM_ICON_NAME'), atom('UTF8_STRING'),
                                  8, len(icon_name), icon_name)
 
 def set_wm_icon_name_checked(window, icon_name):
-    return c.core.ChangePropertyChecked(xcb.xproto.PropMode.Replace, window,
+    return c.core.ChangePropertyChecked(xproto.PropMode.Replace, window,
                                         atom('_NET_WM_ICON_NAME'),
                                         atom('UTF8_STRING'), 8, len(icon_name),
                                         icon_name)
@@ -1221,13 +1221,13 @@ def set_wm_visible_icon_name(window, icon_name):
     :param icon_name:   The icon name of the window.
     :rtype:             xcb.VoidCookie
     """
-    return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, window,
+    return c.core.ChangeProperty(xproto.PropMode.Replace, window,
                                  atom('_NET_WM_VISIBLE_ICON_NAME'),
                                  atom('UTF8_STRING'), 8, len(icon_name),
                                  icon_name)
 
 def set_wm_visible_icon_name_checked(window, icon_name):
-    return c.core.ChangePropertyChecked(xcb.xproto.PropMode.Replace, window,
+    return c.core.ChangePropertyChecked(xproto.PropMode.Replace, window,
                                         atom('_NET_WM_VISIBLE_ICON_NAME'),
                                         atom('UTF8_STRING'), 8, len(icon_name),
                                         icon_name)
@@ -1277,14 +1277,14 @@ def set_wm_window_opacity(window, opacity):
     """
     assert 0 <= opacity <= 1
     packed = struct.pack('I', int(opacity * 0xffffffff))
-    return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, window,
+    return c.core.ChangeProperty(xproto.PropMode.Replace, window,
                                  atom('_NET_WM_WINDOW_OPACITY'),
                                  CARDINAL, 32, 1, packed)
 
 def set_wm_window_opacity_checked(window, opacity):
     assert 0 <= opacity <= 1
     packed = struct.pack('I', int(opacity * 0xffffffff))
-    return c.core.ChangePropertyChecked(xcb.xproto.PropMode.Replace, window,
+    return c.core.ChangePropertyChecked(xproto.PropMode.Replace, window,
                                         atom('_NET_WM_WINDOW_OPACITY'),
                                         CARDINAL, 32, 1, packed)
 
@@ -1314,12 +1314,12 @@ def set_wm_desktop(window, desktop):
     :type desktop:  CARDINAL/32
     :rtype:         xcb.VoidCookie
     """
-    return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, window,
+    return c.core.ChangeProperty(xproto.PropMode.Replace, window,
                                  atom('_NET_WM_DESKTOP'),
                                  CARDINAL, 32, 1, [desktop])
 
 def set_wm_desktop_checked(window, desktop):
-    return c.core.ChangePropertyChecked(xcb.xproto.PropMode.Replace, window,
+    return c.core.ChangePropertyChecked(xproto.PropMode.Replace, window,
                                         atom('_NET_WM_DESKTOP'),
                                         CARDINAL, 32, 1, [desktop])
 
@@ -1364,13 +1364,13 @@ def set_wm_window_type(window, types):
     :rtype:         xcb.VoidCookie
     """
     packed = struct.pack('I' * len(types), *types)
-    return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, window,
+    return c.core.ChangeProperty(xproto.PropMode.Replace, window,
                                  atom('_NET_WM_WINDOW_TYPE'),
                                  ATOM, 32, len(types), packed)
 
 def set_wm_window_type_checked(window, types):
     packed = struct.pack('I' * len(types), *types)
-    return c.core.ChangePropertyChecked(xcb.xproto.PropMode.Replace, window,
+    return c.core.ChangePropertyChecked(xproto.PropMode.Replace, window,
                                         atom('_NET_WM_WINDOW_TYPE'),
                                         ATOM, 32, len(types), packed)
 
@@ -1400,13 +1400,13 @@ def set_wm_state(window, states):
     :rtype:         xcb.VoidCookie
     """
     packed = struct.pack('I' * len(states), *states)
-    return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, window,
+    return c.core.ChangeProperty(xproto.PropMode.Replace, window,
                                  atom('_NET_WM_STATE'), ATOM, 32, len(states),
                                  packed)
 
 def set_wm_state_checked(window, states):
     packed = struct.pack('I' * len(states), *states)
-    return c.core.ChangePropertyChecked(xcb.xproto.PropMode.Replace, window,
+    return c.core.ChangePropertyChecked(xproto.PropMode.Replace, window,
                                         atom('_NET_WM_STATE'),
                                         ATOM, 32, len(states), packed)
 
@@ -1461,13 +1461,13 @@ def set_wm_allowed_actions(window, actions):
     :rtype:         xcb.VoidCookie
     """
     packed = struct.pack('I' * len(actions), *actions)
-    return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, window,
+    return c.core.ChangeProperty(xproto.PropMode.Replace, window,
                                  atom('_NET_WM_ALLOWED_ACTIONS'),
                                  ATOM, 32, len(actions), packed)
 
 def set_wm_allowed_actions_checked(window, actions):
     packed = struct.pack('I' * len(actions), *actions)
-    return c.core.ChangePropertyChecked(xcb.xproto.PropMode.Replace, window,
+    return c.core.ChangePropertyChecked(xproto.PropMode.Replace, window,
                                         atom('_NET_WM_ALLOWED_ACTIONS'),
                                         ATOM, 32, len(actions), packed)
 
@@ -1518,12 +1518,12 @@ def set_wm_strut(window, left, right, top, bottom):
     :rtype:         xcb.VoidCookie
     """
     packed = struct.pack('IIII', left, right, top, bottom)
-    return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, window,
+    return c.core.ChangeProperty(xproto.PropMode.Replace, window,
                                  atom('_NET_WM_STRUT'), CARDINAL, 32, 4, packed)
 
 def set_wm_strut_checked(window, left, right, top, bottom):
     packed = struct.pack('IIII', left, right, top, bottom)
-    return c.core.ChangePropertyChecked(xcb.xproto.PropMode.Replace, window,
+    return c.core.ChangePropertyChecked(xproto.PropMode.Replace, window,
                                         atom('_NET_WM_STRUT'),
                                         CARDINAL, 32, 4, packed)
 
@@ -1598,7 +1598,7 @@ def set_wm_strut_partial(window, left, right, top, bottom, left_start_y,
     packed = struct.pack('I' * 12, left, right, top, bottom, left_start_y,
                          left_end_y, right_start_y, right_end_y, top_start_x,
                          top_end_x, bottom_start_x, bottom_end_x)
-    return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, window,
+    return c.core.ChangeProperty(xproto.PropMode.Replace, window,
                                  atom('_NET_WM_STRUT_PARTIAL'),
                                  CARDINAL, 32, 12, packed)
 
@@ -1609,7 +1609,7 @@ def set_wm_strut_partial_checked(window, left, right, top, bottom,
     packed = struct.pack('I' * 12, left, right, top, bottom, left_start_y,
                          left_end_y, right_start_y, right_end_y, top_start_x,
                          top_end_x, bottom_start_x, bottom_end_x)
-    return c.core.ChangePropertyChecked(xcb.xproto.PropMode.Replace, window,
+    return c.core.ChangePropertyChecked(xproto.PropMode.Replace, window,
                                         atom('_NET_WM_STRUT_PARTIAL'),
                                         CARDINAL, 32, 12, packed)
 
@@ -1662,13 +1662,13 @@ def set_wm_icon_geometry(window, x, y, width, height):
     :rtype:         xcb.VoidCookie
     """
     packed = struct.pack('IIII', x, y, width, height)
-    return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, window,
+    return c.core.ChangeProperty(xproto.PropMode.Replace, window,
                                  atom('_NET_WM_ICON_GEOMETRY'),
                                  CARDINAL, 32, 4, packed)
 
 def set_wm_icon_geometry_checked(window, x, y, width, height):
     packed = struct.pack('IIII', x, y, width, height)
-    return c.core.ChangePropertyChecked(xcb.xproto.PropMode.Replace, window,
+    return c.core.ChangePropertyChecked(xproto.PropMode.Replace, window,
                                         atom('_NET_WM_ICON_GEOMETRY'),
                                         CARDINAL, 32, 4, packed)
 
@@ -1730,7 +1730,7 @@ def set_wm_icon(window, icons):
             flatten.append(argb)
     packed = struct.pack('I' * len(flatten), *flatten)
 
-    return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, window,
+    return c.core.ChangeProperty(xproto.PropMode.Replace, window,
                                  atom('_NET_WM_ICON'),
                                  CARDINAL, 32, len(flatten), packed)
 
@@ -1743,7 +1743,7 @@ def set_wm_icon_checked(window, icons):
             flatten.append(argb)
     packed = struct.pack('I' * len(flatten), *flatten)
 
-    return c.core.ChangePropertyChecked(xcb.xproto.PropMode.Replace, window,
+    return c.core.ChangePropertyChecked(xproto.PropMode.Replace, window,
                                         atom('_NET_WM_ICON'),
                                         CARDINAL, 32, len(flatten), packed)
 
@@ -1773,13 +1773,13 @@ def set_wm_pid(window, pid):
     :rtype:         xcb.VoidCookie
     """
     packed = struct.pack('I', pid)
-    return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, window,
+    return c.core.ChangeProperty(xproto.PropMode.Replace, window,
                                  atom('_NET_WM_PID'), CARDINAL, 32, 1,
                                  packed)
 
 def set_wm_pid_checked(window, pid):
     packed = struct.pack('I', pid)
-    return c.core.ChangePropertyChecked(xcb.xproto.PropMode.Replace, window,
+    return c.core.ChangePropertyChecked(xproto.PropMode.Replace, window,
                                         atom('_NET_WM_PID'), CARDINAL, 32, 1,
                                         packed)
 
@@ -1808,12 +1808,12 @@ def set_wm_handled_icons(window):
     :return:        Whether this property is set or not.
     :rtype:         xcb.VoidCookie
     """
-    return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, window,
+    return c.core.ChangeProperty(xproto.PropMode.Replace, window,
                                  atom('_NET_WM_HANDLED_ICONS'), CARDINAL, 32, 1,
                                  [1])
 
 def set_wm_handled_icons_checked(window):
-    return c.core.ChangePropertyChecked(xcb.xproto.PropMode.Replace, window,
+    return c.core.ChangePropertyChecked(xproto.PropMode.Replace, window,
                                         atom('_NET_WM_HANDLED_ICONS'),
                                         CARDINAL, 32, 1, [1])
 
@@ -1843,12 +1843,12 @@ def set_wm_user_time(window, user_time):
     :type user_time:    CARDINAL/32
     :rtype:             xcb.VoidCookie
     """
-    return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, window,
+    return c.core.ChangeProperty(xproto.PropMode.Replace, window,
                                  atom('_NET_WM_USER_TIME'), CARDINAL, 32, 1,
                                  [user_time])
 
 def set_wm_user_time_checked(window, user_time):
-    return c.core.ChangePropertyChecked(xcb.xproto.PropMode.Replace, window,
+    return c.core.ChangePropertyChecked(xproto.PropMode.Replace, window,
                                         atom('_NET_WM_USER_TIME'),
                                         CARDINAL, 32, 1, [user_time])
 
@@ -1878,12 +1878,12 @@ def set_wm_user_time_window(window, time_win):
     :type time_win:     WINDOW/32
     :rtype:             xcb.VoidCookie
     """
-    return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, window,
+    return c.core.ChangeProperty(xproto.PropMode.Replace, window,
                                  atom('_NET_WM_USER_TIME_WINDOW'),
                                  WINDOW, 32, 1, [time_win])
 
 def set_wm_user_time_window_checked(window, time_win):
-    return c.core.ChangePropertyChecked(xcb.xproto.PropMode.Replace, window,
+    return c.core.ChangePropertyChecked(xproto.PropMode.Replace, window,
                                         atom('_NET_WM_USER_TIME_WINDOW'),
                                         WINDOW, 32, 1, [time_win])
 
@@ -1935,20 +1935,20 @@ def set_frame_extents(window, left, right, top, bottom):
     :rtype:         xcb.VoidCookie
     """
     packed = struct.pack('IIII', left, right, top, bottom)
-    return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, window,
+    return c.core.ChangeProperty(xproto.PropMode.Replace, window,
                                  atom('_NET_FRAME_EXTENTS'), CARDINAL, 32, 4,
                                  packed)
 
 def set_frame_extents_checked(window, left, right, top, bottom):
     packed = struct.pack('IIII', left, right, top, bottom)
-    return c.core.ChangePropertyChecked(xcb.xproto.PropMode.Replace, window,
+    return c.core.ChangePropertyChecked(xproto.PropMode.Replace, window,
                                         atom('_NET_FRAME_EXTENTS'),
                                         CARDINAL, 32, 4, packed)
 
 # _NET_WM_PING
 
 def request_wm_ping(window, response=False,
-                    timestamp=xcb.xproto.Time.CurrentTime):
+                    timestamp=xproto.Time.CurrentTime):
     """
     Sends an event to root window to ping a window or respond to a ping.
 
@@ -1961,14 +1961,14 @@ def request_wm_ping(window, response=False,
                   'WM_PROTOCOLS', atom('_NET_WM_PING'), timestamp, window)
 
 def request_wm_ping_checked(window, response=False,
-                            timestamp=xcb.xproto.Time.CurrentTime):
+                            timestamp=xproto.Time.CurrentTime):
     return revent_checked(window if not response else root(c), 'WM_PROTOCOLS',
                           atom('_NET_WM_PING'), timestamp, window)
 
 # _NET_WM_SYNC_REQUEST
 
 def request_wm_sync_request(window, req_num,
-                            timestamp=xcb.xproto.Time.CurrentTime):
+                            timestamp=xproto.Time.CurrentTime):
     """
     Sends an event to root window to sync with a client.
 
@@ -1984,7 +1984,7 @@ def request_wm_sync_request(window, req_num,
                   atom('_NET_WM_SYNC_REQUEST'), timestamp, low, high)
 
 def request_wm_sync_request_checked(window, req_num,
-                                    timestamp=xcb.xproto.Time.CurrentTime):
+                                    timestamp=xproto.Time.CurrentTime):
     high = req_num >> 32
     low = (high << 32) ^ req_num
 
@@ -2018,13 +2018,13 @@ def set_wm_sync_request_counter(window, counter):
     :rtype:             xcb.VoidCookie
     """
     packed = struct.pack('I', counter)
-    return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, window,
+    return c.core.ChangeProperty(xproto.PropMode.Replace, window,
                                  atom('_NET_WM_SYNC_REQUEST_COUNTER'),
                                  CARDINAL, 32, 1, packed)
 
 def set_wm_sync_request_counter_checked(window, counter):
     packed = struct.pack('I', counter)
-    return c.core.ChangePropertyChecked(xcb.xproto.PropMode.Replace, window,
+    return c.core.ChangePropertyChecked(xproto.PropMode.Replace, window,
                                         atom('_NET_WM_SYNC_REQUEST_COUNTER'),
                                         CARDINAL, 32, 1, packed)
 
@@ -2074,13 +2074,13 @@ def set_wm_fullscreen_monitors(window, top, bottom, left, right):
     :rtype:         xcb.VoidCookie
     """
     packed = struct.pack('IIII', top, bottom, left, right)
-    return c.core.ChangeProperty(xcb.xproto.PropMode.Replace, window,
+    return c.core.ChangeProperty(xproto.PropMode.Replace, window,
                                  atom('_NET_WM_FULLSCREEN_MONITORS'),
                                  CARDINAL, 32, 4, packed)
 
 def set_wm_fullscreen_monitors_checked(window, top, bottom, left, right):
     packed = struct.pack('IIII', top, bottom, left, right)
-    return c.core.ChangePropertyChecked(xcb.xproto.PropMode.Replace, window,
+    return c.core.ChangePropertyChecked(xproto.PropMode.Replace, window,
                                         atom('_NET_WM_FULLSCREEN_MONITORS'),
                                         CARDINAL, 32, 4, packed)
 

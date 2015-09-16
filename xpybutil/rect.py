@@ -5,7 +5,7 @@ For example, finding the area of intersection of two rectangles with
 ``rect_intersect_area``, or getting the rectangle of a monitor after accounting
 for struts with ``monitor_rects``.
 """
-import xcb.xproto
+from xpybutil.compat import xproto
 
 import xpybutil.ewmh as ewmh
 import xpybutil.window as window
@@ -74,7 +74,7 @@ def monitor_rects(monitors):
     for c in clients:
         try:
             cx, cy, cw, ch = window.get_geometry(c)
-        except xcb.xproto.BadWindow:
+        except xproto.BadWindow:
             continue
 
         for i, (x, y, w, h) in enumerate(wa):

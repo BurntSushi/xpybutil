@@ -8,13 +8,13 @@ monitor indices in a physical ordering (left to right, top to
 bottom). These indices can then be used in the list returned by
 'get_monitors'.
 """
-import xcb.xinerama
+from xpybutil.compat import xinerama
 
 from xpybutil import conn
 
 ext = None
 if conn is not None:
-    ext = conn(xcb.xinerama.key)
+    ext = conn(xinerama.key)
 
 def get_monitors():
     '''

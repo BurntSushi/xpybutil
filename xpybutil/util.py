@@ -5,7 +5,7 @@ heavily used throughout the rest of xpybutil.
 """
 import struct
 
-import xcb.xproto
+from xpybutil.compat import xproto
 
 from xpybutil import conn
 
@@ -122,7 +122,7 @@ def get_property(window, atom):
     if isinstance(atom, basestring):
         atom = get_atom(atom)
     return conn.core.GetProperty(False, window, atom,
-                                 xcb.xproto.GetPropertyType.Any, 0,
+                                 xproto.GetPropertyType.Any, 0,
                                  2 ** 32 - 1)
 
 def get_property_unchecked(window, atom):
@@ -142,7 +142,7 @@ def get_property_unchecked(window, atom):
     if isinstance(atom, basestring):
         atom = get_atom(atom)
     return conn.core.GetPropertyUnchecked(False, window, atom,
-                                          xcb.xproto.GetPropertyType.Any, 0,
+                                          xproto.GetPropertyType.Any, 0,
                                           2 ** 32 - 1)
 
 def build_atom_cache(atoms):

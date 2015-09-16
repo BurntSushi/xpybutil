@@ -8,8 +8,7 @@ import struct
 import sys
 import traceback
 
-import xcb
-import xcb.xproto as xproto
+from xpybutil.compat import xcb_Exception, xproto
 
 from xpybutil import conn, root, util
 
@@ -150,7 +149,7 @@ def main():
                 key = (e.__class__, w)
                 for cb in __callbacks.get(key, []):
                     cb(e)
-    except xcb.Exception:
+    except xcb_Exception:
         traceback.print_exc()
         sys.exit(1)
 

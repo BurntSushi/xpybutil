@@ -10,7 +10,7 @@ if you're getting down and dirty.
 from collections import defaultdict
 import sys
 
-import xcb.xproto as xproto
+from xpybutil.compat import xproto
 
 from xpybutil import conn, root, event
 from xpybutil.keysymdef import keysyms, keysym_strings

@@ -1,15 +1,17 @@
+from __future__ import print_function
 import sys
 
 from distutils import sysconfig
 from distutils.core import setup
 
 try:
-    import xcb.xproto, xcb.xcb, xcb.xinerama, xcb.randr
+    from xpybutil.compat import xproto, xinerama, randr
 except:
     print ('')
     print ('xpybutil requires the X Python Binding')
     print ('See: http://cgit.freedesktop.org/xcb/xpyb/')
-    print ('Or xpyb-ng can be used. See', 'https://github.com/dequis/xpyb-ng')
+    print ('More options: xpyb-ng:', 'https://github.com/dequis/xpyb-ng',
+           'and xcffib:', 'https://github.com/tych0/xcffib')
     sys.exit(1)
 
 setup(

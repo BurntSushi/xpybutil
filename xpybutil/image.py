@@ -2,7 +2,7 @@
 An incomplete and haphazard collection of functions that can 
 bridge a gap between PIL and drawing images with X.
 """
-import xcb.xproto
+from xpybutil.compat import xproto
 
 from xpybutil import conn
 from PIL import Image
@@ -34,12 +34,12 @@ def hex_to_rgb(h):
 def get_image_from_pixmap(pid):
     try:
         geom = conn.core.GetGeometry(pid).reply()
-        pimg = conn.core.GetImage(xcb.xproto.ImageFormat.ZPixmap, pid,
+        pimg = conn.core.GetImage(xproto.ImageFormat.ZPixmap, pid,
                                   0, 0, geom.width, geom.height,
                                   2**32 - 1).reply().data
 
         return geom.width, geom.height, pimg
-    except xcb.xproto.BadDrawable:
+    except xproto.BadDrawable:
         return 0, 0, []
 
 def get_image(width, height, data):

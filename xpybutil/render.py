@@ -6,7 +6,7 @@ quite nice.) It's called pycompmgr.
 This is meant to be a very close translation to the corresponding xcb-util
 module. Mostly because I lack a deep understanding of everything here.
 """
-import xcb, xcb.xproto, xcb.render
+from xpybutil.compat import render
 
 class PictFormat:
     Id = 1
@@ -34,7 +34,7 @@ standardFormats = [
     {
         'template': {
             'id': 0,
-            'type': xcb.render.PictType.Direct,
+            'type': render.PictType.Direct,
             'depth': 32,
             'direct': {
                 'red': 16,
@@ -59,7 +59,7 @@ standardFormats = [
     {
         'template': {
             'id': 0,
-            'type': xcb.render.PictType.Direct,
+            'type': render.PictType.Direct,
             'depth': 24,
             'direct': {
                 'red': 16,
@@ -83,7 +83,7 @@ standardFormats = [
     {
         'template': {
             'id': 0,
-            'type': xcb.render.PictType.Direct,
+            'type': render.PictType.Direct,
             'depth': 8,
             'direct': {
                 'red': 0,
@@ -107,7 +107,7 @@ standardFormats = [
     {
         'template': {
             'id': 0,
-            'type': xcb.render.PictType.Direct,
+            'type': render.PictType.Direct,
             'depth': 4,
             'direct': {
                 'red': 0,
@@ -131,7 +131,7 @@ standardFormats = [
     {
         'template': {
             'id': 0,
-            'type': xcb.render.PictType.Direct,
+            'type': render.PictType.Direct,
             'depth': 1,
             'direct': {
                 'red': 0,

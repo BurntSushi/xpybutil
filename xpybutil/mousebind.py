@@ -11,7 +11,7 @@ TODO: Mouse bindings that hook into the event dipatcher like the keybind
 """
 from collections import defaultdict
 
-import xcb.xproto as xproto
+from xpybutil.compat import xproto
 
 from xpybutil import conn, root
 

@@ -5,7 +5,7 @@ toggling window decorations via events.
 """
 import struct
 
-import xcb.xproto
+from xpybutil.compat import xproto
 
 from xpybutil import conn as c
 import util
@@ -48,7 +48,7 @@ class Status:
 
 # Some aliases
 atom = util.get_atom
-preplace = xcb.xproto.PropMode.Replace
+preplace = xproto.PropMode.Replace
 
 # Build the atom cache for quicker access
 util.build_atom_cache(__atoms)

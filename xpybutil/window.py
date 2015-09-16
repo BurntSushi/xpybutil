@@ -31,7 +31,7 @@ The idea here is to tell X that you want events that fall under
 the 'PropertyChange' category. Then you bind 'func' to the 
 particular event 'PropertyNotify'.
 """
-import xcb.xproto
+from xpybutil.compat import xproto
 
 from xpybutil import conn
 import xpybutil.ewmh as ewmh
@@ -68,10 +68,10 @@ def listen(window, *event_mask_names):
     """
     masks = 0
     for mask_name in event_mask_names:
-        assert hasattr(xcb.xproto.EventMask, mask_name)
-        masks |= getattr(xcb.xproto.EventMask, mask_name)
+        assert hasattr(xproto.EventMask, mask_name)
+        masks |= getattr(xproto.EventMask, mask_name)
 
-    conn.core.ChangeWindowAttributesChecked(window, xcb.xproto.CW.EventMask, 
+    conn.core.ChangeWindowAttributesChecked(window, xproto.CW.EventMask,
                                             [masks]).check()
 
 def get_parent_window(window):

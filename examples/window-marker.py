@@ -3,7 +3,7 @@
 import argparse
 import sys
 
-import xcb.xproto
+from xpybutil.compat import xproto
 
 import xpybutil
 import xpybutil.event as event
@@ -54,7 +54,7 @@ def do_goto_window(letter):
         if wdesk is not None and wdesk not in visibles:
             ewmh.request_current_desktop_checked(wdesk).check()
         ewmh.request_active_window_checked(wid, source=1).check()
-    except xcb.xproto.BadWindow:
+    except xproto.BadWindow:
         print >> sys.stderr, '%d no longer exists' % wid
 
 def mark_window():
@@ -66,7 +66,7 @@ def goto_window():
 def start_get_letter(cb):
     global grabbing
 
-    GS = xcb.xproto.GrabStatus
+    GS = xproto.GrabStatus
     if keybind.grab_keyboard(xpybutil.root).status == GS.Success:
         grabbing = cb
 
