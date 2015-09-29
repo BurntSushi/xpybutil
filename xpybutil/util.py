@@ -4,6 +4,7 @@ you are probably 'get_atom' and 'get_atom_name'. The rest are
 heavily used throughout the rest of xpybutil.
 """
 import struct
+import sys
 
 from xpybutil.compat import xproto
 
@@ -62,7 +63,7 @@ class AtomNameCookie(Cookie):
     ATOM name) to a string.
     """
     def reply(self):
-        return str(self.cookie.reply().name.buf())
+        return bytes(self.cookie.reply().name.buf()).decode('utf-8')
 
 def get_property_value(property_reply):
     """
@@ -84,21 +85,10 @@ def get_property_value(property_reply):
              upon the format of the property reply.
     """
     if property_reply.format == 8:
-        if 0 in property_reply.value[:-1]:
-            ret = []
-            s = []
-            for o in property_reply.value:
-                if o == 0:
-                    ret.append(''.join(s))
-                    s = []
-                else:
-                    s.append(chr(o))
-        else:
-            ret = str(property_reply.value.buf())
-            if len(property_reply.value) > 0 and 0 == property_reply.value[-1]:
-                ret = ret[:-1]
-
-        return ret
+        ret = bytes(property_reply.value.buf()).split(b'\0')
+        if ret[-1] == '': ret.pop()
+        ret = [ x.decode('utf-8') for x in ret ]
+        return ret[0] if len(ret) == 1 else ret
     elif property_reply.format in (16, 32):
         return list(struct.unpack('I' * property_reply.value_len,
                                   property_reply.value.buf()))
@@ -119,7 +109,8 @@ def get_property(window, atom):
     :type atom: int OR str
     :rtype: xcb.xproto.GetPropertyCookie
     """
-    if isinstance(atom, basestring):
+    stringtype = str if sys.version_info[0] >= 3 else basestring
+    if isinstance(atom, stringtype):
         atom = get_atom(atom)
     return conn.core.GetProperty(False, window, atom,
                                  xproto.GetPropertyType.Any, 0,
@@ -139,7 +130,8 @@ def get_property_unchecked(window, atom):
     :type atom: int OR str
     :rtype: xcb.xproto.GetPropertyCookie
     """
-    if isinstance(atom, basestring):
+    stringtype = str if sys.version_info[0] >= 3 else basestring
+    if isinstance(atom, stringtype):
         atom = get_atom(atom)
     return conn.core.GetPropertyUnchecked(False, window, atom,
                                           xproto.GetPropertyType.Any, 0,
