@@ -12,7 +12,7 @@ except:
     print ('See: http://cgit.freedesktop.org/xcb/xpyb/')
     print ('More options: xpyb-ng:', 'https://github.com/dequis/xpyb-ng',
            'and xcffib:', 'https://github.com/tych0/xcffib')
-    raise
+    sys.exit(1)
 
 setup(
     name = "xpybutil",
