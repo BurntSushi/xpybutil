@@ -24,5 +24,5 @@ setup(
     url="http://pytyle.com",
     platforms='POSIX',
     packages=['xpybutil'],
-    data_files=[('share/doc/xpybutil', ['README', 'COPYING'])]
+    data_files=[('share/doc/xpybutil', ['README.md', 'COPYING'])]
 )
