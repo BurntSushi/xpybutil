@@ -11,7 +11,7 @@ import struct
 from xpybutil.compat import xproto
 
 from xpybutil import conn as c
-import util
+from xpybutil import util
 
 __atoms = ['WM_PROTOCOLS', 'WM_TAKE_FOCUS', 'WM_SAVE_YOURSELF',
            'WM_DELETE_WINDOW', 'WM_COLORMAP_WINDOWS', 'WM_STATE']
@@ -59,7 +59,7 @@ def get_wm_name(window):
     return util.PropertyCookie(util.get_property(window, atoms.WM_NAME))
 
 def get_wm_name_unchecked(window):
-    return util.PropertyCookie(util.get_property_unchecked(window, 
+    return util.PropertyCookie(util.get_property_unchecked(window,
                                                            atoms.WM_NAME))
 
 def set_wm_name(window, wm_name):
@@ -69,7 +69,7 @@ def set_wm_name(window, wm_name):
 
 def set_wm_name_checked(window, wm_name):
     return c.core.ChangePropertyChecked(xproto.PropMode.Replace, window,
-                                        atoms.WM_NAME, atoms.STRING, 8, 
+                                        atoms.WM_NAME, atoms.STRING, 8,
                                         len(wm_name), wm_name)
 
 # WM_ICON_NAME
@@ -78,7 +78,7 @@ def get_wm_icon_name(window):
     return util.PropertyCookie(util.get_property(window, atoms.WM_ICON_NAME))
 
 def get_wm_icon_name_unchecked(window):
-    return util.PropertyCookie(util.get_property_unchecked(window, 
+    return util.PropertyCookie(util.get_property_unchecked(window,
                                                            atoms.WM_ICON_NAME))
 
 def set_wm_icon_name(window, wm_icon_name):
@@ -136,7 +136,7 @@ def get_wm_normal_hints(window):
     return NormalHintsCookie(util.get_property(window, atoms.WM_NORMAL_HINTS))
 
 def get_wm_normal_hints_unchecked(window):
-    return NormalHintsCookie(util.get_property_unchecked(window, 
+    return NormalHintsCookie(util.get_property_unchecked(window,
                                                          atoms.WM_NORMAL_HINTS))
 
 def _pack_normal_hints(flags, x, y, width, height, min_width, min_height,
@@ -300,7 +300,7 @@ def get_wm_class(window):
     return util.PropertyCookie(util.get_property(window, atoms.WM_CLASS))
 
 def get_wm_class_unchecked(window):
-    return util.PropertyCookie(util.get_property_unchecked(window, 
+    return util.PropertyCookie(util.get_property_unchecked(window,
                                                            atoms.WM_CLASS))
 
 def set_wm_class(window, instance, cls):
@@ -318,7 +318,7 @@ def set_wm_class_checked(window, instance, cls):
 # WM_TRANSIENT_FOR
 
 def get_wm_transient_for(window):
-    return util.PropertyCookie(util.get_property(window, 
+    return util.PropertyCookie(util.get_property(window,
                                                  atoms.WM_TRANSIENT_FOR))
 
 def get_wm_transient_for_unchecked(window):
@@ -343,7 +343,7 @@ def get_wm_protocols(window):
     return util.PropertyCookie(util.get_property(window, 'WM_PROTOCOLS'))
 
 def get_wm_protocols_unchecked(window):
-    return util.PropertyCookie(util.get_property_unchecked(window, 
+    return util.PropertyCookie(util.get_property_unchecked(window,
                                                            'WM_PROTOCOLS'))
 
 def set_wm_protocols(window, protocol_atoms):
@@ -383,7 +383,7 @@ def set_wm_colormap_windows_checked(window, colormap_windows):
 # WM_CLIENT_MACHINE
 
 def get_wm_client_machine(window):
-    return util.PropertyCookie(util.get_property(window, 
+    return util.PropertyCookie(util.get_property(window,
                                                  atoms.WM_CLIENT_MACHINE))
 
 def get_wm_client_machine_unchecked(window):
@@ -455,7 +455,7 @@ def get_icon_size(window):
     return IconSizeCookie(util.get_property(window, atoms.WM_ICON_SIZE))
 
 def get_icon_size_unchecked(window):
-    return IconSizeCookie(util.get_property_unchecked(window, 
+    return IconSizeCookie(util.get_property_unchecked(window,
                                                       atoms.WM_ICON_SIZE))
 
 def set_icon_size(window, min_width=0, min_height=0, max_width=0,
@@ -473,4 +473,3 @@ def set_icon_size_checked(window, min_width=0, min_height=0, max_width=0,
     return c.core.ChangePropertyChecked(xproto.PropMode.Replace, window,
                                         atoms.WM_ICON_SIZE,
                                         atoms.WM_ICON_SIZE, 32, 6, packed)
-

@@ -1,5 +1,5 @@
 """
-An incomplete and haphazard collection of functions that can 
+An incomplete and haphazard collection of functions that can
 bridge a gap between PIL and drawing images with X.
 """
 from xpybutil.compat import xproto

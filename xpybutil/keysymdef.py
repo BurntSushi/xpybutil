@@ -1,6 +1,6 @@
 """
 A module that creates a dictionary mapping from an english string of a key,
-to a keysym (an X data type) in ``keysyms``. 
+to a keysym (an X data type) in ``keysyms``.
 
 The module also creates a reverse mapping called ``keysym_strings`` that maps
 a keysym to a **list** of english string versions of that keysym. (There are

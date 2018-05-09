@@ -65,7 +65,7 @@ def grab_pointer(grab_win, confine, cursor):
     """
     mask = EM.PointerMotion | EM.ButtonRelease | EM.ButtonPress
     return conn.core.GrabPointer(False, grab_win, mask, GM.Async, GM.Async,
-                                 confine, cursor, 
+                                 confine, cursor,
                                  xproto.Time.CurrentTime).reply()
 
 def ungrab_pointer():
@@ -93,7 +93,7 @@ def grab_button(wid, modifiers, button, propagate=False):
     if propagate is True, you *must* make some call to AllowEvents at some
     point, or else your client will lock.)
 
-    N.B. You should probably be using 'bind_mouse' or 'bind_global_mouse' 
+    N.B. You should probably be using 'bind_mouse' or 'bind_global_mouse'
     instead.
 
     :param wid: A window identifier.
@@ -123,7 +123,7 @@ def grab_button(wid, modifiers, button, propagate=False):
 
 def ungrab_button(wid, modifiers, button):
     """
-    Ungrabs a button that was grabbed by ``grab_button``. Similarly, it 
+    Ungrabs a button that was grabbed by ``grab_button``. Similarly, it
     will return True on success and False on failure.
 
     When ungrabbing a button, the parameters to this function should be

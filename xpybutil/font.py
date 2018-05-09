@@ -1,6 +1,6 @@
 """
 This module is pretty inadequate. Mostly because if you find
-yourself wanting to use this module, you're probably doing something wrong. 
+yourself wanting to use this module, you're probably doing something wrong.
 (i.e., use pycairo or PIL.)
 
 This module will likely be removed in the future.

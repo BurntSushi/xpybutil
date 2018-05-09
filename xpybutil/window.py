@@ -1,14 +1,14 @@
 """
-A few utility functions related to client windows. In 
+A few utility functions related to client windows. In
 particular, getting an accurate geometry of a client window
 including the decorations (this can vary with the window
 manager). Also, a functon to move and/or resize a window
 accurately by the top-left corner. (Also can change based on
-the currently running window manager.) 
+the currently running window manager.)
 
-This module also contains a function 'listen' that must be used 
-in order to receive certain events from a window. For example, 
-if you wanted to run 'func' whenever a property on the root 
+This module also contains a function 'listen' that must be used
+in order to receive certain events from a window. For example,
+if you wanted to run 'func' whenever a property on the root
 window changed, you could do something like:
 
   ::
@@ -28,7 +28,7 @@ window changed, you could do something like:
     event.connect('PropertyNotify', xpybutil.root, func)
 
 The idea here is to tell X that you want events that fall under
-the 'PropertyChange' category. Then you bind 'func' to the 
+the 'PropertyChange' category. Then you bind 'func' to the
 particular event 'PropertyNotify'.
 """
 from xpybutil.compat import xproto
@@ -136,7 +136,7 @@ def moveresize(win, x=None, y=None, w=None, h=None, window_manager=None):
         w -= pw - cw
         h -= ph - ch
 
-    ewmh.request_moveresize_window(win, x=x, y=y, width=max(1, w), 
+    ewmh.request_moveresize_window(win, x=x, y=y, width=max(1, w),
                                    height=max(1, h), source=2)
 
 def __get_geometry(win):

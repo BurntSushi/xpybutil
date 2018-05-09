@@ -1,5 +1,5 @@
 """
-Implements a subset of the Motif spec. This module exists 
+Implements a subset of the Motif spec. This module exists
 because some window managers still use this as the only way of
 toggling window decorations via events.
 """
@@ -8,7 +8,7 @@ import struct
 from xpybutil.compat import xproto
 
 from xpybutil import conn as c
-import util
+from xpybutil import util
 
 __atoms = ['_MOTIF_WM_HINTS']
 
