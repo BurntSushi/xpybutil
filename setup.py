@@ -17,7 +17,7 @@ setup(
     name="xpybutil",
     maintainer="Fenner Macrae",
     author_email="fmacrae.dev@gmail.com",
-    version="0.0.4",
+    version="0.0.5",
     license="WTFPL",
     description="An incomplete xcb-util port plus some extras",
     long_description="See README",
