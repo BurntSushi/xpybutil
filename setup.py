@@ -21,7 +21,7 @@ setup(
     license="WTFPL",
     description="An incomplete xcb-util port plus some extras",
     long_description="See README",
-    url="http://pytyle.com",
+    url="http://github.com/BurntSushi/xpybutil",
     platforms='POSIX',
     packages=['xpybutil'],
     data_files=[('share/doc/xpybutil', ['README.md', 'COPYING'])]
