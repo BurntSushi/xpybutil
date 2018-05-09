@@ -12,11 +12,6 @@ other utilities (i.e., xcompmgr and transset-df) while the latter is used by my
 fork of Openbox called Openbox Multihead.
 
 
-Documentation
-=============
-The API docs can be found here: http://pdoc.burntsushi.net/xpybutil
-
-
 Examples
 ========
 There are a few examples included in the 'examples' directory of the source of
