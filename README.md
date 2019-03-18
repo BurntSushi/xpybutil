@@ -11,6 +11,16 @@ non-standard features. The former is widely used by compositing managers and
 other utilities (i.e., xcompmgr and transset-df) while the latter is used by my
 fork of Openbox called Openbox Multihead.
 
+Installation
+============
+xpybutil is compatible with xpyb and its various drop-in replacements (xcffib, xpyb-ng). Since
+there are several choices, it is up to you to choose and install one.
+[xcffib](https://github.com/tych0/xcffib) is the most actively maintained option.
+
+To install xpybutil from pip with xcffib:
+```bash
+pip install xcffib xpybutil
+```
 
 Examples
 ========
