@@ -1238,7 +1238,7 @@ class OpacityCookieSingle(util.PropertyCookieSingle):
     def reply(self):
         v = util.PropertyCookieSingle.reply(self)
 
-        if not v:
+        if not v and v != 0:
             return None
 
         return float(v) / float(0xffffffff)
